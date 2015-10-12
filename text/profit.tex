@@ -1,0 +1,619 @@
+% profit.tex
+% 9/5/2013 jichi
+\section{Optimization Analysis}
+\label {sec-analysis}
+
+We use the following steps to
+determine both the safety and the profitability of overlapping an MPI operation with some local computation.
+
+\begin{enumerate}
+\item Analytically identify MPI operations that are potential performance bottlenecks based on the modeling of communication cost
+    and the execution flow modeling of the entire application described in Section~\ref{sec-model}.
+    In particular, based on the BET representation of the user application, this step identifies the top $N$ most time-consuming MPI \emph{calls}, which take more than $P\%$ of the overall communication time, where both $N$ and $P$ are user-configurable parameters and were set by default with $N=10$ and $P=80$.
+The selection is accomplished by simply sorting the pre-estimated communication time of all MPI  calls in the \texttt{BET} and then selecting the top ones.
+For example, for the NAS FT application shown in Figure~\ref{fig:ft_bet},
+a single MPI call, the \texttt{MPI\_Alltoall} at the bottom of the BET, is selected as
+ it takes more than 95\% of the overall communication time.
+\item
+  For each identified MPI communication to optimize, select a loop of computation that can be potentially overlapped with the communication to improve performance, by  locating the closest enclosing loops of the MPI communication in the \texttt{BET},
+e.g., node\#2 in Figure~\ref{fig:ft_bet} for the NAS FT application, to potentially overlap with the communication.  If the enclosing loop does not exist, the communication is given up as an optimization target.
+\item
+Apply dependence analysis to check the safety of overlapping the selected computation and communication.
+\end{enumerate}
+
+A key challenge in optimizing large applications is that MPI communications are often scattered across procedural boundaries,
+and the computation that can be overlapped with them is often some distance away and similarly across abstraction boundaries,
+By using the SKOPE framework and through the BET representation of the whole user application, we are able to inter-procedurally select MPI communication hot spots as well as their surrounding local computations as potential optimization targets.
+
+To determine the safety of the optimization for the selected code regions,
+  we first inline all function calls within the region and then apply traditional loop dependence analysis to the inlined code.
+In particular, based on results of profitability analysis using our extended SKOPE framework, we insert the following pragmas to guide additional safety analysis of the optimization using the ROSE C/C++/Fortran compiler~\cite {ROSE}.
+\begin{enumerate}
+\item \texttt{\#pragma cco do}, illustrated at line~1 of Figure~\ref{fig:code:ft}, which is inserted before the target loop to optimize selected using our extended SKOPE framework.
+\item \texttt{\#pragma cco ignore},
+ illustrated at line~3 in Figure~\ref{fig:code:ft}, which is manually inserted before each function call that can be safely ignored when performing dependence analysis; that is, these function calls will not implicate the safety of any reordering optimization, when the function call is not reachable at runtime but involves I/O statements for debugging purposes.. Examples of such function calls include the $timer\_start()$ and $timer\_stop()$ in Figure~\ref{fig:code:ft}.
+
+\item \texttt{\#pragma cco override},  illustrated at the first line of Figure~\ref{fig:annot:a2a} and \ref{fig:annot:ft},
+%{\todo remove: for the specific the runtime code path, since no code path is specified here?}
+which defines the memory side effects of the following function call.
+The override definitions, if specified, allow dependence analysis to proceed across procedural boundaries without actual inlining of the procedure implementations. They are also inserted manually but could be automatically generated through the integration of advanced inter-procedural side effect analysis~\cite{kennedy:cpld88}.
+
+\end{enumerate}
+While traditional inlining can be used to overcome the difficulty imposed by procedural boundaries, sometimes the
+ the low-level implementation details of the callee are too complex to be accurately deciphered by traditional compiler dependence analysis. Our manually inserted \emph{ignore} and \emph{override} pragmas are used particularly to overcome this difficulty.
+ Figure~\ref{fig:annot:a2a} shows an example override definition for \texttt{MPI\_Alltoall} in NAS FT,
+  where we use the $read$ and $write$ pseudo statements to indicate read and write memory accesses.
+Based on the domain knowledge of the application that send and receive data have atomic types instead of user-defined types,
+  its memory side effect can be expressed as data accesses to consequent memories in source and target data.
+Figure~\ref{fig:annot:ft} shows another example for the $fft()$ function in NAS FT.
+The original function have several branches for different data layout,
+  while the override definition has only 1D layout that is the target code path to optimize.
+
+We manually override function inlining according to the following criteria:
+\begin{itemize}
+\item The definition of the function is not available or contains too many low-level implementation details that are likely to over complicate the inlined code.
+For example, we manually write memory side effect definition for all MPI function calls.
+\item The runtime code path of the function call allows the side effects of the invocation to be much simplified through specialization than if automatically determined after inlining.
+For example, in NAS FT, there are 6 branches in the procedure \texttt{fft}
+  for solving different dimensions of the FFT problems (0D, 1D, or 2D),
+  while only one branch will be taken for each test.
+By manually overriding the original definition, we can eliminate the unreachable branches.
+\item When the same array data are declared with different dimensions in the caller and callee,
+  the manual override definition can normalize data accesses by converting linearized array accesses to easier-to-analyze coordinates.
+\end{itemize}
+
+%\todo{jichi: I think the following section might be deleted as the important part of its content has already been explained above.}
+%Figure~\ref{fig:code:ft},~\ref{fig:annot:ft},~\ref{fig:code:transpose},~\ref{fig:code:transpose2}, and~\ref{fig:annot:a2a}
+%\todo { try integrate if needed; then remove}
+%illustrate the input code segments of our approach using NAS FT as example.
+%%The input to our approach include the source code with user-inserted pragmas
+%%  and user-supplied alternative implementation for certain functions;
+%%  and the output will be the code region with functions selectively inline.
+%% The following uses NAS FT as an example.
+%Figure~\ref{fig:code:ft} shows the original loop in NAS FT to optimize.
+%We insert directive \texttt{\$cco do} before the loop to indicate that loop is the target to analyze.
+%\done{
+%Additionally, we also insert \texttt{\$cco ignore} directives before timing, debugging and tracing functions
+%  to indicate those functions are \emph{not} needed to be inlined.
+%Then, Figure~\ref{fig:annot:ft} shows user-supplied alternative implementation for $fft()$.
+%It is the same as the original implementation except that the branches unreachable at runtime are removed.
+%%Similarly, we insert \texttt{\$cco inline} directive into Figure~\ref{fig:code:transpose} and Figure~\ref{fig:code:transpose2}
+%%  to inline procedure calls leading to the MPI communication.
+%Finally, in Figure~\ref{fig:annot:a2a},
+%  we describe memory side effects for $MPI\_Alltoall$. %using pseudo code,
+%%  where we use the $read$ and $write$ statements to indicate read and write memory accesses.
+%%The memory side effects for $MPI\_Alltoall$ are based on the domain knowledge of the application that send and receive data have atomic types instead of user-defined types.
+%}%\done
+
+%\subsubsection{Controllable procedure elimination}
+%In summary, the function calls in the candidate loop is processed using one of the following strategies:
+%%\subsubsection{Strategies}
+%\begin{itemize}
+%\item Do not inline the function call. The function arguments are marked to have I/O dependence that could be both read or written.
+%\item Selectively conventional inlining to function calls.
+%  Users can either use pragmas to select the functions to inline, or choose to inline all function calls recursively in the candidate loop.
+%  The original function definition will be inlined.
+%\item Inline functions that are defined by user-specified annotations.
+%\end{itemize}
+
+% Inlining procedure:
+%Given the inlining procedure,
+%Providing the source code in these figures,
+%  all function calls in the call graph of \texttt{\$cco do} with alternative implementations ($fft$ in Figure~\ref{fig:annot:ft} and $MPI\_Alltoall$ in Figure~\ref{fig:annot:a2a})
+%  will have those implementations inlined;
+%  otherwise, if a function call is marked with \texttt{\$cco inline}, the original function definition of it will be inlined.
+%In summary, our approach enables developers %provides a programming interface for developers
+%  to selectively inline functions with either the original definitions,
+%  or alternative implementation and memory side effects according to their domain knowledge.
+
+%Overall, the key benefits of our annotation is as follows in comparison with conventional inlining:
+%%As the implementation of MPI functions are opaque, %it is not possible to directly data-dependence analysis to the target loop.
+%%  we use annotation-based inlining to integrate the memory side effects of the communication to analyze.
+%%In particular, we first write annotations for each MPI function manually,
+%%  then use them to assist removing procedure boundaries in the target loop.
+%%  and finally apply conventional data dependence analysis to find variables with loop-carried dependence.
+%%\subsubsection{Annotation-based inlining}
+%\begin{itemize}
+%\item Runtime taken branches.
+%  For example, NAS FT can solve 0D, 1D or 2D layout problem,
+%    that determined by the input parameters.
+%  The runtime code path for the three layouts are totally different.
+%  Annotation can be used to express the code path of the target layout (1D) to optimize.
+%\item Memory side effects of MPI functions.
+%  The source code of MPI functions are not accessible at compile time.
+%  Even if it is available,
+%    it would be very complicated to extract the memory side effects from the large code base of MPI implementation.
+%  As shown in Figure~\ref{fig:annot:send},
+%    annotations can be used to express the memory side effects using array accesses.
+%\item Normalize array dimensions.
+%The same arrays could be expressed in different dimensions in different functions.
+%For example, in NAS FT,
+%  the arrays used in the communication functions are 1D dimension,
+%  while those used in the computation functions are 3D.
+%Annotation could be used to rewrite all array accesses in 3D dimension.
+%%especially for Fortran applications,
+%\end{itemize}
+
+
+%The developers could use the annotation to unify the dimensions of the same arrays
+%  and directly specify the memory side effects of the computation
+%  to help dependence analysis to understand the runtime data flow.
+%  Arrays used by computation and communication could have different dimensions
+%There can also be indirect array accesses where the data access patterns become opaque.
+
+\begin{figure}[h]
+{\scriptsize
+\begin{verbatim}
+1  !$cco do
+2  do iter = 1, niter
+3    !$cco ignore
+4    if (timers_enabled) call timer_start(T_evolve)
+5    call volve(u0,u1,twiddle,dims(1,1),dims(2,1),dims(3,1))
+6    !$cco ignore
+7    if (timers_enabled) call timer_stop(T_evolve)
+8    !$cco ignore
+9    if (timers_enabled) call timer_start(T_fft)
+10   call fft(-1,u1,u2)
+11   !$cco ignore
+12   if (timers_enabled) call timer_stop(T_fft)
+13   !$cco ignore
+14   if (timers_enabled) call timer_start(T_checksum)
+15   call checksum(iter,u2,dims(1,1),dims(2,1),dims(3,1))
+16   !$cco ignore
+17   if (timers_enabled) call timer_stop(T_checksum)
+18 end do
+\end{verbatim}
+}%\scriptsize
+\caption{Source code with directives of the loop in NAS FT to optimize}
+\label{fig:code:ft}
+\end{figure}
+
+% jichi: Here's the actual annotation for NAS FFT
+% It removed all unreachable branches.
+% The annotation of cco inline tells the analyzer to continues looking into the functions in it.
+% Alternatively, we can use -cco:inlineall to inline all functions in it and remove the cco inline annotation.
+%
+%  subroutine fft(dir, x1, x2)
+%
+%  implicit none
+%  include 'global.h'
+%  double complex x1(ntdivnp), x2(ntdivnp)
+%  double complex scratch(fftblockpad_default*maxdim*2)
+%
+%  !cco inline
+%  call cffts1(-1, dims(1,3), dims(2,3), dims(3,3), x1, x1, scratch)
+%  !cco inline
+%  call transpose_x_yz(3, 2, x1, x2)
+%  !cco inline
+%  call cffts2(-1, dims(1,2), dims(2,2), dims(3,2), x2, x2, scratch)
+%  !cco inline
+%  call cffts1(-1, dims(1,1), dims(2,1), dims(3,1), x2, x2, scratch)
+%
+%  return
+%  end
+\begin{figure}[h]
+{\scriptsize
+\begin{verbatim}
+$cco override
+subroutine fft(dir, x1, x2)
+  cffts1(-1,dims(1,3),dims(2,3),dims(3,3),x1,x1,scratch)
+  transpose_x_yz(3, 2, x1, x2)
+  cffts2(-1,dims(1,2),dims(2,2),dims(3,2),x2,x2,scratch)
+  cffts1(-1,dims(1,1),dims(2,1),dims(3,1),x2,x2,scratch)
+end subroutine
+\end{verbatim}
+}%\scriptsize
+\caption{1D layout code path to override the original $fft()$ definition}
+\label{fig:annot:ft}
+\end{figure}
+
+\begin{figure}[h]
+{\scriptsize
+\begin{verbatim}
+subroutine transpose_x_yz(l1, l2, xin, xout)
+  call transpose2_local(dims(1,l1),
+  > dims(2,l1)*dims(3,l1),xin,xout)
+  call transpose2_global(xout,xin)
+  call transpose2_finish(dims(1,l1),
+  > dims(2,l1)*dims(3,l1),xin,xout)
+end subroutine
+\end{verbatim}
+}%\scriptsize
+\caption{Source code of \texttt{transpose\_x\_yz}}
+\label{fig:code:transpose}
+\end{figure}
+
+\begin{figure}[h]
+{\scriptsize
+\begin{verbatim}
+subroutine transpose2_global(xin, xout)
+  call mpi_alltoall(xin, ntdivnp/np, dc_type, xout,
+  > ntdivnp/np, dc_type, commslice1, ierr)
+end subroutine
+\end{verbatim}
+}%\scriptsize
+\caption{Original source code of \texttt{transpose2\_global}}
+\label{fig:code:transpose2}
+\end{figure}
+
+% jichi: The following is the actual Fortran code for for MPI_Send being inlined.
+% Here, a dummy integer $r$ is used to emulate the $read$ operation.
+%
+%   subroutine MPI_Send_(buf, count, datatype, dest, tag, comm, ierror)
+%   real buf(*)
+%   integer count, dest, tag
+%   integer ierror
+%   integer i, r
+%   do i = 1, count
+%     r = buf(i)
+%   end do
+%   end subroutine
+%
+%\begin{figure}[h]
+%{\scriptsize
+%\begin{verbatim}
+%subroutine MPI_Send(buf, count, datatype, dest, tag, comm, ierr)
+%  real buf(*)
+%  integer count, i
+%  do i = 1, count
+%    read buf(i)
+%  end do
+%end subroutine
+%\end{verbatim}
+%}%\scriptsize
+%\caption{Memory side-effect annotation for MPI\_Send}
+%\label{fig:annot:send}
+%\end{figure}
+
+% subroutine MPI_Alltoall_(sendbuf, sendcount, sendtype, recvbuf, recvcount, recvtype, comm, ierror)
+% !implicit none
+% real, dimension(*) :: sendbuf, recvbuf
+% integer :: sendcount, recvcount
+% !type(MPI_Datatype), intent(in) :: sendtype
+% !type(MPI_Datatype), intent(in) :: recvtype
+% !type(MPI_Comm), intent(in) :: comm
+% integer :: ierror
+% integer i, j
+% integer r, w
+% do i = 1, sendcount
+% !  do j = 1, size
+%   r = sendbuf(i)
+% !  end do
+% end do
+% do i = 1, recvcount
+% !  do j = 1, size
+%   recvbuf(i) = w
+% !  end do
+% end do
+% end subroutine
+\begin{figure}[h]
+{\scriptsize
+\begin{verbatim}
+$cco override
+subroutine MPI_Alltoall(sendbuf, sendcount, sendtype,
+  > recvbuf, recvcount, recvtype, comm, ierror)
+  do i = 1, sendcount
+    read sendbuf(i)
+  end do
+  do i = 1, recvcount
+    write recvbuf(i)
+  end do
+end subroutine
+\end{verbatim}
+}%\scriptsize
+\caption{Memory side-effect of $MPI\_Alltoall()$ with simple datatype to override its original definition}
+\label{fig:annot:a2a}
+\end{figure}
+
+
+% EOF
+
+% \subsection{Profitability of optimization}
+% \label{sec:cco:profit}
+%
+% \todo {What is the input, output, and purpose of this analysis? refine:   the profitability analysis that identifies the hot computation and communication in BET that are likely to benefit from the CCO optimization.}
+%
+% \todo {Is there an algorithm figure? Try add one}. As shown in Figure~\ref{algorithm figure}, the algorithm takes the following three steps. \todo {refine each step and explain its purpose}.
+% %\begin{enumerate}
+% %\item Identify potential communication hot spots.
+% %\item Select the candidate loops to apply CCO optimization as the enclosing loops for the communication hot spots.
+% %\item Find local computation hot spots for each CCO loops.
+% %\end{enumerate}
+% After finding the computation and communication hot spots,
+%   the hot path~\cite{jichi:ipdps14} of the loop to overlap can be extracted from BET.
+%
+% %We extend the SKOPE framework to model the performance of both computation and communication of MPI applications.
+% %Comparing to modeling sequential applications,
+% %  the new challenges for MPI applications are
+% %    modeling runtime code paths for multiple processes
+% %    and estimating communication time analytically.
+% %Because the code paths and data distribution are usually different for different MPI processes,
+% %  the extended framework models the runtime execution flow for each MPI process.
+% %And then, the LogGP model is used to estimate communication cost for each MPI function in the execution flow.
+%
+% \subsubsection{Identify Hot Communications}
+%
+% \todo{ is the following clear from somewhere else? Not enough details here:
+% Given a Bayesian Execution Tree (BET) for a MPI process
+%   with the estimated communication time for each MPI function calls,
+%   the potential communication hot spots
+%   is identified as the MPI function calls
+%   that take most of the estimated communication time. }
+%
+% \todo { This is not nearly enough.   Use the algorithm figure, explain exactly what is the input, output, and how the output is computed from the input.}
+%
+% The number of communication hot spots to keep is determined by the selection criteria specified by users.
+% In current approach, the criteria is to keep
+%   the top hot spots whose total communication time takes more than 80\% of the overall communication time
+%   and to keep at most 10 hot spots.
+% An example of NAS FT is shown in Figure~\ref{fig:ft:hotpath},
+%   where the \texttt{MPI\_Alltoall} at the bottom
+%   is the communication hot spot that takes more than 95\% of the overall communication time.
+%
+% %Finally, the communication cost for a sub-tree in BET is accumulated from all MPI function calls in it
+% %The communication cost is accumulated in the same way as the how we accumulate computation time in our previous SKOPE framework~\cite{skope}
+% %that the total communication cost is the sum of
+% %  all MPI functions' communication cost in the tree multiplying by their execution frequency.
+% %If a communication function is in a loop,
+% %  the communication cost of the loop equals to the communication cost of the function multiplies by the loop count;
+% %if the communication function is in a \texttt{if} or \texttt{switch} branch,
+% %  the communication cost of the branch equals to the communication cost of the function multiplies by the fall-through probability of the branch.
+%
+% %The communication cost is not exactly the same as the actual runtime of a MPI function,
+% %which could also include the wait time for other processes.
+% %Modeling wait time is left as our future work.
+%
+% %For each MPI process, we construct a Bayesian execution tree (BET) to represent its execution flow.
+% %During the construction, the BETs only differ in the ranks returned from the \texttt{MPI\_Comm\_rank} function.
+% %The total number of the processes is specified by the developers from the runtime hints.
+%
+% %In our current framework, the BETs for different processes are constructed and evaluated independently.
+% %We didn't consider the interactions between MPI processes,
+% %    which would be required to estimate the wait time for MPI communication.
+% %Currently, we assume that the workload distributed among MPI processes is well balanced,
+% %    and it will not affect the application's top hot spots.
+% %Modeling wait time for unbalanced MPI workload is left for our future work.
+%
+% %This section will discuss the process to estimate the code regions
+% %containing the communication and computation to overlap
+% %using the execution flow model.
+%
+% % motivation
+% %The overlappable communication and computation could be spread into different functions.
+% %As a result, the optimization analysis would need
+% %inter-procedural data and control flow analysis
+% %that are expensive in analysis complexity,
+% %or inlining which would increasing the code size to analyze.
+% %So, in order to reduce the code size to analyze,
+% %the execution-flow model is used to estimate scope of the overlap region
+% %before applying the optimization analysis.
+%
+% %The model-based analysis sacrifices the accuracy of the overlap region
+% %for the analysis speed.
+% %Because the execution-flow model itself has connected the procedure boundary based on the analytic call graph,
+% %and computation details do not exist in the execution-flow,
+% %it is faster for the control-flow analysis by ignoring the safety and profitability analysis of the analysis.
+%
+% % input, output, and the two-steps analysis process
+% %The analysis will take the hot communication in the BET as input,
+% %and output the overlap code region represented by a subtree in BET.
+% %The analysis process two steps:
+% %first, find the dominator node of the communication which contains all communication functions;
+% %and then, compute the overlap subtree for the dominator node.
+%
+% % find common dominator
+% \subsubsection{Identify Loops to Optimize}
+% \todo {revise, use the algorithm figure, try to explain in a more organized fashion}.
+% After finding the communication hot spots,
+%   the candidate loop to apply CCO optimization is identified as the first enclosing loop outside the each hot communication in the As shown in Figure~\ref{fig:ft},
+%   the loop to overlap is the enclosing loop of the communication.
+% Bayesian Execution Tree.
+% The loop can be in the same or different functions of the communications to overlap.
+% %Because BET is inter-procedural,
+% %  the loop can be in the same function or different functions of the hot communication.
+% An example is shown in Figure~\ref{fig:ft:hotpath},
+%   where the loop to overlap for \texttt{MPI\_Alltoall()}
+%   is the loop immediately below the \texttt{main()} function.
+%
+% %The communication dominator is the most enclosing code block for the communication.
+% %In BET, it can be represented as the root node of the smallest subtree
+% %that contains all communication functions.
+% %If the hot communication is a single MPI function,
+% %then the dominator is the parent block of the communication.
+% %If is a pair of decoupled send/recv or non-blocking communication and blocking wait,
+% %then the dominator is their ancestor node in BET.
+% %The decouple communication could be in the same or different functions.
+% %But because all functions have be concatenated in BET,
+% %the inter-procedure relation does not affect the analysis over BET.
+% %
+% %% find loops in the same level (no conditional)
+% %Given the dominator node of the communication,
+% %I use control flow analysis to compute candidate overlappable computation
+% %assuming there are no data-dependence against the computation.
+% %
+% %The overlappable computation candidates
+% %should be the statements that could be moved to be adjacent to the communication to overlap.
+% %My basic idea is to traverse the statement \emph{surrounding} the communication node
+% %to find the overlappable statements,
+% %and then return the overlap node as the dominator block that contains both the communication node and the overlappable statements.
+% %
+% %My overall procedure to find the overlap node is
+% %to start from the communication node in the BET,
+% %and traverse its parent nodes until a loop or a branch node is encountered.
+% %Then, that node is returned as the dominator node for the overlap code region.
+% %My reasoning is that the traversal of the surrounding statements could be stopped by
+% %the control flow structures including branches, loops, and function calls.
+% %If two statements are in different branches, different loops, or different levels of loops,
+% %then they cannot be reordered without eliminating the branch or loop boundaries.
+% %If the two statements in in different functions,
+% %inlining will be needed to overlap them.
+%
+% %\subsubsection{Identify local independent computations}
+% %\todo {clarify the purpose of the step. Revise explanations}
+% %Given a loop
+% %  the local computation hot spots in the loop,
+% %  which takes most of the computation time of loop,
+% %  is selected as the candidate computation to overlap with the hot communication.
+%
+% \subsection{Enabling Inter-procedural Analysis}
+% \todo {Talk about both the code skeleton and the annotation-based inlining approach}
+%
+% One of the key challenges to apply safety analysis is the absence of knowledge of runtime behavior
+%   of the application.
+%
+% In our approach, we integrate domain knowledge from developers to enhance the accuracy of the optimization for both
+%
+% 1. Code Skeleton: Course-grain analysis
+%
+% 2. Inlining: Fine-grain analysis
+%
+% Before applying dependence analysis,
+%   annotation-based inlining~\cite{jichi:icpp11} is used to integrate domain knowledge from developers in the CCO loop
+%   to improve the accuracy of dependence analysis.
+% The runtime information integrated by annotations are as follows:
+% \begin{itemize}
+% \item Runtime taken branches.
+%   For example, NAS FT can solve 0D, 1D or 2D layout problem,
+%     that determined by the input parameters.
+%   The runtime code path for the three layouts are totally different.
+%   Annotation can be used to express the code path of the target layout (1D) to optimize.
+% \item Memory side effects of MPI functions.
+%   The source code of MPI functions are not accessible at compile time.
+%   Even if it is available,
+%     it would be very complicated to extract the memory side effects from the large code base of MPI implementation.
+%   As shown in Figure~\ref{fig:annot:send},
+%     annotations can be used to express the memory side effects using array accesses.
+% \item Normalize array dimensions.
+% %especially for Fortran applications,
+%   The same arrays could be expressed in different dimensions in different functions.
+% For example, in NAS FT,
+%   the arrays used in the communication functions are 1D dimension,
+%   while those used in the computation functions are 3D.
+% Annotation could be used to rewrite all array accesses in 3D dimension.
+% %The developers could use the annotation to unify the dimensions of the same arrays
+% %  and directly specify the memory side effects of the computation
+% %  to help dependence analysis to understand the runtime data flow.
+% %  Arrays used by computation and communication could have different dimensions
+% %There can also be indirect array accesses where the data access patterns become opaque.
+% \end{itemize}
+% \begin{figure}[h]
+% {\scriptsize
+% \begin{verbatim}
+% def MPI_Send(double buf[], int count, datatype, dest, tag, comm)
+% {
+%   int i;
+%   for (i = 0; i < count; i+=1)
+%     _annot_read(double[i]);
+% }
+% \end{verbatim}
+% }%\scriptsize
+% \caption{Annotation for MPI\_Send}
+% \label{fig:annot:send}
+% \end{figure}
+
+%It is similar to the conventional inlining except that
+%  the user can supply annotations to inline that summarize the runtime behavior of the function,
+%  including the runtime code paths and data access patterns.
+
+
+
+%To overlap the communication and the communication,
+%  MPI\_Test is needed to be inserted into the computation.
+%Given a loop in BET to apply the CCO optimization,
+%  MPI\_Test will be inserted into the computation hot spots in the identified CCO loop.
+%Through analytical performance modeling using Roofline model~\cite{roofline} as discussed in the Chapter~\ref{ch:skeleton},
+%  I can identify the basic blocks in the CCO loop that takes the most significant computation time.
+%MPI\_Test will be inserted into the beginning of these local computation hot spots in the target CCO loop.
+
+%This stage will find all candidate computation around the communication that can be possibly overlapped.
+
+%The ideal goal that cannot be done without estimated execution time:
+%  the amount of overlappable computation and communication have almost the same execution time
+
+%The Feasible goal without profitability analysis:
+%  find all candidate computation around the communication that can be possibly overlapped.
+
+%The code region is an \textbf{inter-procedural} execution flow represented by a subtree in BET.
+%%The communication's common ancestor is either the root of the code region, or is within the code region.
+%An example code region from NAS MG is as follows:
+%{\scriptsize
+%\begin{verbatim}
+%// The hot function in NAS MG
+%subroutine comm3(u,n1,n2,n3,kk)
+%if( .not. dead(kk) )then
+%   do  axis = 1, 3
+%      if( nprocs .ne. 1) then
+%         // Code region begins here
+%         call ready( axis, -1, kk ) // contains Irecv
+%         call ready( axis, +1, kk ) // contains Irecv
+%
+%         call give3( axis, +1, u, n1, n2, n3, kk ) // contains Send
+%         call give3( axis, -1, u, n1, n2, n3, kk ) // contains Send
+%
+%         call take3( axis, -1, u, n1, n2, n3 ) // contains Wait
+%         call take3( axis, +1, u, n1, n2, n3 ) // contains Wait
+%         // Code region ends here
+%      else
+%         call comm1p( axis, u, n1, n2, n3, kk )
+%      endif
+%   enddo
+%else
+%   call zero3(u,n1,n2,n3)
+%endif
+%\end{verbatim}
+%}%\scriptsize
+
+%The descriptions withb \texttt{AST} concept is as follows:
+%Overlapping the computation and communication statements requires reordering them.
+%The statements must be in the same code block in order to reorder them,
+%If the two statements are already in the same block, they can be potentially reordered if there is no data dependence between them.
+%Otherwise, program transformations could be used to bring them into the same code block.
+%
+%If the computation and communication statements are in different blocks, %that are adjacent in the control flow,
+%  whether the block boundary can be removed
+%  depends on the type of the block.
+%If the block is a simple block that is not a branch, loop, or function,
+%  then the block can be eliminated by merging it with its parent block.
+%If the block is a function body,
+%  then inlining can remove the block by merging it with the call site in the caller.
+%
+%Otherwise, let communication \texttt{X} and computation \texttt{Y} be any two statements from different blocks.
+%If the parent of \texttt{X} is a function definition \texttt{F} in the \texttt{AST},
+%let \texttt{C} be any function call to \texttt{F}.
+%If \texttt{Y} and \texttt{C} are in the same code block in the caller of \texttt{F},
+%  then \texttt{Y} and \texttt{X} can be potentially overlapped
+%  because function inlining will eliminate the procedure boundary of \texttt{F} and bring \texttt{X} and \texttt{Y} to the same code block.
+%Otherwise if the two statements are in different blocks but adjacent in the control flow,
+%  the blocks could come from loops, branches, or function calls.
+%If one of the two blocks comes from a branch or or loop,
+%  the control flow dependence will prevent the statements from being in the same scope.
+%Otherwise if the block come from function calls,
+%  function inlining can merge the caller's block with the callee's and hence take the computation and communication into the same block.
+%So, unless that does not contains any branch of loops as parent nodes.
+%So, \textbf{two statements can be possibly overlapped if there is an execution flow in BET between the two statements
+%  that does not contains any branch of loops as parent nodes.}
+
+%    %\end{itemize}
+%    %{\color{brown}
+%    %Overlapping a computation with a communication requires reordering the two statements.
+%    %In order to reorder them,
+%    %  they must be able to be moved into the same block by program transformations.
+%    %If the two statements are in the same block, they can be potentially reordered if there are no dependence between them.
+%    %Otherwise, if the two statements are adjacent in the control flow but in different blocks,
+%    %  the blocks could come from loops, branches, or function calls.
+%    %If one of the two blocks comes from a branch or or loop,
+%    %  the control flow dependence will prevent the statements from being in the same scope.
+%    %Otherwise if the block come from function calls,
+%    %  function inlining can merge the caller's block with the callee's and hence take the computation and communication into the same block.
+%    %%So, unless that does not contains any branch of loops as parent nodes.
+%    %%So, \textbf{two statements can be possibly overlapped if there is an execution flow in BET between the two statements
+%    %%  that does not contains any branch of loops as parent nodes.}
+%    %}%\color
+%
+%    The computation in the overlap code region can be determined by this way:
+%    \begin{itemize}
+%    \item If $S$ is in $A$: add $S$ to the overlap region if $S$ and any communication in the communication group can be possibly overlapped.
+%    \item Otherwise $S$ is outside of $A$: add $S$ to the overlap region if $S$ and $A$ can be possibly overlapped.
+%    \end{itemize}
+%  %\item All statements that are in the \textbf{same level} of the communication in the communication group should be in the output scope
+%  \end{itemize}

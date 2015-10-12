@@ -1,0 +1,114 @@
+% paper.sty
+% 9/5/2013 jichi
+
+\usepackage[normalem]{ulem}
+
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+
+\usepackage{subcaption} % for subfigure
+
+% *** MISC UTILITY PACKAGES ***
+%
+\usepackage{ifpdf}
+
+\usepackage{verbatim}
+
+% Line breaks: http://stackoverflow.com/questions/2195908/latex-multiple-linebreaks
+%\usepackage{setspace}
+
+% *** CITATION PACKAGES ***
+%
+\usepackage{cite}
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+%\ifCLASSINFOpdf
+   %\usepackage[pdftex]{graphicx}
+   %\DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+%\else
+%  \usepackage{epsfig}
+%  \usepackage[dvips]{graphicx}
+%\fi
+
+% *** MATH PACKAGES ***
+%\usepackage[cmex10]{amsmath}
+%\usepackage{amsfonts,amssymb}
+\usepackage{amsmath}
+
+% *** SPECIALIZED LIST PACKAGES ***
+% http://en.wikibooks.org/wiki/LaTeX/Algorithms
+%\usepackage{algorithmic}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+%\floatname{algorithm}{Procedure}
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\renewcommand{\algorithmicforall}{\textbf{for each}}
+
+% *** ALIGNMENT PACKAGES ***
+%
+\usepackage{array}
+\usepackage{mdwmath}
+\usepackage{mdwtab}
+\usepackage{eqparbox}
+\usepackage{booktabs}
+\usepackage{multirow}
+
+%\usepackage[tight,footnotesize]{subfigure}
+%\usepackage{stfloats}
+
+%\usepackage[caption=false,font=scriptsize]{subfig}
+%\usepackage{fixltx2e}
+%\usepackage{url}
+
+\usepackage{listings}
+
+\usepackage{xcolor}
+\newcommand{\FIXME}[1]{{\color{red} \bf FIXME: #1}}
+\newcommand{\JICHI}[1]{{\color{blue} (JICHI: #1)}}
+\newcommand{\TODO}[1]{{\color{green} \bf TODO: #1}}
+\newcommand{\NEW}[1]{{\color{red} #1}}
+\newcommand{\REMOVE}[1]{}
+\newcommand{\NOTE}[1]{{\color{cyan} #1}}
+\newcommand{\done}[1]{{\color{blue} #1}}
+
+\newcommand{\LABEL}[1]{{\color{blue}\textbf(#1)}}
+%\newcommand{\COMMENT}[1]{{\color{cyan} /* #1 */}}
+\newcommand{\COMMENT}[1]{{/* #1 */}}
+
+%\newcommand{\LINEBREAK}{\vspace{.5cm}}
+%\newcommand{\VSPACE}{\vspace{.5cm}}
+
+%\renewcommand{\baselinestretch}{0.99}
+
+
+% No line number
+% http://tex.stackexchange.com/questions/11269/how-to-add-unnumbered-lines-in-an-algorithm
+%\def\nolineno#1{{\def\alglinenumber##1{}\State #1}\addtocounter{ALG@line}{-1}}
+
+% Colored line number
+% http://tex.stackexchange.com/questions/65950/colored-line-numbers-with-algorithmicx/65952#65952
+%\algrenewcommand{\alglinenumber}[1]{\color{blue}\footnotesize#1:}
+
+%\def\nolineno{\algrenewcommand{\alglinenumber}[1]{}} % hide line number by default
+\newcommand{\nolineno}{\algrenewcommand{\alglinenumber}[1]{}} % hide line number by default
+
+%\algrenewcommand{\alglinenumber}[1]{\color{blue}\footnotesize#1:}
+\newcommand{\lineno}[1]{\algrenewcommand{\alglinenumber}[1]{\color{blue}\footnotesize#1:}}
+
+\newcommand{\resetlineno}{\algrenewcommand{\alglinenumber}[1]{\color{blue}\footnotesize##1:}}
+
+%% Overall analysis algorithm
+%\newcommand{\setalglineno}[1]{
+%  \setcounter{ALC@line}{\numexpr#1-1}}
+
+\newcommand{\IPDPS}[1]{#1}
+\newcommand{\ASPLOS}[1]{#1}
+\newcommand{\IPDPSREVIEW}[1]{{#1}}
+
+\newcommand{\THINCAPTION}[1]{\caption{#1}}
+\newcommand{\THINTABLECAPTION}[1]{\caption{#1}}
+
+% EOF

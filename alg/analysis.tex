@@ -1,0 +1,782 @@
+% analysis.tex
+% 11/7/2013
+% The hotspot and hotpath algorithm figure.
+
+%
+% - Overall analysis algorithm
+% - Hot spot analysis
+% - Optimization scope selection
+% - Decomposition configuration selection
+% - Inlining selection
+%
+
+%% Overall analysis algorithm
+%\begin{algorithm}
+%{\scriptsize
+%\begin{algorithmic}
+%\Require Source code, BST, BET, hardware performance model, optimization criteria
+%\Ensure Optimization annotations
+%% Step 1: Select the communication hot spot to optimize
+%\Function{cco\_analyze}{source\_code, BST, BET, hwmodel, criteria}
+%  \State metrics = project\_perf\_metrics(BET, hwmodel)
+%  \State hotspots = find\_comm\_hotspots(BST, metrics, criteria)
+%  % Step 2: Select optimization scope
+%  \State scopes = empty set
+%  \ForAll{communication hotspot H \textbf{in} hotspots}
+%    \State scope = select\_opt\_scope(H, BET, metrics, criteria)
+%    \State scopes.add(scope)
+%  \EndFor
+%  % Step 3: Select decomposition configuration
+%  \State config = empty list
+%  \ForAll{optimization scope S \textbf{in} scopes}
+%    \State decomp\_config = select\_decomp\_config(S, hwmodel, criteria)
+%    \State config.add(decom\_config)
+%  \EndFor
+%  % Step 4: Select inlining configuration
+%  \ForAll{optimization configuration C \textbf{in} config}
+%    \State inline\_config = select\_inline\_config(C, BST, criteria)
+%    \State config.add(inline\_config)
+%  \EndFor
+%  % Step 5: Code generation
+%  \State insert\_annotations(source\_code, config)
+%\EndFunction
+%\end{algorithmic}
+%\caption{CCO optimization analysis}
+%\label{alg:analysis}
+%}%\scriptsize
+%\end{algorithm}
+
+%\section{CCO analysis}
+%
+%\TODO{Move to other files}
+%
+%Overall procedure
+%\begin{enumerate}
+%\item Use performance model to find communication hotspot
+%\item Model and safety to find nearby communication up and down
+%\item Safety analysis to reject illegal ons
+%\item Safety analysis find multiple possible decomposition configuration and model to reject
+%\item Generate annotation
+%\item Transformation
+%\end{enumerate}
+
+\begin{algorithm}
+{\scriptsize
+\begin{algorithmic}[1]
+\Require Hot communication groups
+%\Ensure Optimization configurations
+\nolineno
+
+\Function{cco\_analyze}{hot\_comm\_groups}
+  \ForAll{communication group g \textbf{in} hot\_comm\_groups}
+    %\State \COMMENT{Estimte the overlapping scope in BET without considering safety constraits}
+    \lineno{1}
+    \State cco\_scope = compute\_overlapping\_scope(BET, g)
+    \nolineno
+
+    %\State \COMMENT{Specialize the function calls that are needed to be modified in the cco\_scope}
+    \lineno{2}
+    \State calls = inline\_functions(cco\_scope, g)
+    \nolineno
+
+    %\State \COMMENT{Get the computations that can be reordered around the communication}
+    \lineno{3}
+    \State (indep\_stmts, decompose\_stmts) = dependence\_analysis(cco\_scope, g)
+    \nolineno
+
+    %\State \COMMENT{Shrink overlap scope}
+    %\lineno{4}
+    %\State cco\_scope = shrink\_overlapping\_scope(cco\_scope, g, indep\_stmts, decompose\_stmts)
+    %\nolineno
+
+    %%\State \COMMENT{Get the computations that can be reordered around the communication}
+    %\lineno{2}
+    %\State indep\_stmts = compute\_indep\_stmts(cco\_scope, g, depgraph)
+    %\nolineno
+
+    %%\State \COMMENT{Get the modifications to each statement which is needed to be decomposed to overlap the communication with computation. The result is a map from the original statements to the modified statements.}
+    %\lineno{3}
+    %\State decomp\_stmts = compute\_stmts\_to\_decompose(cco\_scope, g, indep\_stmts, depgraph)
+    %\nolineno
+
+    %\State \COMMENT{Need to prove why use g is enough to mark the communication hotspot}
+    \lineno{4}
+    \State insert\_cco\_annotation(cco\_scope, g)
+    \nolineno
+    \State insert\_indep\_annotations(indep\_stmts, cco\_scope)
+    \State insert\_decomp\_annotations(decomp\_stmts, cco\_scope)
+  \EndFor
+\EndFunction
+\resetlineno
+\end{algorithmic}
+\caption{CCO optimization analysis workflow}
+\label{alg:analysis}
+}%\scriptsize
+\end{algorithm}
+
+%% Hot spot analysis
+%\begin{algorithm}
+%{\scriptsize
+%\begin{algorithmic}[1]
+%\Require BET, Communication groups in BET, hardware performance model, hot spot selection criteria
+%\Ensure Code regions in BET that are communication hot regions
+%\nolineno
+%\Function{identify\_comm\_hotspots}{BET, comm\_groups, hwmodel, threshold\_percentage}
+%  %\State \COMMENT{Estimate the overall performance of the application}
+%  \lineno{1}
+%  \State totaltime = project\_total\_time(BET, hwmodel)
+%  \nolineno{1}
+%  \State groups = empty list
+%  \ForAll{communication group g \textbf{in} comm\_groups}
+%    %\State \COMMENT{Group the hot communication statement with nearby communications. 1. If it is a blocking send/recv, group with newby send/recv in the same commgroup. 2. If it is a non-blocking or collective communication, group with newby wait statement. The size threshold is used to limit the maximum code size of the communication group.}
+%    %\State \COMMENT{Estimate the blocking communication time and non-blocking wait time to select the hotspots}
+%    \lineno{2}
+%    \State commtime = project\_comm\_time(g, hwmodel)
+%    \nolineno
+%    \If{commtime > totaltime * threshold\_percentage}
+%      \State groups.add(g)
+%    \EndIf
+%  \EndFor
+%  \State \Return groups
+%\EndFunction
+%%\Function{find\_comm\_group}{BET, comm, codesize\_threshold}
+%%  \State comms = emptylist
+%%  \State comms.add(comm)
+%%  %\State \COMMENT{Group the hot communication statement with nearby communications. 1. If it is a blocking send/recv, group with newby send/recv in the same commgroup. 2. If it is a non-blocking or collective communication, group with newby wait statement. The size threshold is used to limit the maximum code size of the communication group.}
+%%  \State \COMMENT{Find the pair of nonblocking sendrecv and blocking wait}
+%%  \If{is\_nonblocking\_comm(comm)}
+%%    \State wait = find\_matched\_wait(BET, comm)
+%%    \State comms.add(wait)
+%%  \EndIf
+%%  %\If{is\_sendrecv\_comm(comm)}
+%%  %  \State \LABEL{2} \COMMENT{For blocking or non-blocking send and recv.}
+%%  %  \State send\_or\_recv = find\_paired\_sendrecv(BET, comm)
+%%  %  \State comms.add(send\_or\_recv)
+%%  %\EndIf
+%%  \If{is\_sendrecv\_comm(comm)}
+%%    \State \FIXME{How to find paired send and recv}
+%%  \EndIf
+%%  \State \Return comms
+%%\EndFunction
+%\resetlineno
+%\end{algorithmic}
+%\caption{Communication hot spot analysis}
+%\label{alg:hotspot}
+%}%\scriptsize
+%\end{algorithm}
+
+% Select CCO region
+\begin{algorithm}
+{\scriptsize
+\begin{algorithmic}[1]
+\Require A group of communications (either a collective communication, or several decoupled send, receive, and wait)
+\Ensure The overlap code region for the communications
+\nolineno
+\Function{deterine\_overlapping\_scope}{comms}
+  \State \COMMENT{Intialize the code region with the communications}
+  \State R = empty set of statements in the code region
+  \ForAll{communication C \textbf{in} comms}
+    \State R.add(C)
+  \EndFor
+  \State \COMMENT{Iterate until the size of R no longer changes}
+  \State size = 0
+  \While{size $\ne$ R.size()}
+    \State size = R.size()
+    \ForAll{statement X \textbf{in} R}
+      \State \COMMENT{Add statements in the same block to R}
+      \State P = get\_parent\_block(X)
+      \While{is\_simple\_block(P)}
+        \State P = get\_parent\_block(P)
+      \EndWhile
+      \ForAll{child statement Y \textbf{in} P}
+        \State R.add(Y)
+      \EndFor
+      \If{is\_function\_definition(P)}
+        \State \COMMENT{Add statements in different functions to R}
+        \ForAll{function call F \textbf{in} find\_function\_calls(P)}
+          \State Q = get\_parent\_block(F)
+          \ForAll{statement Y \textbf{in} Q}
+            \State R.add(Y)
+          \EndFor
+        \EndFor
+      \EndIf
+    \EndFor
+  \EndWhile
+  \State \Return R
+\EndFunction
+\resetlineno
+\end{algorithmic}
+\caption{ the overlapping scope}
+\label{alg:cco:region}
+}%\scriptsize
+\end{algorithm}
+
+% Select decomposition statements
+\begin{algorithm}
+{\scriptsize
+\begin{algorithmic}
+\Require Overlap code region, group of communications
+\Ensure Indepdent statments and decomposable statements
+\Function{dependence\_analysis}{region, comms}
+  \State depgraph = compute\_dependence\_graph(region)
+  \State indep\_stmts = empty set of independent statements
+  \State decomp\_loops = empty set of decomposable loops
+  %\State \COMMENT{Compute reachable independent statements}
+  %\ForAll{communication C \textbf{in} comms}
+  %  \State \COMMENT{Traverse the statements before or after the communictions C}
+  %  %\ForAll{statement list F \textbf{in} get\_statements\_in\_the\_same\_controlflow\_starts\_or\_ends\_with(C, region)}
+  %  \ForAll{statement list F \textbf{in} compute\_controlflows(C, region)}
+  %    \ForAll{statement S \textbf{in} F}
+  %      \If{is\_independent(S, comms, G)}
+  %        \State I.add(S)
+  %      \Else
+  %        \State \textbf{break}
+  %      \EndIf
+  %    \EndFor
+  %  \EndFor
+  %\EndFor
+  \State \COMMENT{Compute decomposable communication}
+  \State l = \textbf{none}
+  \If{is\_collective\_comm(comms)}
+    \State \COMMENT{Decompose collective communiction to a loop of decoupled point-to-point communications}
+    \State l = decompose\_collective\_comm\_to\_parameterized\_loop(comms)
+  \ElsIf{is\_in\_loop(comms)}
+    \State \COMMENT{The communications are already in a loop that does not require decomposition}
+    \State l = get\_parent\_loop(comms)
+  \EndIf
+
+\color{purple}
+  \State \COMMENT{Compute indepdent statements: 1. dependent from all comms 2. reachable}
+  \State (readdata, writedata) = get\_read\_write\_data(comms) \COMMENT{memory side effects}
+  \State top = get\_top\_stmt(comms)
+  \ForAll{statement s before top in reverse order}
+    \If{independent(s, readdata, writedata, depgraph)}
+      \State indep\_stmts.add(s)
+      \State top = s
+    \Else
+      \State \textbf{break}
+    \EndIf
+  \EndFor
+  \State bottom = get\_bottom\_stmt(comms)
+  \ForAll{statement s after bottom}
+    \If{independent(s, readdata, writedata, depgraph)}
+      \State indep\_stmts.add(s)
+      \State bottom = s
+    \Else
+      \State \textbf{break}
+    \EndIf
+  \EndFor
+
+  \State \COMMENT{Compute decomposable loops: 1. fusible to comm loop 2. reachable}
+  \If{communication loop l $\neq$ \textbf{none}}
+    \ForAll{statement s before top in reverse order}
+      \State \textbf{if} fusible\_loops(s, l, depgraph) \textbf{then} decomp\_loops.add(s)
+      \State \textbf{else} \textbf{break}
+    \EndFor
+    \ForAll{statement s after bottom}
+      \State \textbf{if} fusible\_loops(s, l, depgraph) \textbf{then} decomp\_loops.add(s)
+      \State \textbf{else} \textbf{break}
+    \EndFor
+  \EndIf
+  \State \Return (indep\_stmts, decomp\_loops)
+
+  %\State \COMMENT{Compute execution flow of reachable statements for each communication}
+  %\State seqs = empty list of statement list
+  %\ForAll{communication comm \textbf{in} comms}
+  %  \State seq = get\_statements\_up(comm)
+  %  \State seqs.add(seq)
+  %  \State seq = get\_statements\_down(comm)
+  %  \State seqs.add(seq)
+  %\EndFor
+  %\If{decomp\_comm $\neq$ \textbf{none}}
+  %  \State seq = get\_statements\_up(decomp\_comm)
+  %  \State seqs.add(seq)
+  %  \State seq = get\_statements\_down(decomp\_comm)
+  %  \State seqs.add(seq)
+  %\EndIf
+  %\State \COMMENT{Iterate flow of reachable computations for communications}
+  %\ForAll{statement list seq \textbf{in} seqs}
+  %  \State (comm, seq) = remove\_first\_stmt(seq)
+  %  \If{comm = decomp\_comm}
+  %    \State \COMMENT{Compute both independent and decomposable statements}
+  %    \State traverse\_sequence(seq, comm, depgraph, indep\_stmts, dep\_stmts)
+  %  \Else
+  %    \State \COMMENT{Compute independent statements only}
+  %    \State traverse\_sequence(seq, comm, depgraph, indep\_stmts, \textbf{none})
+  %  \EndIf
+  %\EndFor
+  %\State \Return (indep\_stmts, decomp\_stmts)
+\EndFunction
+
+\color{brown}
+\State \COMMENT{Find the upper and lower boundary communications}
+\Function{get\_first\_last\_comms}{comms}
+  \If{is\_collective\_comm(comms)}
+    \State \Return (comms, comms)
+  \ElsIf{is\_nonblocking\_comm(comms)}
+    \State waits = find\_nonblocking\_waits(comms)
+    \State bcomms = find\_blocking\_comms(comms)
+    \State \Return (find\_first\_stmt(bcomms), find\_last\_stmt(waits))
+  \Else
+    \State \Return (find\_first\_stmt(comms), find\_last\_stmt(comms))
+  \EndIf
+\EndFunction
+
+%\Function{compute\_indep\_up}{comm, before, depgraph, indep\_stmts}
+%  \State (before, prev) = remove\_last\_stmt(before)
+%  \If{prev $\neq$ \textbf{none} \textbf{and} independent(prev, comm, depgraph)}
+%    \State indep\_stmts.add(prev)
+%    \State compute\_indep\_up(prev, before, depgraph, indep\_stmts)
+%  \EndIf
+%\EndFunction
+%\Function{compute\_indep\_down}{comm, after, depgraph, indep\_stmts}
+%  \State \ldots
+%\EndFunction
+
+%\State \COMMENT{Recursively traverse reachable computations for each communication}
+%\Function{traverse\_stmts}{seq, comm, depgraph, indep\_stmts, decomp\_stmts}
+%  \State (cur, seq) = remove\_first\_stmt(seq)
+%  \If{first $\neq$ \textbf{none}}
+%    \If{indep\_stmts $\neq$ \textbf{none} \textbf{and} independent(cur, comm, depgraph)}
+%      \State indep\_stmts.add(cur)
+%      \State traverse\_sequence(seq, comm, depgraph, indep\_stmts, decomp\_stmts)
+%    \ElsIf{decomp\_stmts $\neq$ \textbf{none} \textbf{and} compatible\_loops(cur, comm) \textbf{and} fusible\_loops(cur, comm)}
+%      \State decomp\_stmts.add(cur)
+%      \State traverse\_sequence(seq, comm, depgraph, {\color{blue}\textbf{none}}, decomp\_stmts)
+%    \EndIf
+%  \EndIf
+%\EndFunction
+
+%\If{comm\_loop $\ne$ \textbf{none}}
+%\State \COMMENT{Traverse the statements before or after the communictions}
+%%\ForAll{statement list F \textbf{in} get\_statements\_in\_the\_same\_controlflow\_starts\_or\_ends\_with(comm\_loop, region)}
+%\If{L $\neq$ \textbf{none}}
+%  \State \COMMENT{Compute both independent and decomposable statements only}
+%  \State cur = L
+%  \State found\_decomp = \textbf{false}
+%  \While{has\_prev\_statement(cur, region)}
+%    \State cur = get\_prev\_statements(cur, region)
+%    \If{\textbf{not} found\_decomp \textbf{and} is\_independent(L, comms, G)}
+%      \State \COMMENT{If the statement is independent, add it to I}
+%      \State I.add(cur)
+%    \ElsIf{is\_loop(cur) \textbf{and} fusible\_loops(L, cur)}
+%      \State \COMMENT{If the computation loop is compatible to the decomposable communication, add it to D}
+%      \State D.add(cur)
+%      \State found\_decomp = \textbf{true}
+%    \Else
+%      \State \textbf{break}
+%    \EndIf
+%  \EndWhile
+%  \State cur = L
+%  \State found\_decomp = \textbf{false}
+%  \While{has\_next\_statement(cur, region)}
+%    \State \ldots
+%  \EndWhile
+%\Else
+%  \State \COMMENT{Compute independent statements only}
+%  \State \ldots
+%\EndIf
+%\State \Return (I, D)
+
+%\Function{is\_decomposable}{S, comms, G}
+%  \Return \textbf{true}
+%\EndFunction
+
+\end{algorithmic}
+\caption{Select decomposable statements}
+\label{alg:cco:depanal}
+}%\scriptsize
+\end{algorithm}
+
+% Select decomposition statements, recursive version
+\begin{algorithm}
+{\scriptsize
+\begin{algorithmic}
+\Require Overlap code region, group of communications
+\Ensure Indepdent statments and decomposable statements
+\Function{compute\_overlapable\_statements}{region, comms}
+  \State G = compute\_dependence\_graph(region)
+  \State D = empty set of dependent statements
+  \State I = empty set of independent statements
+  \State P = empty set of decomposable statements
+
+  \State \COMMENT{Compute all dependent statements}
+  \ForAll{communication C \textbf{in} comms}
+    \State D.add(C)
+  \EndFor
+  \State size = D.size()
+  \While{size $\neq$ D.size()}
+    \State size = D.size()
+    \ForAll{statement S \textbf{in} region}
+      \If{is\_dependent(S, D, G)}
+        \State D.add(S)
+      \EndIf
+    \EndFor
+  \EndWhile
+
+  \State \COMMENT{Compute reachable independent statements}
+  \ForAll{communication C \textbf{in} comms}
+    \State compute\_indep\_before(C, I, D, region)
+    \State compute\_indep\_after(C, I, D, region)
+  \EndFor
+
+  \State \COMMENT{Compute decomposable statements}
+  \State L = \textbf{none}
+  \If{is\_collective\_comm(comms)}
+    \State \COMMENT{Decompose collective communiction to a loop of decoupled point-to-point communications}
+    \State L = decompose\_collective\_comm\_to\_parameterized\_loop(comms)
+  \ElsIf{is\_in\_loop(comms)}
+    \State \COMMENT{The communications are already in a loop that does not require decomposition}
+    \State L = get\_parent\_loop(comms)
+  \EndIf
+
+  \State \COMMENT{Compute decomposable statements if the communication is decomposable}
+  \If{L $\neq$ \textbf{none}}
+    \State compute\_decomp\_before(L, L, P, I, G, region, \textbf{false})
+    \State compute\_decomp\_after(L, L, P, I, G, region, \textbf{false})
+  \EndIf
+  \State \Return (I, P)
+\EndFunction
+
+\Function{compute\_indep\_before}{cur, I, C, region}
+  \If{has\_prev\_statement(cur, region)}
+    \State prev = get\_prev\_statements(cur, region)
+    \If{prev \textbf{not} \textbf{in} D}
+      \State I.add(prev)
+      \State compute\_indep\_before(prev, I, G, comms)
+    \EndIf
+  \EndIf
+\EndFunction
+\Function{compute\_indep\_after}{cur, I, G, comms, region}
+  \State \ldots
+\EndFunction
+
+\Function{compute\_decomp\_before}{cur, L, P, I, G, region, found\_decomp}
+  \If{has\_prev\_statement(cur, region)}
+    \State prev = get\_prev\_statements(cur, region)
+    \If{\textbf{not} found\_indep \textbf{and} prev \textbf{in} I}
+      \State compute\_decomp\_before(prev, L, P, I, G, region, \textbf{false})
+    \ElsIf{is\_loop(prev) \textbf{and} is\_compatible(prev, L, G)}
+      \State D.add(prev)
+      \State compute\_decomp\_before(prev, L, P, D, G, region, \textbf{true})
+    \EndIf
+  \EndIf
+\EndFunction
+\Function{compute\_decomp\_after}{cur, L, I, G, region, found\_decomp}
+  \State \ldots
+\EndFunction
+
+%\Function{is\_decomposable}{S, comms, G}
+%  \Return \textbf{true}
+%\EndFunction
+
+\end{algorithmic}
+\caption{Select decomposable statements (recursive version)}
+\label{alg:cco:depanal}
+}%\scriptsize
+\end{algorithm}
+
+%% Select independent statements
+%\begin{algorithm}
+%{\scriptsize
+%\begin{algorithmic}
+%\Require Overlap scope, communication group, dependence graph
+%\Ensure Pairs of indendent computations and communications
+%\Function{compute\_indep\_stmts}{scope, commgroup, depgraph}
+%  \State stmts = empty list
+%  \State \COMMENT{Top-down traverse the scope and find all pairs of indepdent computation and communication.}
+%  \ForAll{statement S \textbf{in} scope}
+%    \ForAll{communication C \textbf{in} commgroup}
+%      \If{indepdent(C, S, depgraph)}
+%        \State stmts.add((C, S))
+%      \EndIf
+%    \EndFor
+%  \EndFor
+%  \State \Return stmts
+%\EndFunction
+%\end{algorithmic}
+%\caption{Select independent computations}
+%\label{alg:cco:indep}
+%}%\scriptsize
+%\end{algorithm}
+%
+%% Select decomposition statements
+%\begin{algorithm}
+%{\scriptsize
+%\begin{algorithmic}
+%\Require Overlap scope, communication group, independent statements, dependence graph
+%\Ensure Parameterized decomposed statements
+%\Function{compute\_stmts\_to\_decompose}{scope, commgroup, indep\_stmts, depgraph}
+%  \State stmts = empty list
+%  \ForAll{communication C \textbf{in} commgroup}
+%    \If{decomposable\_communication(C, depgraph)}
+%      \State data = compute\_decomposable\_data(C, depgraph)
+%      \State \COMMENT{Bottom-up traverse the computation surrounding the communication}
+%      \ForAll{statement S surrounding C in the scope}
+%        \If{(C, S) \textbf{in} indep\_stmts}
+%          \State do nothing
+%        \ElsIf{decomposable\_computation(S, C, data, depgraph)}
+%          \State list = compute\_decomposed\_stmts(S, C, data, depgraph)
+%          \State stmts.add(list)
+%        \Else
+%          \State \textbf{break}
+%        \EndIf
+%      \EndFor
+%    \EndIf
+%  \EndFor
+%  \State \Return stmts
+%\EndFunction
+%\end{algorithmic}
+%\caption{Select decomposable statements}
+%\label{alg:cco:decomp}
+%}%\scriptsize
+%\end{algorithm}
+
+% EOF
+
+%\Function{select\_decomp\_region}{region, comm, depgraph, hwmodel}
+%  \State decomp\_region = empty list
+%  \State decomp\_annots = empty list
+%  \ForAll{comp \textbf{in} get\_prev\_stmts(region)}
+%    \If{is\_comp\_comm\_balanced(region, comm, hwmodel)}
+%      \State \textbf{break}
+%    \ElsIf{can\_partial\_overlap(comm, comp, depgraph)}
+%      \State accesses = overlapped\_data\_accesses(comm, comp, depgraph)
+%      \If{\textbf{not} is\_decomposed(comm, accesses)}
+%        \State (comm, config) = decompose\_comm(comm, accesses)
+%        \State decomp\_annots.add(config)
+%      \EndIf
+%      \If{\textbf{not} is\_decomposed(comp, accesses)}
+%        \State (comp, config) = decompose\_comp(comp, accesses)
+%        \State decomp\_annots.add(config)
+%      \EndIf
+%      \State decomp\_region.add(comp)
+%    \Else
+%      \State \textbf{break}
+%    \EndIf
+%  \EndFor
+%  \ForAll{comp \textbf{in} get\_next\_stmts(region)}
+%    \State \ldots
+%  \EndFor
+%  \State \Return (decomp\_region, decomp\_annots)
+%\EndFunction
+%
+%\Function{can\_partial\_overlap}{comp, comm, depgraph}
+%  \If{decomposable(comp, depgraph) \textbf{and} decomposable(comm, depgraph)}
+%    \State x = get\_outermost\_data\_access\_pattern(comp, depgraph)
+%    \State y = get\_outermost\_data\_access\_pattern(comm, depgraph)
+%    \State \Return compatible\_access\_patterns(x, y)
+%  \EndIf
+%  \State \Return \textbf{false}
+%\EndFunction
+%
+%\Function{is\_comp\_comm\_balanced}{comp, comm, hwmodel}
+%  \State threshold\_percentage = 0.1
+%  \State commtime = project\_time(comm, hwmodel)
+%  \State comptime = project\_time(comp, hwmodel)
+%  \State \Return \textbf{abs}(commtime - comptime) / (commtime + comptime) < threshold\_percentage
+%\EndFunction
+%\Function{needs\_optimization}{comp, comm, hwmodel}
+%  \State threshold\_percentage = 0.5
+%  \State commtime = project\_comm\_time(comm, hwmodel)
+%  \State comptime = project\_comp\_time(comp, hwmodel)
+%  \State overlaptime = project\_overlap\_time(comp, comm, hwmodel)
+%  \State \Return overlaptime / \textbf{min}(commtime, comptime) < threshold\_percentage
+%\EndFunction
+%\end{algorithmic}
+%\caption{CCO optimization analysis workflow}
+%\label{alg:details}
+%}%\scriptsize
+%\end{algorithm}
+
+%% Optimization scope selection
+%\begin{algorithm}
+%{\scriptsize
+%\begin{algorithmic}
+%\Require Communication spots, data dependence graph and hardware performance model
+%\Ensure Region of the communications and computations to overlap
+%\Function{select\_overlap\_region}{comm, depgraph, hwmodel}
+%  \State region = empty forest
+%  \State stmts = get\_sibling\_stmts(comm)
+%  \State (before, comm, after) = split\_stmts(stmts, comm)
+%  \ForAll{comp \textbf{in} reverse(before)}
+%    \If{\textbf{not} safe\_to\_overlap(comm, comp)}
+%      \State \textbf{break}
+%    \EndIf
+%    \State region.add(comp)
+%    \If{is\_region\_balanced(region, hwmodel)}
+%      \State \Return region
+%    \EndIf
+%  \EndFor
+%  \ForAll{comp \textbf{in} after}
+%    \If{\textbf{not} safe\_to\_overlap(comm, comp)}
+%      \State \textbf{break}
+%    \EndIf
+%    \State region.add(comp)
+%    \If{is\_region\_balanced(region, hwmodel}
+%      \State \Return region
+%    \EndIf
+%  \EndFor
+%  \State \Return \textbf{region}
+%
+%\EndFunction
+%
+%\Function{safe\_to\_overlap}{comp, comm, depgraph}
+%  \If{independent(comp, comm, depgraph)}
+%    \State \Return \textbf{true}
+%  \EndIf
+%  \If{decomposable(comp, depgraph) \textbf{and} decomposable(comm, depgraph)}
+%    \State x = get\_outermost\_data\_access\_pattern(comp, depgraph)
+%    \State y = get\_outermost\_data\_access\_pattern(comm, depgraph)
+%    \State \Return compatible\_access\_patterns(x, y)
+%  \EndIf
+%  \State \Return \textbf{false}
+%\EndFunction
+%
+%\end{algorithmic}
+%\caption{Select region of computations and communications to overlap}
+%\label{alg:scope}
+%}%\scriptsize
+%\end{algorithm}
+
+%% Decomposition configuration selection
+%\begin{algorithm}
+%{\scriptsize
+%\begin{algorithmic}
+%\Require Region of code to overlap, data dependence graph, and hardware performance model
+%\Ensure Transformations to apply
+%\Function{select\_transformations}{region, depgraph, hwmodel}
+%  \State \TODO{\Return the transformations needed to enable CCO}
+%\EndFunction
+%\end{algorithmic}
+%\caption{Select optimization configuration}
+%\label{alg:scope}
+%}%\scriptsize
+%\end{algorithm}
+
+%% Decomposition configuration selection
+%
+% Steps
+% 1. traverse along the control flow
+% 2. find out the data flow being shared on the way
+% 3. summarize the data access pattern
+% 4. come up a decomposition so that two data can be divided
+% 5. double check for the data safety analysis
+% 6. predict performance
+%\begin{algorithm}
+%{\scriptsize
+%\begin{algorithmic}
+%\Require Optimization scope in BET, hardware performance model
+%\Ensure Decomposition configurations
+%\Function{select\_decomp\_config}{scope, hwmodel}
+%  \State configs = empty list
+%  \ForAll{communication hotspot comm \textbf{in} scope}
+%    \State add\_prev\_configs(configs, comm, comm, scope)
+%    \State add\_next\_configs(configs, comm, comm, scope)
+%  \EndFor
+%  % Return the configuration with the maximum score
+%  \State speedup = 0
+%  \State ret = empty
+%  \ForAll{configuration C \textbf{in} configs}
+%    \State s = estimate\_speedup(scope, config, hwmodel)
+%    \If{s > speedup}
+%      \State speedup = s
+%      \State ret = C
+%    \EndIf
+%  \EndFor
+%  \State \Return ret
+%\EndFunction
+%
+%\Function{add\_prev\_configs}{configs, cur, comm, scope}
+%  %  Traverse along the control flow
+%  \State prev = get\_prev\_node(cur, scope)
+%  % Find out the data flow being shared on the way
+%  \If{\textbf{not} has\_data\_dependence(prev, comm)}
+%    \State add\_prev\_configs(configs, prev, comm, scope)
+%  \ElsIf{is\_loop(prev)}
+%    % Summarize the data access pattern
+%    \State data = get\_comm\_data(comm)
+%    \State pattern = get\_data\_access\_pattern(data, prev)
+%    % Come up a decomposition so that two data can be divided
+%    \State config = get\_decomp\_config(comm, pattern)
+%    \If{config is not empty}
+%      \State config.comm = comm
+%      \State configs.add(config)
+%    \EndIf
+%  \EndIf
+%\EndFunction
+%
+%\Function{add\_next\_configs}{configs, cur, comm, scope}
+%  \State \TODO{Similar to add\_prev\_configs, omit}
+%\EndFunction
+%
+%\Function{get\_prev\_node}{cur, scope}
+%  \If{has\_prev\_sibling\_stmt(cur, scope)}
+%    \State \Return get\_prev\_sibling\_stmt(cur, scope)
+%  \ElsIf{has\_enclosing\_block(cur, scope)}
+%    \State \Return get\_enclosing\_block(cur, scope)
+%  \EndIf
+%\EndFunction
+%
+%\Function{get\_data\_access\_pattern}{data, loop}
+%  \State ret = empty map
+%    \ForAll{array a \textbf{in} data}
+%      \State slice = get\_read\_write\_slice\_in\_loop(loop)
+%      \State \FIXME{describe representation of the data access pattern}
+%      \State \FIXME{Example data access pattern for array:}
+%      \State \FIXME{(read\_or\_write, arrayname(start:stop:step))}
+%      \State ret[a] = slice
+%    \EndFor
+%  \State \Return ret
+%\EndFunction
+%
+%\Function{get\_decomp\_config}{comm, pattern}
+%  \State config = empty configuration
+%  \State op = get\_comm\_op(comm)
+%  \If{op is MPI collective}
+%    \State data = get\_comm\_data(comm)
+%    \ForAll{array a \textbf{in} data}
+%      \If{a \textbf{in} pattern}
+%        \State slice = pattern[a]
+%        \If{can\_decompose\_comm(comm, slice)}
+%          \State config.patern[a] = slice
+%        \Else
+%          \State \Return empty
+%        \EndIf
+%      \EndIf
+%    \EndFor
+%  \Else
+%    \State \TODO{support other communication operations}
+%  \EndIf
+%  \State \Return config
+%\EndFunction
+%
+%
+%\Function{estimate\_speedup}{code, config, hwmodel}
+%  \State totaltime = get\_projected\_runtime(code)
+%  \State commtime = get\_projected\_runtime(config.comm)
+%  \State decomp\_comm = decompose\_comm(config.comm, config.pattern)
+%  \State new\_commtime = project\_runtime(decomp\_comm, hwmodel)
+%  \State comp = get\_overlapped\_computations(code, config)
+%  \State comptime = get\_projected\_runtime(comp)
+%  \State speeduptime =  commtime + comptime - max(new\_commtime, comptime)
+%  \State \Return totaltime / (totaltime - speeduptime)
+%\EndFunction
+%\end{algorithmic}
+%\caption{Select decomposition configuration}
+%\label{alg:decomp}
+%}%\scriptsize
+%\end{algorithm}
+%
+%%% Inlining selection
+%\begin{algorithm}
+%{\scriptsize
+%\begin{algorithmic}
+%\Require BET, optimization configuration
+%\Ensure Inlining configuration
+%\State TODO
+%\end{algorithmic}
+%\caption{Select inlining configuration}
+%\label{alg:inlining}
+%}%\scriptsize
+%\end{algorithm}

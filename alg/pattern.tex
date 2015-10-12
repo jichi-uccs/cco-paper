@@ -1,0 +1,278 @@
+% pattern.tex
+% 11/9/2013
+% Optimization patterns
+
+% NAS: http://www.nas.nasa.gov/publications/npb.html
+% Github: https://github.com/moutai/hpc-medley.git
+% NPB3.3.1 MPI
+% io
+% - DT
+% kernel
+% - CG
+% - EP
+% - FT
+% - IS
+% - MG
+% app
+% - BT
+% - SP
+% - LU
+
+%
+% NAS IS is.c:rank
+% Within the same block but different basic blocks.
+%
+% The hotspot is alltoallv
+% We can accurately measure.
+%
+% NAS IS.C.64
+% qsub -n 2 -c32
+%
+% count: 32768
+% app: 0.997666666667
+% bench: 0.907333333333
+% error 0.0905446040762
+%
+
+\begin{algorithm}
+{\scriptsize
+\begin{algorithmic}
+\Require Source code pattern
+\State MPI\_Alltoallv(key\_buff1, send\_count, send\_disp, key\_buff2, \ldots)
+
+\State count = compute\_count(mpi\_rank)
+\ForAll{i = 1,count}
+  \State key\_buff1[i] = KernelSubroutine(i, \ldots)
+\EndFor
+
+\Ensure Intermediate transformed code: decompose communication and tile computation
+\State count = compute\_count(mpi\_rank)
+\ForAll{j = 1, count, block\_size}
+  \State MPI\_Send(key\_buff1, block\_size, \ldots)
+  \State MPI\_Secv(key\_buff2, block\_size, \ldots)
+\EndFor
+
+\ForAll{j = 1, count, block\_size}
+  \ForAll{i = j,block\_size}
+    \State key\_buff1[i] = KernelSubroutine(i, \ldots)
+  \EndFor
+\EndFor
+
+\Ensure Optimized code 1: overlap computation with recv
+\State count = compute\_count(mpi\_rank)
+\ForAll{j = 1, count, block\_size}
+  \State MPI\_Irecv(key\_buff2, block\_size, \ldots, req)
+  \State MPI\_Send(key\_buff1, block\_size, \ldots)
+  \ForAll{i = j,block\_size}
+    \State key\_buff1[i] = KernelSubroutine(i, \ldots)
+  \EndFor
+\EndFor
+\State MPI\_Waitall(\ldots)
+
+\Ensure Optimized code 2: overlap computation with next communication
+\State count = compute\_count(mpi\_rank)
+\State MPI\_Irecv(key\_buff2, block\_size, \ldots, req)
+\State MPI\_ISend(key\_buff1, block\_size, \ldots, req2[1])
+\ForAll{j = 1, count -1, block\_size}
+  \State MPI\_Irecv(key\_buff2, block\_size, \ldots, req)
+  \State MPI\_ISend(key\_buff1, block\_size, \ldots, req2[i+1])
+  \State MPI\_Wait(req2[i], \ldots)
+  \ForAll{i = j,block\_size}
+    \State key\_buff1[i] = KernelSubroutine(i, \ldots)
+  \EndFor
+\EndFor
+\ForAll{i = count - blocksize,block\_size}
+  \State key\_buff1[i] = KernelSubroutine(i, \ldots)
+\EndFor
+\State MPI\_Waitall(\ldots)
+
+\end{algorithmic}
+\caption{Hot region extracted from NAS IS (is.c:rank)}
+\label{pat:is}
+}%\scriptsize
+\end{algorithm}
+
+%
+% NAS MG mg.f:psinv
+% Inter-procedural
+%
+% NAS MG.C.64
+% qsub -n 2 -c32
+%
+% sendtime: 0.397333333333
+% irecvtime: 0.0156666666667
+% waittime: 0.221333333333
+% avg count: 2875
+% max count: 16900
+% min count: 1
+% real time: 0.176
+% proj time: 0.0404075706846
+% error 0.770411530201
+%
+
+\begin{algorithm}
+{\scriptsize
+\begin{algorithmic}
+\Require Source code pattern
+\ForAll{i3 = 2,n3-1}
+  \State KernelSubroutine(id3, u, \ldots)
+\EndFor
+% comm3
+\ForAll{axis = 1,3}
+  % ready
+  \State MPI\_Irecv(buff[3-1], \ldots, req1)
+  % ready
+  \State MPI\_Irecv(buff[3+1], \ldots, req2)
+  % give3
+  \State MPI\_Send(buff[3-1], \ldots)
+  % give3
+  \State MPI\_Send(buff[3+1], \ldots)
+  % take3
+  \State MPI\_Wait(req1, \ldots)
+  \State NonHotComputation(buff[3-1], \ldots)
+  % take3
+  \State MPI\_Wait(req2, \ldots)
+  \State NonHotComputation(buff[3+1], \ldots)
+\EndFor
+
+\Ensure Intermediate tiled computation
+\ForAll{axis = 1,3}
+  \ForAll{i3 = 2,n3-1,3}
+    \State KernelSubroutine(id3, u, \ldots)
+  \EndFor
+\EndFor
+% comm3
+\ForAll{axis = 1,3}
+  % ready
+  \State MPI\_Irecv(buff[3-1], \ldots, req1)
+  % ready
+  \State MPI\_Irecv(buff[3+1], \ldots, req2)
+  % give3
+  \State MPI\_Send(buff[3-1], \ldots)
+  % give3
+  \State MPI\_Send(buff[3+1], \ldots)
+  % take3
+  \State MPI\_Wait(req1, \ldots)
+  \State NonHotComputation(buff[3-1], \ldots)
+  % take3
+  \State MPI\_Wait(req2, \ldots)
+  \State NonHotComputation(buff[3+1], \ldots)
+\EndFor
+
+\Ensure Optimized code
+\ForAll{axis = 1,3}
+  % ready
+  \State MPI\_Irecv(buff[3-1], \ldots, req1)
+  % ready
+  \State MPI\_Irecv(buff[3+1], \ldots, req2)
+  % give3
+  \State MPI\_Send(buff[3-1], \ldots)
+  % give3
+  \State MPI\_Send(buff[3+1], \ldots)
+  \ForAll{i3 = 2,n3-1,3}
+    \State KernelSubroutine(id3, u, \ldots)
+  \EndFor
+  % take3
+  \State MPI\_Wait(req1, \ldots)
+  \State NonHotComputation(buff[3-1], u, \ldots)
+  % take3
+  \State MPI\_Wait(req2, \ldots)
+  \State NonHotComputation(buff[3+1], u, \ldots)
+\EndFor
+\end{algorithmic}
+\caption{Hot region extracted from NAS MG (mg.f:psinv)}
+\label{pat:mg}
+}%\scriptsize
+\end{algorithm}
+
+
+% CHECKPOINT
+
+%% CG cg.f:conj_grad
+\begin{algorithm}
+{\scriptsize
+\begin{algorithmic}
+\Require Source code pattern
+\ForAll{j = 1,n}
+  \State w[j] = KernelSubroutine(j, \ldots)
+\EndFor
+
+\ForAll{i = 1,m}
+  \State MPI\_Irecv(q[start[i]], count[i], \ldots, i, \ldots, req)
+  \State MPI\_Send(w[start[i]], count[i], \ldots, i, \ldots)
+  \State MPI\_Wait(req, \ldots)
+  \ForAll{j = start[i],count[i]}
+    \State w[j] = w[j] + q[j]
+  \EndFor
+\EndFor
+
+\Ensure Optimized code 1: Block computation and overlap with recv
+
+\ForAll{i = 1,m}
+  \State MPI\_Irecv(q[start[i]], count[i], \ldots, i, \ldots, req)
+  \ForAll{j = start[i],count[i]}
+    \State w[j] = KernelSubroutine(j, \ldots)
+  \EndFor
+  \State MPI\_Send(w[start[i]], count[i], \ldots, i, \ldots)
+  \State MPI\_Wait(req, \ldots)
+  \ForAll{j = start[i],count[i]}
+    \State w[j] = w[j] + q[j]
+  \EndFor
+\EndFor
+
+\Ensure Optimized code 2: Overlap computation with previous communication
+
+\ForAll{j = start[1],count[1]}
+  \State w[j] = KernelSubroutine(j, \ldots)
+\EndFor
+\State MPI\_Irecv(q[start[1]], count[1], \ldots, 1, \ldots, req[1])
+\State MPI\_Isend(w[start[1]], count[1], \ldots, 1, \ldots, req2[1])
+\ForAll{i = 1,m-1}
+  \State MPI\_Irecv(q[start[i+1]], count[i+1], \ldots, i+1, \ldots, req[i+1])
+  \ForAll{j = start[i+1],count[i+1]}
+    \State w[j] = KernelSubroutine(j, \ldots)
+  \EndFor
+  \State MPI\_Isend(w[start[i+1]], count[i+1], \ldots, i+1, \ldots, req2[i+1])
+  \State MPI\_Wait(req[i], \ldots)
+  \State MPI\_Wait(req2[i], \ldots)
+  \ForAll{j = start[i],count[i]}
+    \State w[j] = w[j] + q[j]
+  \EndFor
+\EndFor
+\ForAll{j = start[m],count[m]}
+  \State w[j] = w[j] + q[j]
+\EndFor
+
+\end{algorithmic}
+\caption{Hot region extracted from NAS CG (cg.f:conj\_grad)}
+\label{pat:cg}
+}%\scriptsize
+\end{algorithm}
+
+%% LU buts.f:buts and exchange_?.f
+\begin{algorithm}
+{\scriptsize
+\begin{algorithmic}
+\Require Source code pattern
+% buts
+\ForAll{j = jend, jst, -1}
+  \ForAll{i = iend, ist, -1}
+    \ForAll{do m = 1, 5}
+      \State tv[m][i][j] = KernelSubroutine(m,i,j, \ldots)
+    \EndFor
+  \EndFor
+\EndFor
+\State \TODO{CHECKPOINT}
+% exchange
+\If{north != -1}
+  \State MPI\_Send(\ldots)
+\EndIf
+
+\Ensure Optimized code
+\end{algorithmic}
+\caption{Hot region extracted from NAS LU (buts.f and exchange\_*.f)}
+\label{pat:mg}
+}%\scriptsize
+\end{algorithm}
+
+% EOF

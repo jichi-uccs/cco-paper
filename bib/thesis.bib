@@ -1,0 +1,785 @@
+% thesis.bib
+% 7/17/2014
+
+%% Inter-procedural analysis %%
+% http://dl.acm.org/citation.cfm?id=13328
+@article{burke:scc86,
+ author = {Burke, Michael and Cytron, Ron},
+ title = {Interprocedural Dependence Analysis and Parallelization},
+ journal = {SIGPLAN Not.},
+ issue_date = {July 1986},
+ volume = {21},
+ number = {7},
+ month = jul,
+ year = {1986},
+ issn = {0362-1340},
+ pages = {162--175},
+ numpages = {14},
+ url = {http://doi.acm.org/10.1145/13310.13328},
+ doi = {10.1145/13310.13328},
+ acmid = {13328},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+}
+
+%% Compilers %%
+
+% http://www.open64.net/
+@misc{open64,
+  author = {Open64},
+  title = {Open64}},
+  howpublished = {http://www.open64.net/},
+  year = {2014},
+  note = "[Online; accessed 2-December-2014]"
+}
+
+% http://pips4u.org/
+@misc{pips,
+  author = {PIPS},
+  title = {PIPS}},
+  howpublished = {http://pips4u.org/},
+  year = {2014},
+  note = "[Online; accessed 2-December-2014]"
+}
+
+% http://sourceforge.net/projects/coins-project/
+@misc{coins,
+  author = {COINS},
+  title = {CONIS compiler framework}},
+  howpublished = {http://sourceforge.net/projects/coins-project/},
+  year = {2014},
+  note = "[Online; accessed 2-December-2014]"
+}
+
+
+% http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.49.6779
+@inproceedings{Blume94polaris,
+    author = {William Blume and Rudolf Eigenmann and Keith Faigin and John Grout and Jay Hoeflinger and David Padua and Paul Petersen and William Pottenger and Lawrence Rauchwerger and Peng Tu and Stephen Weatherford},
+    title = {Polaris: Improving the Effectiveness of Parallelizing Compilers},
+    booktitle = {In Languages and Compilers for Parallel Computing},
+    year = {1994},
+    pages = {141--154},
+    publisher = {Springer-Verlag}
+}
+
+% http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.34.9816
+% PARADIGM compiler
+@INPROCEEDINGS{Gupta93paradigm,
+    author = {Manish Gupta and Prithviraj Banerjee},
+    title = {PARADIGM: A Compiler for Automatic Data Distribution on Multicomputers},
+    booktitle = {In International Conference on Supercomputing},
+    year = {1993},
+    pages = {87--96}
+}
+
+%http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.56.4165
+% SUIF compiler
+@TECHREPORT{Wilson91suif,
+    author = {Robert Wilson and Robert French and Christopher Wilson and Saman Amarasinghe and Jennifer Anderson and Steve Tjiang and Shih-wei Liao and Chau-wen Tseng and Mary Hall and Monica Lam and John Hennessy},
+    title = {An Overview of the SUIF Compiler System},
+    institution = {},
+    year = {}
+}
+
+% http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.22.9487
+% Rice Fortran D compiler
+@TECHREPORT{Fox90fortrand,
+    author = {Geoffrey Fox and Seema Hiranandani and Ken Kennedy and Charles Koelbel and Ulrich Kremer and Chau-Wen Tseng and Min-You Wu},
+    title = {Fortran D Language Specification},
+    institution = {},
+    year = {1990}
+}
+
+%% MPI %%
+
+% Program transformations
+% Automatic MPI to AMPI Program Transformation using Photran
+% http://dl.acm.org/citation.cfm?id=2032050&CFID=514340680&CFTOKEN=29420728
+@inproceedings{Europar10mpi2ampi,
+ author = {Negara, Stas and Zheng, Gengbin and Pan, Kuo-Chuan and Negara, Natasha and Johnson, Ralph E. and Kal{\'e}, Laxmikant V. and Ricker, Paul M.},
+ title = {Automatic MPI to AMPI Program Transformation Using Photran},
+ booktitle = {Proceedings of the 2010 Conference on Parallel Processing},
+ series = {Euro-Par 2010},
+ year = {2011},
+ isbn = {978-3-642-21877-4},
+ location = {Ischia, Italy},
+ pages = {531--539},
+ numpages = {9},
+ url = {http://dl.acm.org/citation.cfm?id=2031978.2032050},
+ acmid = {2032050},
+ publisher = {Springer-Verlag},
+ address = {Berlin, Heidelberg},
+}
+
+% Enhancing Performance Portability of MPI Applications through Annotation-Based Transformations
+
+% Program transformation and runtime support for threaded MPI execution on shared-memory machines
+% http://dl.acm.org/citation.cfm?id=363920
+@article{Toplas00mpitrans,
+ author = {Tang, Hong and Shen, Kai and Yang, Tao},
+ title = {Program Transformation and Runtime Support for Threaded MPI Execution on Shared-memory Machines},
+ journal = {ACM Trans. Program. Lang. Syst.},
+ issue_date = {July 2000},
+ volume = {22},
+ number = {4},
+ month = jul,
+ year = {2000},
+ issn = {0164-0925},
+ pages = {673--700},
+ numpages = {28},
+ url = {http://doi.acm.org/10.1145/363911.363920},
+ doi = {10.1145/363911.363920},
+ acmid = {363920},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {MPI, lock-free synchronization, multiprogrammed environments, program transformation, shared-memory machines, threaded execution},
+}
+
+% Enhancing Performance Portability of MPI Applications through Annotation-Based Transformations. ICPP 2013: 631-640
+% http://www.informatik.uni-trier.de/~ley/pers/hd/y/Yi:Qing
+@inproceedings{icpp11ziaul,
+  author    = {Md. Ziaul Haque and
+               Qing Yi and
+               James Dinan and
+               Pavan Balaji},
+  title     = {Enhancing Performance Portability of MPI Applications through
+               Annotation-Based Transformations},
+  booktitle = {ICPP},
+  year      = {2013},
+  pages     = {631-640},
+  ee        = {http://dx.doi.org/10.1109/ICPP.2013.77},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+% Automatic generation and tuning of MPI collective communication routines
+@inproceedings{ics05mpi2coll,
+ author = {Faraj, Ahmad and Yuan, Xin},
+ title = {Automatic Generation and Tuning of MPI Collective Communication Routines},
+ booktitle = {Proceedings of the 19th Annual International Conference on Supercomputing},
+ series = {ICS '05},
+ year = {2005},
+ isbn = {1-59593-167-8},
+ location = {Cambridge, Massachusetts},
+ pages = {393--402},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/1088149.1088202},
+ doi = {10.1145/1088149.1088202},
+ acmid = {1088202},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {MPI, cluster of workstations, empirical, tuning system},
+}
+
+%
+% Inlining decision
+%
+@INPROCEEDINGS{Dean94towardsbetter,
+  author = {Jeffrey Dean and Craig Chambers},
+  title = {Towards Better Inlining Decisions Using Inlining Trials},
+  booktitle = {In Proceedings of the 1994 ACM Conference on LISP and Functional Programming},
+  year = {1994},
+  pages = {273--282},
+  abstract={
+Inlining trials are a general mechanism for making better automatic decisions about whether a routine is profitable to inline. Unlike standard source-level inlining heuristics, an inlining trial captures the effects of optimizations applied to the body of the inlined routine when calculating the costs and benefits of inlining. The results of inlining trials are stored in a persistent database to be reused when making future inlining decisions at similar call sites. Type group analysis can determine the amount of available static information exploited during compilation, and the results of analyzing the compilation of an inlined routine help decide when a future call site would lead to substantially the same generated code as a given inlining trial. We have implemented inlining trials and type group analysis in an optimizing compiler for SELF, and by making wiser inlining decisions we were able to cut compilation time and compiled code space with virtually no loss of execution speed. We believe that inlining trials and type group analysis could be applied effectively to many high-level languages where procedural or functional abstraction is used heavily.
+  }
+}
+
+@inproceedings{Waddell:inline97,
+ author = {Waddell, Oscar and Dybig, R. Kent},
+ title = {Fast and Effective Procedure Inlining},
+ booktitle = {SAS '97: Proceedings of the 4th International Symposium on Static Analysis},
+ year = {1997},
+ isbn = {3-540-63468-1},
+ pages = {35--52},
+ publisher = {Springer-Verlag},
+ address = {London, UK},
+ abstract = {
+This paper presents a new inlining algorithm for higher-order languages that combines simple
+analysis techniques with demand-driven online transformation to achieve consistent and often dramatic
+performance gains in fast linear time. Benchmark results reported here demonstrate that this inlining
+algorithm is as effective as and significantly faster than offline, analysis-intensive algorithms recently
+described in the literature.
+  }
+}
+
+% http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.4.2429
+@INPROCEEDINGS{Jagannathan96flow-directedinlining,
+  author = {Suresh Jagannathan and Andrew Wright},
+  title = {Flow-directed Inlining},
+  booktitle = {In Proceedings of the ACM Conference on Programming Language Design and Implementation},
+  year = {1996},
+  pages = {193--205}
+}
+
+@article{Ayers:inlining97,
+ author = {Ayers, Andrew and Schooler, Richard and Gottlieb, Robert},
+ title = {Aggressive inlining},
+ journal = {SIGPLAN Not.},
+ volume = {32},
+ number = {5},
+ year = {1997},
+ issn = {0362-1340},
+ pages = {134--145},
+ doi = {http://doi.acm.org/10.1145/258916.258928},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ abstract = {
+Existing research understates the benefits that can be
+obtained from inlining and cloning, especially when
+guided by profile information. Our implementation of
+inlining and cloning yields excellent results on average
+and very rarely lowers performance. We believe our
+good results can be explained by a number of factors:
+inlining at the intermediate-code level removes most
+technical restrictions on what can be inlined; the ability
+to inline across files and incorporate profile information
+enables us to choose better inline candidates; a highquality
+back end can exploit the scheduling and register
+allocation opportunities presented by larger subroutines;
+an aggressive processor architecture benefits from
+more predictable branch behavior; and a large instruction
+cache mitigates the impact of code expansion. We
+describe the often dramatic impact of our inlining and
+cloning on performance: for example, the implementations
+of our inlining and cloning algorithms in the HPUX
+10.20 compilers boost SPECint95 performance on
+a PA8000-based workstation by a factor of 1.32.
+  }
+}
+
+@article{Cooper:inline92,
+ author = {Cooper, Keith D. and Hall, Mary W. and Torczon, Linda},
+ title = {Unexpected side effects of inline substitution: a case study},
+ journal = {ACM Lett. Program. Lang. Syst.},
+ volume = {1},
+ number = {1},
+ year = {1992},
+ issn = {1057-4514},
+ pages = {22--32},
+ doi = {http://doi.acm.org/10.1145/130616.130619},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
+@article{Arnold:inline2000,
+ author = {Arnold, Matthew and Fink, Stephen and Sarkar, Vivek and Sweeney, Peter F.},
+ title = {A comparative study of static and profile-based heuristics for inlining},
+ journal = {SIGPLAN Not.},
+ volume = {35},
+ number = {7},
+ year = {2000},
+ issn = {0362-1340},
+ pages = {52--64},
+ doi = {http://doi.acm.org/10.1145/351403.351416},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ }
+
+% http://portal.acm.org/citation.cfm?id=174675.177973
+@inproceedings{177973,
+  author = {Calder, Brad and Grunwald, Dirk},
+  title = {Reducing indirect function call overhead in C++ programs},
+  booktitle = {POPL '94: Proceedings of the 21st ACM SIGPLAN-SIGACT symposium on Principles of programming languages},
+  year = {1994},
+  isbn = {0-89791-636-0},
+  pages = {397--408},
+  location = {Portland, Oregon, United States},
+  doi = {http://doi.acm.org/10.1145/174675.177973},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+}
+
+@INPROCEEDINGS{Zhao:inline03,
+  author = {Peng Zhao and José Nelson Amaral},
+  title = {To Inline or Not to Inline? Enhanced Inlining Decisions},
+  booktitle = {In Workshop on Languages and Compilers for Parallel Computing (LCPC},
+  year = {2003},
+  pages = {405--419},
+  abstract={
+The decision to inline a procedure in the Open Research Compiler (ORC) was based on a temperature heuristics that takes into consideration the time spent in a procedure and the size of the procedure. In this paper we describe the trade-off that has to be worked out to make the correct inlining decisions. We introduce two new heuristics to enhance the ORC inlining heuristics: adaptation and cycle_density. With adaptation we are allowed to vary the temperature threshold and prevent penalizing small benchmarks. With cycle_density we prevent the inlining of procedures that have a high temperature in spite of being called infrequently. Experiments show that while adaptation improves the speedup obtained with inlining across the SPEC2000 suite, cycle_density reduces significantly both the code growth and compilation time increase caused by inlining. We then characterize the SPEC INT2000 benchmarks according to the inlining potential of their function calls. Our enhancement is released in the ORC 2.0.}
+}
+
+% http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.61.8617
+@INPROCEEDINGS{Cavazos05automatictuning,
+  author = {John Cavazos and Michael F. P. O’Boyle},
+  title = {Automatic Tuning of Inlining Heuristics},
+  booktitle = {IN ACM/IEEE CONFERENCE ON SUPERCOMPUTING},
+  year = {2005},
+  pages = {14},
+  publisher = {}
+}
+
+% http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.46.3443
+@INPROCEEDINGS{Ashley97theeffectiveness,
+  author = {J. Michael Ashley},
+  title = {The Effectiveness of Flow Analysis for Inlining},
+  booktitle = {In Proceedings of the 1997 ACM SIGPLAN International Conference on Functional Programming},
+  year = {1997},
+  pages = {99--111}
+}
+
+%
+% Outlining
+%
+
+% http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.67.3806
+@MISC{Zhao_functionoutlining,
+  author = {Peng Zhao},
+  title = {Function Outlining and Partial Inlining},
+  year = {}
+}
+
+% http://portal.acm.org/citation.cfm?id=1234683
+@article{Zhao:Ablego07,
+ author = {Zhao, Peng and Amaral, Jos\'{e} Nelson},
+ title = {Ablego: a function outlining and partial inlining framework},
+ journal = {Softw. Pract. Exper.},
+ volume = {37},
+ number = {5},
+ year = {2007},
+ issn = {0038-0644},
+ pages = {465--491},
+ doi = {http://dx.doi.org/10.1002/spe.v37:5},
+ publisher = {John Wiley \& Sons, Inc.},
+ address = {New York, NY, USA},
+ }
+
+% http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.36.9407
+@MISC{Komondoor00semantics-preservingprocedure,
+  author = {Raghavan Komondoor and Susan Horwitz},
+  title = {Semantics-Preserving Procedure Extraction},
+  year = {2000}
+}
+
+@INPROCEEDINGS{Triantafyllis06aframework,
+  author = {Spyridon Triantafyllis and Matthew J. Bridges and Easwaran Raman and Guilherme Ottoni and David I. August},
+  title = {A framework for unrestricted whole-program optimization},
+  booktitle = {In ACM SIGPLAN 2006 Conference on Programming Language Design and Implementation},
+  year = {2006},
+  pages = {61--71}
+}
+
+%
+% Inlining with Parallelization
+%
+
+% http://www.pubzone.org/dblp/conf/pdcn/ShirakoNIOK04
+@inproceedings{Shirako04,
+  author    = {Jun Shirako and
+               Kouhei Nagasawa and
+               Kazuhisa Ishizaka and
+               Motoki Obata and
+               Hironori Kasahara},
+  title     = {Selective inline expansion for improvement of multi grain
+               parallelism},
+  booktitle = {Parallel and Distributed Computing and Networks},
+  year      = {2004},
+  pages     = {476-482},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+%
+% Regions
+%
+
+% http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.141.4417
+@INPROCEEDINGS{Hank95region-basedcompilation,
+  author = {Richard E. Hank and Wen-mei W. Hwu and B. Ramakrishna Rau},
+  title = {Region-based compilation: An introduction and motivation},
+  booktitle = {in Proceedings of the 28th Annual International Symposium on Microarchitecture},
+  year = {1995},
+  pages = {158--168}
+}
+
+% http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.5.2324
+@INPROCEEDINGS{Liu03aregion-based,
+  author = {Yang Liu and Yang Liu Zhaoqing and Ruliang Qiao and Roy Dz-ching Ju},
+  title = {A Region-Based Compilation Infrastructure},
+  booktitle = {In Proc. of the 7th Workshop on Interaction between Compilers and Computer Architectures},
+  year = {2003},
+  pages = {75--84},
+  publisher = {IEEE Computer Society Press}
+}
+
+%
+% Semantic-based Inlining
+%
+
+% http://portal.acm.org/citation.cfm?id=357493
+@article{Grant00:DyC,
+  author = {Grant, Brian and Mock, Markus and Philipose, Matthai and Chambers, Craig and Eggers, Susan J.},
+  title = {DyC: an expressive annotation-directed dynamic compiler for C},
+  journal = {Theor. Comput. Sci.},
+  volume = {248},
+  number = {1-2},
+  year = {2000},
+  issn = {0304-3975},
+  pages = {147--199},
+  doi = {http://dx.doi.org/10.1016/S0304-3975(00)00051-7},
+  publisher = {Elsevier Science Publishers Ltd.},
+  address = {Essex, UK},
+}
+
+% http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.81.7982
+@ARTICLE{Kennedy01telescopinglanguages,
+  author = {Ken Kennedy and Bradley Broom and Keith Cooper and Jack Dongarra and Rob Fowler and Dennis Gannon and Lennart Johnsson and John Mellor-crummey and Linda Torczon},
+  title = {Telescoping Languages: A strategy for automatic generation of scientific problem-solving systems from annotated libraries},
+  journal = {Journal of Parallel and Distributed Computing},
+  year = {2001},
+  volume = {61},
+  pages = {1803--1826}
+}
+
+% http://portal.acm.org/citation.cfm?id=1267940
+@inproceedings{Guyer99:annot,
+  author = {Guyer, Samuel Z. and Lin, Calvin},
+  title = {An annotation language for optimizing software libraries},
+  booktitle = {DSL'99: Proceedings of the 2nd conference on Conference on Domain-Specific Languages},
+  year = {1999},
+  pages = {4--4},
+  location = {Austin, Texas},
+  publisher = {USENIX Association},
+  address = {Berkeley, CA, USA},
+}
+
+% http://portal.acm.org/citation.cfm?id=1267959
+@inproceedings{Engler97:semantics,
+   author = {Engler, Dawson R.},
+   title = {Incorporating application semantics and control into compilation},
+   booktitle = {DSL'97: Proceedings of the Conference on Domain-Specific Languages on Conference on Domain-Specific Languages (DSL), 1997},
+   year = {1997},
+   pages = {9--9},
+   location = {Santa Barbara, California},
+   publisher = {USENIX Association},
+   address = {Berkeley, CA, USA},
+ }
+
+% http://domino.watson.ibm.com/library/cyberdig.nsf/a3807c5b4823c53f85256561006324be/601592d895e45db88525669d00670e8f?OpenDocument
+@inproceedings{WMMG99,
+  title = "Improving {J}ava Performance Through Semantic Inlining",
+  author = "Peng Wu and Samuel P. Midkiff and Jose E. Moreira and Manish
+  Gupta",
+  booktitle = "Proceedings of the Ninth SIAM Conference on Parallel Processing for Scientific Computing",
+  month = "Mar",
+  year = "1999",
+  abstract = {
+Improving Java program performance by treating selected
+classes and methods as primitive data types and primitive operations
+  }
+}
+
+% http://www.pubzone.org/dblp/conf/ppsc/WuMMGP99
+@inproceedings{Peng99:inlining,
+  author    = {Peng Wu and
+               Jos{\'e} E. Moreira and
+               Samuel P. Midkiff and
+               Manish Gupta and
+               David A. Padua},
+  title     = {Semantic Inlining - the Compiler Support for Java in Technical
+               Computing},
+  booktitle = {PPSC},
+  year      = {1999},
+  bibsource = {DBLP, http://dblp.uni-trier.de}
+}
+
+% citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.5.9632
+@Article{Broadway05,
+  author =       "Samuel Z. Guyer and Calvin Lin",
+  title =        "Broadway: A Compiler for Exploiting the Domain-Specific Semantics of Software Libraries",
+  journal =      "Proceedings of the IEEE, Special issue on program generation,Optimization, and Adaptation",
+  volume =       "93",
+  number =       "2",
+  pages =        "342--357",
+  year =         "2005",
+  summary = {
+exploit domain-specific semantics of software libraries to enable
+library-level optimization --- domain-specific transformations of library calls.
+annotate side-effects of procedures and categorization of runtime values as
+properties. Apply data-flow analysis to automatically derive properties values
+of procedural calls to specialize (improve) individual calls.
+  }
+}
+
+% http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.112.3058
+@MISC{Neil94:abstract,
+  author = "Neil D. Jones and Flemming Nielson",
+  title = {Abstract Interpretation: a Semantics-Based Tool for Program Analysis},
+  year = {1994},
+  booktitle = "Handbook of Logic in Computer Science",
+  publisher = "Oxford University Press",
+  pages = "327-629"
+}
+
+% http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.88.6124
+@article{Gregor02semanticand,
+  author = {A Douglas Gregor and A David Musser and Shin-ming Liu B},
+  title = {Semantic and behavioral library transformations},
+  journal = {Information and Software Technology},
+  year = {2002},
+  volume = {44},
+  pages = {2002}
+}
+
+
+@InProceedings{Donadio2005:X,
+  author = {Sebastien Donadio and James Brodman and Thomas Roeder and Kamen Yotov and Denis Barthou and Albert Cohen and Mar\'ia Jes\'us Garzar\'an and David Padua and Keshav Pingali},
+  title = {A language for the compact representation of multiple program versions},
+  booktitle = {LCPC},
+  month = {October},
+  year = {2005}
+}
+
+@Book{Jones93:partial:eval,
+  author = {Neil D. Jones and Carsten K. Gomard and Peter Sestoft},
+  title = {Partial evaluation and automatic program generation},
+  publisher = {Prentice-Hall},
+  year = {1993}
+}
+
+@InProceedings{Hall:Recipe10,
+  author = {Mary Hall and Jacqueline Chame and Chun Chen and Jaewook Shin and Gabe Rudy and Malik Murtaza Khan},
+  title = {Loop Transformation Recipes for Code Generation and Auto-Tuning},
+  booktitle = {LCPC},
+  month = {October},
+  year = {2009}
+}
+
+% Dependence analysis
+
+% http://dl.acm.org/citation.cfm?id=318813&CFID=460267309&CFTOKEN=35247122
+@inproceedings{Li:1989,
+ author = {Li, Zhiyuan and Yew, Pen-Chung and Zhu, Chuag-Qi},
+ title = {Data Dependence Analysis on Multi-dimensional Array References},
+ booktitle = {Proceedings of the 3rd International Conference on Supercomputing},
+ series = {ICS '89},
+ year = {1989},
+ isbn = {0-89791-309-4},
+ location = {Crete, Greece},
+ pages = {215--224},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/318789.318813},
+ doi = {10.1145/318789.318813},
+ acmid = {318813},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+}
+
+% http://dl.acm.org/citation.cfm?id=110626&CFID=460267309&CFTOKEN=35247122
+@inproceedings{havlak:sc90,
+  author = {Havlak, Paul and Kennedy, Ken},
+  title = {Experience with Interprocedural Analysis of Array Side Effects},
+  booktitle = {Proceedings of the 1990 ACM/IEEE Conference on Supercomputing},
+  series = {Supercomputing '90},
+  year = {1990},
+  isbn = {0-89791-412-0},
+  location = {New York, New York, USA},
+  pages = {952--961},
+  numpages = {10},
+  url = {http://dl.acm.org/citation.cfm?id=110382.110626},
+  acmid = {110626},
+  publisher = {IEEE Computer Society Press},
+  address = {Los Alamitos, CA, USA},
+}
+
+% http://dl.acm.org/citation.cfm?id=135233
+@article{Pugh:92,
+  author = {Pugh, William},
+  title = {A Practical Algorithm for Exact Array Dependence Analysis},
+  journal = {Commun. ACM},
+  issue_date = {Aug. 1992},
+  volume = {35},
+  number = {8},
+  month = aug,
+  year = {1992},
+  issn = {0001-0782},
+  pages = {102--114},
+  numpages = {13},
+  url = {http://doi.acm.org/10.1145/135226.135233},
+  doi = {10.1145/135226.135233},
+  acmid = {135233},
+  publisher = {ACM},
+  address = {New York, NY, USA},
+  keywords = {Omega test, dependence analysis, integer programming, linear Diophantine equations},
+}
+
+% http://dl.acm.org/citation.cfm?id=1152653&CFID=460267309&CFTOKEN=35247122
+@article{kim:toplas06,
+ author = {Kim, Seon Wook and Ooi, Chong-Liang and Eigenmann, Rudolf and Falsafi, Babak and Vijaykumar, T. N.},
+ title = {Exploiting Reference Idempotency to Reduce Speculative Storage Overflow},
+ journal = {ACM Trans. Program. Lang. Syst.},
+ issue_date = {September 2006},
+ volume = {28},
+ number = {5},
+ month = sep,
+ year = {2006},
+ issn = {0164-0925},
+ pages = {942--965},
+ numpages = {24},
+ url = {http://doi.acm.org/10.1145/1152649.1152653},
+ doi = {10.1145/1152649.1152653},
+ acmid = {1152653},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {Idempotent references, compiler-assisted speculative execution, speculation},
+}
+@article{kim:ppopp01,
+ author = {Kim, Seon Wook and Ooi, Chong-liang and Eigenmann, Rudolf and Falsafi, Babak and Vijaykumar, T. N.},
+ title = {Reference Idempotency Analysis: A Framework for Optimizing Speculative Execution},
+ journal = {SIGPLAN Not.},
+ issue_date = {July 2001},
+ volume = {36},
+ number = {7},
+ month = jun,
+ year = {2001},
+ issn = {0362-1340},
+ pages = {2--11},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/568014.379547},
+ doi = {10.1145/568014.379547},
+ acmid = {379547},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+}
+
+% http://dblp.uni-trier.de/rec/bibtex/conf/europar/JimboreanCCS13
+@inproceedings{jimborean:europar13,
+  author    = {Alexandra Jimborean and
+               Philippe Clauss and
+               Juan Manuel Martinez Caama{\~{n}}o and
+               Aravind Sukumaran{-}Rajam},
+  title     = {Online Dynamic Dependence Analysis for Speculative Polyhedral Parallelization},
+  booktitle = {Euro-Par 2013 Parallel Processing - 19th International Conference,
+               Aachen, Germany, August 26-30, 2013. Proceedings},
+  pages     = {191--202},
+  year      = {2013},
+  url       = {http://dx.doi.org/10.1007/978-3-642-40047-6_21},
+  doi       = {10.1007/978-3-642-40047-6_21},
+  timestamp = {Wed, 24 Jul 2013 18:34:45 +0200},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/europar/JimboreanCCS13},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
+}
+
+% http://dblp.uni-trier.de/rec/bibtex/conf/europar/JimboreanCCS13
+@inproceedings{jimborean:cc12,
+  author    = {Alexandra Jimborean and
+               Luis Mastrangelo and
+               Vincent Loechner and
+               Philippe Clauss},
+  title     = {{VMAD:} An Advanced Dynamic Program Analysis and Instrumentation Framework},
+  booktitle = {Compiler Construction - 21st International Conference, {CC} 2012,
+               Held as Part of the European Joint Conferences on Theory and Practice
+               of Software, {ETAPS} 2012, Tallinn, Estonia, March 24 - April 1, 2012.
+               Proceedings},
+  pages     = {220--239},
+  year      = {2012},
+  url       = {http://dx.doi.org/10.1007/978-3-642-28652-0_12},
+  doi       = {10.1007/978-3-642-28652-0_12},
+  timestamp = {Fri, 23 Mar 2012 15:33:02 +0100},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/cc/JimboreanMLC12},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
+}
+
+
+% http://dl.acm.org/citation.cfm?id=1934996
+@inproceedings{kim:micro10,
+ author = {Kim, Minjang and Kim, Hyesoon and Luk, Chi-Keung},
+ title = {SD3: A Scalable Approach to Dynamic Data-Dependence Profiling},
+ booktitle = {Proceedings of the 2010 43rd Annual IEEE/ACM International Symposium on Microarchitecture},
+ series = {MICRO '43},
+ year = {2010},
+ isbn = {978-0-7695-4299-7},
+ pages = {535--546},
+ numpages = {12},
+ url = {http://dx.doi.org/10.1109/MICRO.2010.49},
+ doi = {10.1109/MICRO.2010.49},
+ acmid = {1934996},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+ keywords = {profiling, data dependence, parallel programming, program analysis, compression, parallelization},
+}
+
+% http://dl.acm.org/citation.cfm?id=1545052
+@inproceedings{zhang:cgo09,
+ author = {Zhang, Xiangyu and Navabi, Armand and Jagannathan, Suresh},
+ title = {Alchemist: A Transparent Dependence Distance Profiling Infrastructure},
+ booktitle = {Proceedings of the 7th Annual IEEE/ACM International Symposium on Code Generation and Optimization},
+ series = {CGO '09},
+ year = {2009},
+ isbn = {978-0-7695-3576-0},
+ pages = {47--58},
+ numpages = {12},
+ url = {http://dx.doi.org/10.1109/CGO.2009.15},
+ doi = {10.1109/CGO.2009.15},
+ acmid = {1545052},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+ keywords = {execution indexing, parallelization, profiling, program dependence},
+}
+
+% http://dl.acm.org/citation.cfm?id=1698206
+@techreport{scholz:tr08,
+ author = {Scholz, Bernhard and Zhang, Chenyi and Cifuentes, Cristina},
+ title = {User-input Dependence Analysis via Graph Reachability},
+ year = {2008},
+ source = {SMLI TR-2008-171},
+ publisher = {Sun Microsystems, Inc.},
+ address = {Mountain View, CA, USA},
+}
+
+% Misc
+
+% http://dl.acm.org/citation.cfm?id=1074171
+@incollection{tilingfactor,
+ author = {Freeman, David N. and Reilly, Edwin D.},
+ title = {Block and Blocking Factor},
+ booktitle = {Encyclopedia of Computer Science},
+ isbn = {0-470-86412-5},
+ pages = {150--151},
+ numpages = {2},
+ url = {http://dl.acm.org/citation.cfm?id=1074100.1074171},
+ acmid = {1074171},
+ publisher = {John Wiley and Sons Ltd.},
+ address = {Chichester, UK},
+}
+
+% http://dl.acm.org/citation.cfm?id=325150
+@article{chen:isca90,
+ author = {Chen, Ding-Kai and Su, Hong-Men and Yew, Pen-Chung},
+ title = {The Impact of Synchronization and Granularity on Parallel Systems},
+ journal = {SIGARCH Comput. Archit. News},
+ issue_date = {June 1990},
+ volume = {18},
+ number = {2SI},
+ month = may,
+ year = {1990},
+ issn = {0163-5964},
+ pages = {239--248},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/325096.325150},
+ doi = {10.1145/325096.325150},
+ acmid = {325150},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+}
+
+% http://dl.acm.org/citation.cfm?id=1844322
+@inproceedings{ghumman:ci10,
+ author = {Ghumman, Waheed Aslam and L\'{o}pez-Garcia, Pedro},
+ title = {Optimized Parallelization Heuristic for Task Scheduling},
+ booktitle = {Proceedings of the 4th WSEAS International Conference on Computational Intelligence},
+ series = {CI'10},
+ year = {2010},
+ isbn = {978-960-474-179-3},
+ location = {Bucharest, Romania},
+ pages = {122--128},
+ numpages = {7},
+ url = {http://dl.acm.org/citation.cfm?id=1844299.1844322},
+ acmid = {1844322},
+ publisher = {World Scientific and Engineering Academy and Society (WSEAS)},
+ address = {Stevens Point, Wisconsin, USA},
+ keywords = {optimization heuristic algorithm, optimization in task scheduling, task scheduling heuristic},
+}
+
+
+% EOF %
+

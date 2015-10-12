@@ -1,0 +1,129 @@
+% paper.tex
+% 9/5/2013 jichi
+% Also note that the "draftcls" or "draftclsnofoot", not "draft", option
+% should be used if it is desired that the figures are to be displayed in
+% draft mode.
+
+%\documentclass[10pt,onecolumn,draftcls,conference]{IEEEtran}
+%\documentclass[conference]{IEEEtran}
+%\documentclass[preprint]{style/sigplanconf_fixed}
+%\documentclass{style/sig-alternate}
+%\documentclass[pageno]{style/jpaper}
+\documentclass[10pt,doublecolumn,conference]{IEEEtran}
+
+%replace XXX with the submission number you are given from the ASPLOS submission site.
+%\newcommand{\asplossubmissionnumber}{267}
+
+% Include my styles
+\usepackage{paper}
+\usepackage{color}
+
+%\renewcommand{\baselinestretch}{0.99}
+\newcommand{\todo}[1]{\textcolor{red}{#1}}
+
+\begin{document}
+
+%
+% paper title
+%
+\title{Overlapping Communication With Computation in MPI Applications}
+
+\author{Jichi Guo$^\dag$, Qing Yi$^\dag$, Jiayuan Meng$^\ddag$, Junchao Zhang$^\ddag$, Pavan Baraji$^\ddag$\\
+University of Colorado Colorado Springs$^\dag$\\
+Colorado Springs, CO, USA\\
+\{jguo2, qyi\}@uccs.edu \\
+Argonne National Laboratory$^\ddag$\\
+Lemont, IL, USA\\
+meng.jiayuan@gmail.com, \{jczhang, baraji\}@anl.gov
+}
+%\authorinfo{}{}{}
+
+% PLEASE ADD INSTITUTIONS
+% make the title area
+\maketitle
+
+\begin{abstract}
+The performance of distributed memory applications, many of which written in MPI, critically depends on how well the
+applications can ameliorate the long latency of remote memory accesses by overlapping them with ongoing computations,
+thereby minimizing wait time.
+This paper presents a study of the various optimization techniques to enable such overlapping in large MPI applications
+and presents a framework towards systematically  enabling a majority of such optimizations.
+Our framework first uses analytical performance modeling of the application execution flow,
+ combined with application profiling, to automatically
+identify potential communication hot spots that may induce long wait time.
+%and any nearby computation that may be overlapped with the communication time.
+Then, for each communication hot spot,
+it searches the call graph to find surrounding loops that includes sufficient local computation
+to overlap with the communication.
+Finally,  blocking MPI communications are decoupled into non-blocking operations when necessary, and their surrounding loop
+transformed to hide the communication latencies behind local computations.
+%We use the MPI\_Test operation inserted into the transformed code
+%  to dynamically adjust the communication frequency. % jichi: ``progress'' is a terminology to describe the poll-based MPI communication engine
+%The execution frequency of MPI\_Test if in loops is tuned for different input data and runtime environment using binary search.
+%Finally, modify the workflow.
+We evaluated our framework using 7 MPI applications from the \texttt{NAS} Benchmark suite.
+Our optimizations are able to attain 3\% to 72\% speedup over the original implementations.
+\end{abstract}
+
+
+\lstdefinelanguage{sklt}{
+  morecomment=[s]{/*}{*/},
+  morecomment=[l]{//},
+  morekeywords={
+    dummy,
+    def, call, from, import,
+    stream, for, forall, switch, case, if, else, return, break, continue,
+    st, ld, comp, ilp, blk, block,
+    int, long, float, double, char, string,
+    for_threads, grid, thread_block, commit,
+    comm, send, recv, bcast, barrier, allreduce, sendrecv, all2all, reduce,
+  },
+}
+
+\lstset{
+  language=sklt,
+  keywordstyle=\bf,
+  %keywordstyle=\em\bfseries,
+  basicstyle=\ttfamily\scriptsize,
+  numbers=left,
+  numberstyle=\tiny,
+  stepnumber=2,
+  numbersep=3pt,
+}
+
+\input{text/intro}
+\input{text/model}
+\input{text/profit}
+\input{text/tune}
+\input{text/exp}
+\input{text/related}
+\input{text/conclusion}
+
+\REMOVE{
+\section*{Acknowledgment}
+The research is partially funded by the National Science Foundation of USA
+under Grants 1261778, 1261811, and 1261.
+This research used resources of the Argonne Leadership Computing
+Facility at Argonne National Laboratory, which is supported by the
+Office of Science of the U.S. Department of Energy under contract
+DE-AC02-06CH11357.
+}
+
+
+\bibliographystyle{plain}
+\bibliography{bib/refs,bib/hotpath,bib/qing,bib/mpi,bib/jichi,bib/bench,bib/cco}
+%\bibliography{venkat, jmeng, kk}
+
+%\clearpage
+\REMOVE{
+\framebox{
+\parbox{3.2in}{
+The submitted manuscript has been created by UChicago Argonne, LLC, Operator of Argonne National Laboratory (``Argonne"). Argonne, a U.S. Department of Energy Office of Science laboratory, is operated under Contract No. DE-AC02-06CH11357. The U.S. Government retains for itself, and others acting on its behalf, a paid-up nonexclusive, irrevocable worldwide license in said article to reproduce, prepare derivative works, distribute copies to the public, and perform publicly and display publicly, by or on behalf of the Government.
+}
+}
+}
+
+% that's all folks
+\end{document}
+
+% EOF

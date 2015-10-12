@@ -1,0 +1,223 @@
+% workflow.tex
+% 9/5/2013
+% The hotspot and hotpath algorithm figure.
+%
+% Algorithms:
+% - region profiling
+% - hot spot prediction
+% - hot path extraction
+%
+%
+% Example:
+% - Input: FT
+%   F1 // cffts
+%     L
+%       L
+%        C1 // cfftz
+%   F2 // transpose
+%     F3 // transpose_local
+%       L
+%         L
+%           C2
+%     F4 // transpose_global
+%       MPI_Alltoall
+%
+% - Inline & decompose computation:
+%   L
+%     L
+%       C1
+%   L
+%     L
+%       F3 // transpose_local
+%   MPI_Alltoall
+%
+% - Output: one-sided:
+%    MPI_Win_create
+%    MPI_Win_fence
+%    L
+%      L
+%        C1
+%        F3
+%        L
+%          MPI_Put
+%      MPI_Win_fence
+%
+% - Output: non-blocking, see: http://www.2decomp.org/occ.html
+%   L
+%     C1
+%     F3 // transpose_local
+%   MPI_Isend D_1
+%   MPI_Irecv D_1
+%   L k=2,n
+%     L
+%       C1
+%       F3 // transpose_local
+%     MPI_Wait D_(k-1)
+%     MPI_Isend D_k
+%     MPI_Irecv D_k
+%   MPI_Wait D_n
+%
+% One-sided algorithm:
+% - Decompose communication
+%   L
+%     L
+%       C1
+%   L
+%     L
+%       F3 // transpose_local
+%   MPI_Win_create
+%   MPI_Win_fence
+%   L
+%     L
+%       L
+%         MPI_Put
+%         MPI_Win_fence
+% - Fuse loops
+%   MPI_Win_create
+%   MPI_Win_fence
+%   L
+%     L
+%       C1
+%       F3 // transpose_local
+%       L
+%         MPI_Put
+%         MPI_Win_fence
+% - Move wait down / out
+%   MPI_Win_create
+%   MPI_Win_fence
+%   L
+%     L
+%       C1
+%       L
+%         F3 // transpose_local
+%       MPI_Put
+%     MPI_Win_fence
+
+%% Overall workflow %%
+\begin{algorithm}
+{\scriptsize
+\begin{algorithmic}
+\Require Source code and hardware configuration
+\Ensure Optimized source code
+
+\ForAll{cco\_block with cco\_dir \textbf{in} source code}
+  \ForAll{function f with decompose\_dir \textbf{in} cco\_block}
+    \State decompose\_computation(f, decompose\_dir)
+  \EndFor
+
+  % Apply skeleton-based inlining to functions that are complicated
+  % but won’t be modified for cco transformations
+  \ForAll{function f with inline\_func\_dir \textbf{in} cco\_block}
+    \State inline\_func(f)
+  \EndFor
+
+  \State skeletons = set()
+  \ForAll{function f with inline\_skeleton\_dir \textbf{in} cco\_block}
+    \State inlined\_code = inline\_skeleton(f)
+    \State add\_to\_set(skeletons, inlined\_code)
+  \EndFor
+
+  % Reorganize the computation and communication
+  % to increase the amount of computation in the communication window
+  \State overlap\_comm\_comp(cco\_block, cco\_dir)
+
+  \ForAll{sk \textbf{in} skeletons}
+    \State reverse\_inline\_skeleton(sk)
+  \EndFor
+\EndFor
+
+\end{algorithmic}
+\caption{Overall transformation algorithm}
+\label{alg:workflow}
+}%\scriptsize
+\end{algorithm}
+
+%% Computation-communication overlap %%
+
+\begin{algorithm}
+{\scriptsize
+\begin{algorithmic}
+\Require Source code with MPI cco pragma,
+\State where the computation have been already decomposed, and
+\State the functions have been selectively inlined so that there are no procedure boundaries
+\Ensure Code where communication is decomposed and overlapped with computation
+
+% Overlap communication with the computation in input
+% - input: the cco block to optimize
+% - cco\_directive: the cco pragma describing the computation pattern
+\Function{overlap\_comm\_comp}{input, cco\_dir}
+  \State comm\_group = get\_comm\_group(cco\_dir) % get the computation group from the cco pragma
+  \State comms = find\_matching\_comms(comm\_group, input) % find individual communication operations
+  \ForAll{MPI call comm \textbf{in} comms}
+    \If{has\_decompose\_dir(comm, cco\_dir)}
+      \State decompose\_comm(comm, cco\_dir) % according to the pragma, split communication
+    \EndIf
+    \If{is\_blocking\_comm(comm)}
+      \State (comm, wait) = blocking\_to\_non\_blocking\_comm(comm) % split into blocking wait and non-blocking comm
+    \Else
+      \State wait = find\_blocking\_wait(comm, input) % find the wait for non-blocking communication
+    \EndIf
+
+    % Synchronized wait should be moved before moving asynchronized comm
+    \State move\_wait(wait, input)  % continuously move sync wait down or out to the upper block
+
+    \State scope = get\_enclosing\_block(wait) % get the current enclosing block outside wait
+    \State move\_comm(comm, scope)  % continuously move async comm up or merge with the previous loop
+  \EndFor
+\EndFunction
+
+% Move the synchronized wait down or out of the enclosing block
+% - wait: code block that contains synchronized wait
+% - scope: the top level block that wait should not go outside of
+\Function{move\_wait}{wait, scope}
+  \While{\textbf{true}} % continuously move wait down or out  to upper block
+    \If{has\_next\_stmt(wait, scope)}
+      \State next = get\_next\_stmt(wait) % get the next statement in the enclosing block
+      \If{indep(wait, next)}
+        \State swap\_stmt(wait, next) % move wait after next statement
+        \State \textbf{continue}
+      \EndIf
+    \EndIf
+    \If{has\_enclosing\_block(wait, scope)}
+      \State parent = get\_enclosing\_block(wait)
+      \If{block\_ends\_with(block, wait) \textbf{and} indep(wait, block)}
+        \State move\_stmt\_out(wait, block) % move wait out behind the block
+      \EndIf
+      \State \textbf{continue}
+    \EndIf
+    \State \textbf{break}
+  \EndWhile
+\EndFunction
+
+% Move the asynchronized communication up or fuse with the previous loop
+% - comm: Code block that contains asynchronized communication
+% - scope: the top level block that wait should not go outside of
+\Function{move\_comm}{comm, scope}
+  \While{\textbf{true}} % continuously move async comm up or merge with the previous loop
+    \If{has\_prev\_stmt(comm, scope)}
+      \State prev = get\_prev\_stmt(comm, scope) % get the previous statement in the enclosing block
+      \If{indep(comm, prev)}
+        \State swap\_stmt(comm, prev):  % move comm before prev statement
+        \State \textbf{continue}
+      \EndIf
+      \If{is\_loop(comm) \textbf{and} is\_loop(prev) \textbf{and} fusable(comm, prev)}
+        \State fused\_loop = fuse\_loops(comm, prev) % If both are loops, try to fuse them
+        \State comm = fused\_loop
+        \State \textbf{continue}
+      \EndIf
+    \EndIf
+    \If{has\_enclosing\_block(comm, scope)}
+      \State comm = get\_enclosing\_block(comm)
+      \State \textbf{continue}
+    \EndIf
+    \State \textbf{break}
+  \EndWhile
+\EndFunction
+
+\end{algorithmic}
+\caption{CCO transformation algorithm}
+\label{alg:cco}
+}%\scriptsize
+\end{algorithm}
+
+% EOF

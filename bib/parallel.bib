@@ -1,0 +1,369 @@
+% About Inserting URLs: http://tex.stackexchange.com/questions/35977/how-to-add-a-url-to-a-latex-bibtex-file
+
+%% Libraries
+@misc{intel:tbb,
+  author = {Intel},
+  title = {Threading Building Blocks}},
+  howpublished = {https://www.threadingbuildingblocks.org/},
+  year = {2014},
+  note = "[Online; accessed 1-December-2014]"
+}
+
+%% Languages
+@misc{intel:cilk,
+  author = {Intel},
+  title = {Cilk Plus}},
+  howpublished = {https://www.cilkplus.org/cilk-plus-tutorial},
+  year = {2014},
+  note = "[Online; accessed 1-December-2014]"
+}
+
+%% Compilers:
+
+@misc{gcc:autopar,
+  author = {GCC AutoPar},
+  title = {{Automatic parallelization in GCC}},
+  howpublished = {https://gcc.gnu.org/wiki/AutoParInGCC},
+  year = {2014},
+  note = "[Online; accessed 25-November-2014]"
+}
+
+@misc{llvm:polly,
+  author = {LLVM Polly},
+  title = {{LLVM Framework for High-Level Loop and Data-Locality Optimizations}},
+  howpublished = {http://polly.llvm.org/},
+  year = {2014},
+  note = "[Online; accessed 25-November-2014]"
+}
+
+@misc{icc:par,
+  author = {ICC},
+  title = {{Automatic Parallelization with Intel Compilers}},
+  howpublished = {https://software.intel.com/en-us/articles/automatic-parallelization-with-intel-compilers},
+  year = {2014},
+  note = "[Online; accessed 25-November-2014]"
+}
+
+% http://dl.acm.org/citation.cfm?id=1375595
+@article{bondhugula:pldi08,
+ author = {Bondhugula, Uday and Hartono, Albert and Ramanujam, J. and Sadayappan, P.},
+ title = {A Practical Automatic Polyhedral Parallelizer and Locality Optimizer},
+ journal = {SIGPLAN Not.},
+ issue_date = {June 2008},
+ volume = {43},
+ number = {6},
+ month = jun,
+ year = {2008},
+ issn = {0362-1340},
+ pages = {101--113},
+ numpages = {13},
+ url = {http://doi.acm.org/10.1145/1379022.1375595},
+ doi = {10.1145/1379022.1375595},
+ acmid = {1375595},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {affine transformations, automatic parallelization, locality optimization, loop transformations, polyhedral model, tiling},
+}
+
+@inproceedings{andion:scopes14,
+ author = {Andi\'{o}n, Jos{\'e} M. and Arenaz, Manuel and Rodr\'{\i}guez, Gabriel and Touri\~{n}o, Juan},
+ title = {A Parallelizing Compiler for Multicore Systems},
+ booktitle = {Proceedings of the 17th International Workshop on Software and Compilers for Embedded Systems},
+ series = {SCOPES '14},
+ year = {2014},
+ isbn = {978-1-4503-2941-5},
+ location = {Sankt Goar, Germany},
+ pages = {138--141},
+ numpages = {4},
+ url = {http://doi.acm.org/10.1145/2609248.2609254},
+ doi = {10.1145/2609248.2609254},
+ acmid = {2609254},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {automatic parallelization, compiler intermediate representation, domain-independent kernel, multicore processor},
+}
+
+@inproceedings{bondhugula:pact10,
+ author = {Bondhugula, Uday and Gunluk, Oktay and Dash, Sanjeeb and Renganarayanan, Lakshminarayanan},
+ title = {A Model for Fusion and Code Motion in an Automatic Parallelizing Compiler},
+ booktitle = {Proceedings of the 19th International Conference on Parallel Architectures and Compilation Techniques},
+ series = {PACT '10},
+ year = {2010},
+ isbn = {978-1-4503-0178-7},
+ location = {Vienna, Austria},
+ pages = {343--352},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/1854273.1854317},
+ doi = {10.1145/1854273.1854317},
+ acmid = {1854317},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {automatic parallelization, locality optimization, loop fusion, polyhedral model, prefetching},
+}
+
+%% Loop parallelization
+
+% http://dl.acm.org/citation.cfm?id=2259027&CFID=602808215&CFTOKEN=21058746
+@inproceedings{zou:cgo12,
+ author = {Zou, Yun and Rajopadhye, Sanjay},
+ title = {Scan Detection and Parallelization in "Inherently Sequential" Nested Loop Programs},
+ booktitle = {Proceedings of the Tenth International Symposium on Code Generation and Optimization},
+ series = {CGO '12},
+ year = {2012},
+ isbn = {978-1-4503-1206-6},
+ location = {San Jose, California},
+ pages = {74--83},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/2259016.2259027},
+ doi = {10.1145/2259016.2259027},
+ acmid = {2259027},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+}
+
+% http://dl.acm.org/citation.cfm?id=1993554
+@article{sato:pldi11,
+ author = {Sato, Shigeyuki and Iwasaki, Hideya},
+ title = {Automatic Parallelization via Matrix Multiplication},
+ journal = {SIGPLAN Not.},
+ issue_date = {June 2011},
+ volume = {46},
+ number = {6},
+ month = jun,
+ year = {2011},
+ issn = {0362-1340},
+ pages = {470--479},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/1993316.1993554},
+ doi = {10.1145/1993316.1993554},
+ acmid = {1993554},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {automatic parallelization, linear recurrence equation, loop, matrix multiplication, reduction, scan, semiring},
+}
+
+% http://dl.acm.org/citation.cfm?id=1772975&CFID=602808215&CFTOKEN=21058746
+@inproceedings{han:cgo10,
+ author = {Han, Liang and Liu, Wei and Tuck, James M.},
+ title = {Speculative Parallelization of Partial Reduction Variables},
+ booktitle = {Proceedings of the 8th Annual IEEE/ACM International Symposium on Code Generation and Optimization},
+ series = {CGO '10},
+ year = {2010},
+ isbn = {978-1-60558-635-9},
+ location = {Toronto, Ontario, Canada},
+ pages = {141--150},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/1772954.1772975},
+ doi = {10.1145/1772954.1772975},
+ acmid = {1772975},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {multi-core architecture, parallelization, reduction variables, thread-level speculation},
+}
+
+% http://dl.acm.org/citation.cfm?id=892933&CFID=602808215&CFTOKEN=21058746
+@techreport{dang:report01,
+ author = {Dang, Francis and Yu, Hao and Rauchwerger, Lawrence},
+ title = {The R-LRPD Test: Speculative Parallelization of Partially Parallel Loops},
+ year = {2001},
+ source = {http://www.ncstrl.org:8900/ncstrl/servlet/search?formname=detail\&id=oai%3Ancstrlh%3Atamucs%3Ancstrl.tamu_cs%2F%2FTR01-009},
+ publisher = {Texas A \& M University},
+ address = {College Station, TX, USA},
+}
+
+% http://dl.acm.org/citation.cfm?id=298812&CFID=602808215&CFTOKEN=21058746
+@article{rauchwerger:tpds99,
+ author = {Rauchwerger, Lawrence and Padua, David A.},
+ title = {The LRPD Test: Speculative Run-Time Parallelization of Loops with Privatization and Reduction Parallelization},
+ journal = {IEEE Trans. Parallel Distrib. Syst.},
+ issue_date = {February 1999},
+ volume = {10},
+ number = {2},
+ month = feb,
+ year = {1999},
+ issn = {1045-9219},
+ pages = {160--180},
+ numpages = {21},
+ url = {http://dx.doi.org/10.1109/71.752782},
+ doi = {10.1109/71.752782},
+ acmid = {298812},
+ publisher = {IEEE Press},
+ address = {Piscataway, NJ, USA},
+ keywords = {Compilers, parallel processing, speculative, run-time, DOALL, reduction, privatization.},
+}
+
+
+%% Recursion parallelization
+
+% http://dl.acm.org/citation.cfm?id=2034791&CFID=602808215&CFTOKEN=21058746
+@article{morihata:icfp11,
+ author = {Morihata, Akimasa and Matsuzaki, Kiminori},
+ title = {Balanced Trees Inhabiting Functional Parallel Programming},
+ journal = {SIGPLAN Not.},
+ issue_date = {September 2011},
+ volume = {46},
+ number = {9},
+ month = sep,
+ year = {2011},
+ issn = {0362-1340},
+ pages = {117--128},
+ numpages = {12},
+ url = {http://doi.acm.org/10.1145/2034574.2034791},
+ doi = {10.1145/2034574.2034791},
+ acmid = {2034791},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {balanced tree, divide-and-conquer parallelism, equational reasoning, parametric polymorphism},
+}
+
+% http://dl.acm.org/citation.cfm?id=2175460&CFID=602808215&CFTOKEN=21058746
+@inproceedings{morihata:flops10,
+ author = {Morihata, Akimasa and Matsuzaki, Kiminori},
+ title = {Automatic Parallelization of Recursive Functions Using Quantifier Elimination},
+ booktitle = {Proceedings of the 10th International Conference on Functional and Logic Programming},
+ series = {FLOPS'10},
+ year = {2010},
+ isbn = {3-642-12250-7, 978-3-642-12250-7},
+ location = {Sendai, Japan},
+ pages = {321--336},
+ numpages = {16},
+ url = {http://dx.doi.org/10.1007/978-3-642-12251-4_23},
+ doi = {10.1007/978-3-642-12251-4_23},
+ acmid = {2175460},
+ publisher = {Springer-Verlag},
+ address = {Berlin, Heidelberg},
+}
+
+% http://dl.acm.org/citation.cfm?id=1148116&CFID=602808215&CFTOKEN=21058746
+@inproceedings{matsuzaki:spaa06,
+ author = {Matsuzaki, Kiminori and Hu, Zhenjiang and Takeichi, Masato},
+ title = {Towards Automatic Parallelization of Tree Reductions in Dynamic Programming},
+ booktitle = {Proceedings of the Eighteenth Annual ACM Symposium on Parallelism in Algorithms and Architectures},
+ series = {SPAA '06},
+ year = {2006},
+ isbn = {1-59593-452-9},
+ location = {Cambridge, Massachusetts, USA},
+ pages = {39--48},
+ numpages = {10},
+ url = {http://doi.acm.org/10.1145/1148109.1148116},
+ doi = {10.1145/1148109.1148116},
+ acmid = {1148116},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {code generator, commutative semiring, dynamic programming, parallel programming, parallel tree contraction, tree},
+}
+
+%% Task level
+
+% http://dl.acm.org/citation.cfm?id=2666210
+@inproceedings{gebremedhin:eoolt14,
+ author = {Gebremedhin, Mahder and Fritzson, Peter},
+ title = {Automatic Task Based Analysis and Parallelization in the Context of Equation Based Languages},
+ booktitle = {Proceedings of the 6th International Workshop on Equation-Based Object-Oriented Modeling Languages and Tools},
+ series = {EOOLT '14},
+ year = {2014},
+ isbn = {978-1-4503-2953-8},
+ location = {Berlin, Germany},
+ pages = {49--52},
+ numpages = {4},
+ url = {http://doi.acm.org/10.1145/2666202.2666210},
+ doi = {10.1145/2666202.2666210},
+ acmid = {2666210},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {Modelica, OpenModelica, modeling, multi-core, parallel simulation, simulation, task parallel},
+}
+
+% http://dl.acm.org/citation.cfm?id=1769354
+@inproceedings{ishizaka:lcps01,
+ author = {Ishizaka, Kazuhisa and Obata, Motoki and Kasahara, Hironori},
+ title = {Coarse Grain Task Parallel Processing with Cache Optimization on Shared Memory Multiprocessor},
+ booktitle = {Proceedings of the 14th International Conference on Languages and Compilers for Parallel Computing},
+ series = {LCPC'01},
+ year = {2003},
+ isbn = {3-540-04029-3},
+ location = {Cumberland Falls, KY, USA},
+ pages = {352--365},
+ numpages = {14},
+ url = {http://dl.acm.org/citation.cfm?id=1769331.1769354},
+ acmid = {1769354},
+ publisher = {Springer-Verlag},
+ address = {Berlin, Heidelberg},
+}
+
+%% Analysis
+
+% http://dl.acm.org/citation.cfm?id=1190266
+@article{jhala:popl07,
+ author = {Jhala, Ranjit and Majumdar, Rupak},
+ title = {Interprocedural Analysis of Asynchronous Programs},
+ journal = {SIGPLAN Not.},
+ issue_date = {January 2007},
+ volume = {42},
+ number = {1},
+ month = jan,
+ year = {2007},
+ issn = {0362-1340},
+ pages = {339--350},
+ numpages = {12},
+ url = {http://doi.acm.org/10.1145/1190215.1190266},
+ doi = {10.1145/1190215.1190266},
+ acmid = {1190266},
+ publisher = {ACM},
+ address = {New York, NY, USA},
+ keywords = {asynchronous (event-driven) programming, dataflow analysis},
+}
+
+% http://dl.acm.org/citation.cfm?id=2175544&CFID=602808215&CFTOKEN=21058746
+@inproceedings{heubner:fossacs10,
+ author = {Heussner, Alexander and Leroux, Jerome and Muscholl, Anca and Sutre, Gregoire},
+ title = {Reachability Analysis of Communicating Pushdown Systems},
+ booktitle = {Proceedings of the 13th International Conference on Foundations of Software Science and Computational Structures},
+ series = {FOSSACS'10},
+ year = {2010},
+ isbn = {3-642-12031-8, 978-3-642-12031-2},
+ location = {Paphos, Cyprus},
+ pages = {267--281},
+ numpages = {15},
+ url = {http://dx.doi.org/10.1007/978-3-642-12032-9_19},
+ doi = {10.1007/978-3-642-12032-9_19},
+ acmid = {2175544},
+ publisher = {Springer-Verlag},
+ address = {Berlin, Heidelberg},
+}
+
+% http://dl.acm.org/citation.cfm?id=2190054
+@inproceedings{hertzberg:cgo11,
+ author = {Hertzberg, Ben and Olukotun, Kunle},
+ title = {Runtime Automatic Speculative Parallelization},
+ booktitle = {Proceedings of the 9th Annual IEEE/ACM International Symposium on Code Generation and Optimization},
+ series = {CGO '11},
+ year = {2011},
+ isbn = {978-1-61284-356-8},
+ pages = {64--73},
+ numpages = {10},
+ url = {http://dl.acm.org/citation.cfm?id=2190025.2190054},
+ acmid = {2190054},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+}
+
+% http://dl.acm.org/citation.cfm?id=2457518
+@inproceedings{ketterlin:micro12,
+ author = {Ketterlin, Alain and Clauss, Philippe},
+ title = {Profiling Data-Dependence to Assist Parallelization: Framework, Scope, and Optimization},
+ booktitle = {Proceedings of the 2012 45th Annual IEEE/ACM International Symposium on Microarchitecture},
+ series = {MICRO-45},
+ year = {2012},
+ isbn = {978-0-7695-4924-8},
+ location = {Vancouver, B.C., CANADA},
+ pages = {437--448},
+ numpages = {12},
+ url = {http://dx.doi.org/10.1109/MICRO.2012.47},
+ doi = {10.1109/MICRO.2012.47},
+ acmid = {2457518},
+ publisher = {IEEE Computer Society},
+ address = {Washington, DC, USA},
+}
+
+% EOF

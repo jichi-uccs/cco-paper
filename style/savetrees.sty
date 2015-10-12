@@ -1,0 +1,82 @@
+
+\usepackage{style/atbeginend}
+
+%% Page layout
+\setlength{\columnsep}{0.22in}
+\setlength{\topmargin}{-0.1in}  %% Gap above the header
+\setlength{\topskip}{-0.2in}    %% Between header and text
+\setlength{\textheight}{9.2in}
+\setlength{\textwidth}{7.2in}
+\setlength{\oddsidemargin}{-0.32in}
+\renewcommand{\baselinestretch}{1.0}
+
+%% Section titles
+\let \Mysection \section
+\newcommand{\Mysectionstar}[1]{
+  \vspace{-2.5ex}
+  \Mysection*{#1}
+  \vspace{-1.0ex}
+}
+
+\renewcommand{\section}[1]{
+  \ifthenelse{\equal{#1}{*}}
+	     {\Mysectionstar}
+	     {
+	       \vspace{-3.0ex}
+	       \Mysection{#1}
+	       \vspace{-2.0ex}
+	     }
+}
+
+\let \Mysubsection \subsection
+\renewcommand{\subsection}[1]{
+  \vspace{-2.5ex}
+  \Mysubsection{#1}
+  \vspace{-2.0ex}}
+
+\let \Mysubsubsection \subsubsection
+\renewcommand{\subsubsection}[1]{
+  \vspace{-2.0ex}
+  \Mysubsubsection{#1}
+  \vspace{-2.0ex}
+}
+
+\let \Mycaption \caption
+\renewcommand{\caption}[1]{
+  \vspace{-1.0ex}
+  \Mycaption{\small\sf #1}
+  \vspace{0.0ex}
+}
+
+%% Paragraphs
+\setlength{\parindent}{0.0ex}
+\setlength{\parskip}{1.0ex}
+
+%% Floats (tables and figures)
+\addtolength{\floatsep}{0.0ex}     %% Space left between floats
+\addtolength{\textfloatsep}{0.0ex} %% Space between floats and text
+\addtolength{\intextsep}{0.0ex}    %% Space on top/bottom of intext float
+\addtolength{\dbltextfloatsep}{0.0ex} %% For two column format
+\addtolength{\abovecaptionskip}{0.0ex}
+\addtolength{\belowcaptionskip}{-2.0ex}
+
+\renewcommand\floatpagefraction{0.9}
+\renewcommand\topfraction{0.9}
+\renewcommand\bottomfraction{0.9}
+\renewcommand\textfraction{0.1}
+\setcounter{totalnumber}{50}
+\setcounter{topnumber}{50}
+\setcounter{bottomnumber}{50}
+
+%% Math
+\addtolength{\abovedisplayskip}{0.0ex} %% Above math
+\addtolength{\belowdisplayskip}{0.0ex} %% Below math
+
+%% Lists
+\newcommand{\listtopcompress}{2.0ex}
+\newcommand{\listitemcompress}{1.0ex}
+\newcommand{\sublistitemcompress}{1.0ex}
+\AfterBegin{enumerate}{
+  \addtolength{\topsep}{-\listtopcompress}
+  \addtolength{\itemsep}{-\listitemcompress}
+}
