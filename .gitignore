@@ -1,0 +1,14 @@
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+#desktop.ini
+
+# LaTeX
+*.bbl
+
+# Paper
+paper.pdf
+
+# EOF
