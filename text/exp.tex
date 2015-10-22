@@ -2,7 +2,7 @@
 % 9/5/2013 jichi
 
 \section{Experiment results}
-\label{sec:cco:exp}
+\label{sec-exp}
 To evaluate the accuracy of our hot-spot communication predictions
   and the performance implications of our manually applied optimizations to better overlap computation with communication,
 we applied our approach to model and optimize 7 MPI applications form NAS NPB~\cite{npb}
@@ -184,8 +184,6 @@ the set of $N$ hot spots equals the top $N$ hot spots.
 %}%\scriptsize
 %\end{figure}
 
-% \todo { why is this table still here? How is it different from the other table?}
-% jichi: Removed. The following figure is a subset of the result of the overall table.
 %\begin{table}
 %%{\scriptsize
 %\begin{center}
@@ -226,7 +224,7 @@ the set of $N$ hot spots equals the top $N$ hot spots.
 {\scriptsize
 \centering
 \includegraphics[width=.48\textwidth]{fig/blues/npb_blues_B.png}
-\caption{Speed up of NPB with input B class on Intel x86 Infiniband cluster.}
+\caption{Optimization speedups on the Infiniband cluster.}
 \label{fig:npb:x86}
 }%\scriptsize
 \end{figure}
@@ -234,9 +232,9 @@ the set of $N$ hot spots equals the top $N$ hot spots.
 {\scriptsize
 \centering
 \includegraphics[width=.48\textwidth]{fig/disco/npb_disco_B.png}
-\caption{Speed up of NPB with input B class on Intel x64 Ethernet cluster.}
+\caption{Optimization speedups on the Ethernet cluster.}
 \label{fig:npb:x64}
-}%\scriptsize
+}
 \end{figure}
 %\begin{figure}
 %{\scriptsize
@@ -248,20 +246,17 @@ the set of $N$ hot spots equals the top $N$ hot spots.
 %\end{figure}
 
 
-Figure~\ref{fig:npb:x86} and \ref{fig:npb:x64}
-\todo {change the y-axis of these figures to "Speedup over the original code"}\done{jichi: fixed}
-shows the speedups we attained by enabling better computation-communication overlapping for the NPB applications.
-In particular, for each benchmark, the performance of the original application and the optimized code is measured using input class B on 9 processors,  with one MPI process bound to each node.
-We collect the total runtime on 2,4,8 nodes for most NPB applications except \done{3,9 nodes} for NAS BT and SP, which require the number of processes to be times of 3
-\todo { you just said you use 9 processors, what do you mean 2,4,8 nodes again?}
-\done{(jichi: I used 3/9 nodes (times of 3) for  BT/SP, and 2,4,8 (times of 2) for others NPB apps.)}
+Figures~\ref{fig:npb:x86} and \ref{fig:npb:x64}
+show the speedups we attained by enabling better computation-communication overlapping for the NPB applications.
+In particular, for each benchmark, the performance of the original application and the optimized code is measured using input class B on 2, 4, 8, and 9 nodes,  with one MPI process bound to each node, 
+with the exception of NAS BT and SP, which require the number of processes to be a multiple of 3 and so are configured to run on 3 and 9 nodes only.
 The overall elapsed time of each application is measured using NPB's built-in timer, which reports the elapsed time of multiple iterations with exclusion of the initialization time.
 
 
 Among all the NPB applications, FT and IS are the only benchmarks that use {\em alltoall} collectives as the main communication operation, while the other benchmarks mostly use point-to-point send/receives.
-Our optimization attained 3\%-88\% speedup for all applications.
+Our optimization attained 3-88\% speedup for all applications.
 The maximum 88\% performance improvement is observed from the NAS FT benchmark, which uses a time-consuming $MPI\_Alltoall$ operation, enclosed inside the outermost loop of the application,  to exchange a large amount of data.
-The lowest speedup (3\%) is observed from NAS MG, which does not have sufficient local computation in the surrounding loop of the MPI communication to overlap with communication.
+The lowest speedup (3\%) is observed from NAS MG, which does not have sufficient local computation in the surrounding loop of the MPI communication to overlap with communication. \todo { I think we need to discuss more the difference between using the two different platforms}
 
 %Another application NAS IS has the similar structure whose main loop is also the same as its communication loop.
 %However, its most time-consuming communication is $MPI\_Alltoallv$ and the sizes of the communication data vary a lot at runtime.

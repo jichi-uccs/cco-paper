@@ -1,15 +1,9 @@
 \section{Conclusion}
-\label{sec:cco:conclusion}
+\label{sec-concl}
 
-\todo { rewrite to make it appropriate for a paper}
-\done{
-In this paper, we present an integrated approach to optimize particular computation-communication patterns through overlapping.
-We first find the potential time consuming communication loops through analytical performance modeling.
-Then, we applied dependence analysis with domain knowledge and manually overlapped the computation and communication in the loop
-  by shifting loop iterations.
-Finally, we inserted MPI\_Test into computation loop and tuned the frequency of the MPI\_Test at runtime.
-We applied our approach to NPB applications on both high-speed and low-speed inter-connected distributed environment and achieved up to 1.8x speedup.
-}
+This paper presents a systematic approach to automate the overlapping of  communications with local independent computations in large MPI applications, thereby enhancing their performance portability.
+Our optimization workflow starts with analytical performance modeling of the overall application execution flow to identify long-lasting MPI communications to overlap, following with semi-automatic safety and profitability analysis to find optimization opportunities, and finally completing the optimization by manually applying the necessary transformations in a systematic fashion that can be potentially automated. 
+We applied our approach to optimize 7 NAS NPB applications on both a high-speed and a slow network-connected cluster environment and achieved 3-88\% speedup on both platforms.
 
 % EOF
 

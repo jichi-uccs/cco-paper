@@ -3,10 +3,10 @@
 % Technical background.
 
 \section{Related work}
-\label{sec:related}
+\label{sec-related}
 
 To enhance the efficiency of MPI applications, existing work has mostly focused on
-the development of effectual communication mechanisms underlying the wide variety of MPI operations,  e.g.,
+communication mechanisms underlying the wide variety of MPI operations,  e.g.,
 alternative protocols for point-to-point MPI communications~\cite{brightwell:eurompi03,denis:eurompi11},
 collective operations~\cite{traff:eurompi14:ocd,traff:eurompi14:mcd,graham:eurompi08,mittal:ppopp12},
 Remote Direct Memory Accesses (RDMA)~\cite{liu:ics03,woodall:eurompi06,hatanaka:eurompi13},
@@ -26,7 +26,6 @@ In contrast, our work focuses on application level performance enhancement by en
 %  ~\cite{isujita:eurompi14} proposed an alternative locality-aware process mapping optimization scheme.
 %  ~\cite{ozog:ics13} used the inspector/executor pattern to optimize load balancing for block-sparse tensor contractions.
 
-Similar to our work,
  %Based on the types of the communication to overlap,
  % the overlapping optimization could be divided into optimization for pt2pt/collective communication,
  % and that for one-sided communication with remote memory accesses.
@@ -36,46 +35,31 @@ Similar to our work,
 %  overlapping MPI with \emph{non-blocking computation} in multi-threading models such as OpenMP~\cite{kaiser:sp01};
 %  overlapping CCO one-sided communication\cite{bell:ipdps06},
 %  the CCO patterns for high-speed networks~\cite{iancu:ppopp07} to overlap large amount of fast messages.
-\todo { who? list the authors ??}
-\done{
-Iancu  et. al~~\cite{ancu:ppopp07}
-  presented a methodology for discovering optimal message sizes and schedules for a variety of application scenarios
-  by combining an analytic model that takes into account the variability of performance parameters with system scale and load with heuristics designed to avoid network congestion.
+Iancu  et. al~~\cite{iancu:ppopp07}
+tried to automatically determine message sizes and schedules for MPI communications through an analytical model of system scale and load  to avoid network congestion.
 % jichi: I removed the following paper.
 % It achieved 1.9x speedup for NAS FT using one-sided communication in UPC instead of MPI.
 %Bell et. al~\cite{bell:ipdps06}
-}
-Danalis et. al~\cite{danalis:ics09} investigated compiler optimizations that can be applied to potentially automate the overlapping of MPI computations and communications, by
+Danalis et. al~\cite{danalis:ics09} investigated compiler optimizations to potentially automate the overlapping of MPI computations and communications, by
 formulating a set of data flow equations to describe the side effects of key MPI operations so that an MPI-aware compiler can automatically assess the safety of several optimizations, which were then manually applied in their paper.
 Various patterns of computation-communication overlapping and automated optimization schemes have also been discussed in~\cite{danalis:sc05,fishgold:ipdps06}.
- %overlapping non-blocking communications to better tolerate their latencies \todo {more details}.
-\todo {How is our work different from the above?}
-%Our paper focuses on enabling automated overlap of MPI point-to-point and collective communications with independent local computations.
-\done{
-Comparing with the existing optimization approaches,
-  our approach focuses and targets on a specific communication-computation pattern
-  where the overlapped computation and communication are in a loop
-  that we find common in NPB applications,
-and our optimization is achieved by shifting the loop iterations to overlap consequent loop iterations. % i.e. ovelap loop(i) with loop(i+1)
-}
+This paper presents a systematic approach to enable a pattern of loop-based communication-computation overlapping in scientific applications,
+%  where the overlapped computation and communication are in a loop
+%  that we find common in NPB applications,
+including automated identification of optimization opportunities and a semi-automated implementation to perform the optimizations
+using hot path analysis, dependence analysis, as well as empirical tuning to determine where and how to apply the optimizations.
+
 
 To reason about the profitability of optimizing MPI applications,
  Sancho et. al~\cite{sancho:sc06} combined empirical tuning with networking models
     to quantify the potential benefit of overlapping communication and computation in large-scale scientific applications;
   % author={Potluri, Sreeram and Lai, Ping and Tomko, Karen and Sur, Sayantan and Cui, Yifeng and Tatineni, Mahidhar and Schulz, Karl W. and Barth, William L. and Majumdar, Amitava and Panda, Dhabhaleswar K.}
-
-  % jichi: See: http://dl.acm.org/citation.cfm?id=1810092
   % As far as I understood, it "quantified" by actually running the AWM-Olsen code to get its runtime, and then did calculation based on the runtime.
-  Potluri et. al~\cite{potluri:ics10} \todo {how}
-  \done{used an empirical approaches}
-  to quantify the overlapping of MPI-2 operations in a seismic modeling application.
+  Potluri et. al~\cite{potluri:ics10} empirically quantified the overlapping of MPI-2 operations in a seismic modeling application.
   Hu et. al~\cite{hu:npc08,song:ppopp14} identified the consumer-producer model from the control flow graph of the application to guide optimization decisions  for overlapping Alltoall communication in a 3-D FFT.
 Didelot et. al~\cite{didelot:imc14,didelot:eurompi12} developed a message progression model based on Collaborative Polling which allows an efficient auto-adaptive overlapping of communication phases with computation.
-  \todo {Need to discuss here what is unique about our paper}.
-\done{
-In our approach in comparison, we focuses on finding the most time-consuming \emph{hot} code path of of the computation-communication patterns to optimize.
-We utilizes existing analytical communication models to find the potential hot code path before applying the optimization.
-}
+In this paper, we predicted the most time-consuming \emph{hot} code path of of the computation-communication patterns to optimize, using existing analytical model of communications~\cite{loggp}.
+
 
 %Two key challenges of automating optimizations for  MPI applications are how to determine the safety constraints and profitabilities of the optimizations due to the difficulty of precisely understanding the semantics of MPI library invocations  and to predict runtime behavior over a targeting platform,
 %~\cite{danalis:eurompi12} summarized the challenges to enable automatic compiler optimizations for MPI applications.
@@ -84,13 +68,8 @@ Preissl et. al~\cite{preissl:tms10} summarized common communication patterns in 
 Pellegrini et. al~\cite{pellegrini:eurompi12} proposed an exact dependence analysis approach for increasing the overlapping of computation and communication.
 Subotic et. al~\cite{subotic:hipeac08} speculatively extracted runtime data-flow to understand the dynamic dependence of the application.
 Aananthakrishnan et. al~\cite{aananthakrishnan:ics13} used a hybrid  static and runtime data-flow analysis of MPI programs.
-\todo {Need to compare and distinguish our work from above}
-\done{
-In our approach, we also use dependence analysis to help safety analysis of the optimization.
-In addition, we use an inlining-based technique to integrate domain knowledge
-  about the MPI APIs and application's runtime code path
-  to further improve the accuracy of the dependence analysis.
-}
+We also use dependence analysis to determine the safety of optimization, enhanced with additional knowledge from developers
+about the MPI operations and runtime code paths within their applications.
 
 To find the optimal placement of nonblocking MPI operations within the computation control flow,
 accurate modeling of the underlying computation and communication is required~\cite{brightwell:ics04}.
@@ -99,13 +78,8 @@ Ino,  Fujimoto, and Hagihara~\cite{ino:ppopp2001} presented a parallel computati
 % author = {Martinez, D. R. and Cabaleiro, J. C. and Pena, T. F. and Rivera, F. F. and Blanco, V.},
 Martinez et. al~\cite{martinez:ipdps09} developed an analytical model extending LogGP~\cite{loggp} for accurate estimation of individual MPI communication.
 Moritz and Frank~\cite{moritz:tpds01} modeled network contention in MPI applications.
-\todo {Need to precisely distinguish our paper from other existing work}
-\done{
-In our approach, we use MPI\_Test to adjust the overlap of computation and communication.
-Particularly, we tuned the optimal frequencies of MPI\_Test in the computation loops.
-}
-%In our paper, we use an analytical modeling approach to identify computation and communication to overlap,
-%and combine with empirical tuning to select the distribution of MPI\_Test.
+In our optimization,
+  we first reposition each pair of local computation and non-blocking communication as far apart as safety allows across different loop iterations and insert MPI\_Test with empirically tuned frequencies into the local computation to ensure proper progress of the nonblocking communication. 
 
 
 % EOF

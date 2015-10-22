@@ -92,8 +92,8 @@ non-blocking ones, by reordering the computations and communications involved, a
 Note that to guarantee the profitability of the optimization,
 any communication slowdown from the use of the non-blocking operations must be fully overlapped with the local computation,
 and the insertion of MPI\_Test operations should only cause marginal slowdown of the local computation so that its effect is
-insigficant when compared with the reduction of the original communication time.
-Our framework currently uses empirical tuning of the optimized code to select approriate optimization configurations and to skip non-profitable optimizations.
+insignificant when compared with the reduction of the original communication time.
+Our framework currently uses empirical tuning of the optimized code to select appropriate optimization configurations and to skip non-profitable optimizations.
 %The computation intensity is represented by the numbers of fixed-point and floating-point instructions.
 %The memory accesses include the allocated memory sizes and numbers of loads and stores.
 %The communication behaviors consist of the MPI functions being invoked,
@@ -110,24 +110,19 @@ Our framework currently uses empirical tuning of the optimized code to select ap
 %Finally, when the communication or computation to overlap takes short time,
 %  the overlap speed up might not be large enough to overcome the above slowdown.
 
-\todo {to add list of contributions to intro}
-\done{ % I think this part is critical important here and hence used red color
 Our main contributions include:
 \begin{itemize}
- \item Integrate analytical performance modeling to estimate communication analytically by trading off the accuracy of analysis for improved analysis efficiency.
- \item Utilize code skeletons to help select communication and computation workflow to overlap.
- \item Combine domain knowledge with data dependence analysis to validate safety of the optimization through annotation-based inlining.
- \item Utilize analytical performance model to reduce tuning space for the distribution of MPI\_Test.
- \item An integrated framework for overlapping computation and communication combining performance modeling, dependence analysis, tuning, and domain knowledge together.
+ \item We present a framework that integrates analytical performance modeling of large MPI applications, semantic inlining of developer-supplied domain knowledge, and pattern-based transformation to systematically enable better overlapping of MPI communications with independent local computations to enhance the performance portability of MPI applications. We currently manually applied the necessary program transformations (the last stage of the optimization) but expect to automate this step in our future work. 
+ \item We applied our approach to optimize 7 NAS NPB applications on both a high-speed and a slow network-connected cluster environment and achieved 3-88\% speedup on both platforms.
 \end{itemize}
-}
+
 
 The remainder of the paper is organized as follows.
 Section~\ref{sec-model} presents our analytical performance modeling component for automatically identifying communication and computation hot spots in MPI applications
 Section~\ref{sec-analysis} discusses how to determine the safety of computation-communication overlap through optimization analysis.
 Section~\ref{sec-opt} summarizes strategies we used to perform the actual optimizations and the tuning of their configurations.
-Section~\ref{sec-expr} evaluates our framework using 9 NAS application benchmarks~\cite{NAS}.
-Finally, Section~\ref{sec-related} discusses related work, and onclusions are drawn in
+Section~\ref{sec-exp} evaluates our framework using 9 NAS application benchmarks~\cite{npb}.
+Finally, Section~\ref{sec-related} discusses related work, and clusions are drawn in
 Section~\ref{sec-concl}.
 
 % EOF
