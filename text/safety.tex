@@ -1,40 +1,40 @@
-
 \subsection{Safety Of Optimization}
 \label{sec:cco:safety}
 
-\todo {Make an algorithm Figure. Reference the algorithm figure, summarize the key steps:
-Given the loops that containing the computation and communication to overlap,
-  the safety analysis will check if it is safe to reorder them,
-  and what variables are needed to be privatized to enable the overlap transformation.
-}
+\todo{Make an algorithm Figure. Reference the algorithm figure,
+  summarize the key steps: Given the loops that containing the
+  computation and communication to overlap, the safety analysis will
+  check if it is safe to reorder them, and what variables are needed
+  to be privatized to enable the overlap transformation.}
 
-\todo {don't make up terms such as CCO loop, it's not even a name}
-\todo {reorganize the following to following an algorithm figure}
+\todo{don't make up terms such as CCO loop, it's not even a name}
+\todo{reorganize the following to following an algorithm figure}
 
-As shown in Figure~\ref{fig:ft} , loop can be split into separation of computation can communication.
-After reordering the computation and communication for CCO,
-  three loop iterations $I-1$, $I$ and $I+1$ will be \emph{interleaved}.
-$After(I+1)$ will be executed before $Communication(I)$ and $Before(I-1)$.
-To guarantee the safety of the reordering, there must be no loop-carried dependence from
-  $After(I+1)$ to $Communication(I)$ and $Before(I-1)$.
+As shown in Figure~\ref{fig:ft} , loop can be split into separation of
+computation can communication.  After reordering the computation and
+communication for CCO, three loop iterations $I-1$, $I$ and $I+1$ will
+be \emph{interleaved}.  $After(I+1)$ will be executed before
+$Communication(I)$ and $Before(I-1)$.  To guarantee the safety of the
+reordering, there must be no loop-carried dependence from $After(I+1)$
+to $Communication(I)$ and $Before(I-1)$.
 
-However, in the applications such as NAS FT,
-  there are often buffer arrays shared by different iterations that could introduce such loop-carried dependence.
-When that happens,
-  the buffers are needed to be privatized to each loop iteration in order to apply CCO optimization.
-If the buffers are also used as the output of the loop,
-  the privatized buffers are needed to be copied to the output array.
-But if the dependence from $After(I-1)$ to $Before(I+1)$ cannot be removed by privatizing variables,
-  it is not safe to apply CCO optimization to the loop.
+However, in the applications such as NAS FT, there are often buffer
+arrays shared by different iterations that could introduce such
+loop-carried dependence.  When that happens, the buffers are needed to
+be privatized to each loop iteration in order to apply CCO
+optimization.  If the buffers are also used as the output of the loop,
+the privatized buffers are needed to be copied to the output array.
+But if the dependence from $After(I-1)$ to $Before(I+1)$ cannot be
+removed by privatizing variables, it is not safe to apply CCO
+optimization to the loop.
 
-After applying annotation-based inlining, function calls in the CCO loop will be eliminated.
-Conventional loop dependence analysis can be applied report the variables that have the loop-carried dependence discussed in the first section.
-Based on the location of the communication,
-   all the statements in the CCO can be divided into three groups:
-   (1) computation statements before the communication,
-   (2) communication statements,
-   and (3) computation statements after the communication.
-Then, the variables that has loop-carried dependence from (3) to (1) and (2) can be identified
-  using loop dependence hoisting analysis~\cite{YKA:JSC04}.
-
-% EOF
+After applying annotation-based inlining, function calls in the CCO
+loop will be eliminated.  Conventional loop dependence analysis can be
+applied report the variables that have the loop-carried dependence
+discussed in the first section.  Based on the location of the
+communication, all the statements in the CCO can be divided into three
+groups: (1) computation statements before the communication, (2)
+communication statements, and (3) computation statements after the
+communication.  Then, the variables that has loop-carried dependence
+from (3) to (1) and (2) can be identified using loop dependence
+hoisting analysis~\cite{YKA:JSC04}.

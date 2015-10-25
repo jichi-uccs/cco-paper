@@ -43,26 +43,25 @@ meng.jiayuan@gmail.com, \{jczhang, balaji\}@anl.gov
 \maketitle
 
 \begin{abstract}
-The performance of distributed-memory applications, many of which are written in MPI, critically depends on how well the
-applications can ameliorate the long latency of remote memory accesses by overlapping them with ongoing computations,
-thereby minimizing wait time.
-This paper presents a study of the various optimization techniques to enable such overlapping in large MPI applications
-and presents a framework for systematically  enabling a majority of such optimizations.
-Our framework first uses analytical performance modeling of the application execution flow,
- combined with application profiling, to automatically
-identify potential communication hot spots that may induce long wait time.
-%and any nearby computation that may be overlapped with the communication time.
-Next, for each communication hot spot,
-it searches the call graph to find surrounding loops that include sufficient local computation
-to overlap with the communication.
-Then,  blocking MPI communications are decoupled into nonblocking operations when necessary, and their surrounding loop
-is transformed to hide the communication latencies behind local computations.
-%We use the MPI\_Test operation inserted into the transformed code
-%  to dynamically adjust the communication frequency. % jichi: ``progress'' is a terminology to describe the poll-based MPI communication engine
-%The execution frequency of MPI\_Test if in loops is tuned for different input data and runtime environment using binary search.
-%Finally, modify the workflow.
-We evaluated our framework using 7 MPI applications from the \texttt{NAS} benchmark suite.
-Our optimizations can attain 3\% to 72\% speedup over the original implementations.
+The performance of distributed-memory applications, many of which are
+written in MPI, critically depends on how well the applications can
+ameliorate the long latency of remote memory accesses by overlapping
+them with ongoing computations, thereby minimizing wait time.  This
+paper presents a study of the various optimization techniques to
+enable such overlapping in large MPI applications and presents a
+framework for systematically enabling a majority of such
+optimizations.  Our framework first uses analytical performance
+modeling of the application execution flow, combined with application
+profiling, to automatically identify potential communication hot spots
+that may induce long wait time.  Next, for each communication hot
+spot, it searches the call graph to find surrounding loops that
+include sufficient local computation to overlap with the
+communication.  Then, blocking MPI communications are decoupled into
+nonblocking operations when necessary, and their surrounding loop is
+transformed to hide the communication latencies behind local
+computations.  We evaluated our framework using 7 MPI applications
+from the \texttt{NAS} benchmark suite.  Our optimizations can attain
+3\% to 72\% speedup over the original implementations.
 \end{abstract}
 
 
@@ -101,12 +100,11 @@ Our optimizations can attain 3\% to 72\% speedup over the original implementatio
 
 \REMOVE{
 \section*{Acknowledgment}
-The research is partially funded by the National Science Foundation of USA
-under Grants 1261778, 1261811, and 1261.
-This research used resources of the Argonne Leadership Computing
-Facility at Argonne National Laboratory, which is supported by the
-Office of Science of the U.S. Department of Energy under contract
-DE-AC02-06CH11357.
+The research is partially funded by the National Science Foundation of
+USA under Grants 1261778, 1261811, and 1261.  This research used
+resources of the Argonne Leadership Computing Facility at Argonne
+National Laboratory, which is supported by the Office of Science of
+the U.S. Department of Energy under contract DE-AC02-06CH11357.
 }
 
 
@@ -118,7 +116,14 @@ DE-AC02-06CH11357.
 \REMOVE{
 \framebox{
 \parbox{3.2in}{
-The submitted manuscript has been created by UChicago Argonne, LLC, Operator of Argonne National Laboratory (``Argonne"). Argonne, a U.S. Department of Energy Office of Science laboratory, is operated under Contract No. DE-AC02-06CH11357. The U.S. Government retains for itself, and others acting on its behalf, a paid-up nonexclusive, irrevocable worldwide license in said article to reproduce, prepare derivative works, distribute copies to the public, and perform publicly and display publicly, by or on behalf of the Government.
+The submitted manuscript has been created by UChicago Argonne, LLC,
+Operator of Argonne National Laboratory (``Argonne"). Argonne, a
+U.S. Department of Energy Office of Science laboratory, is operated
+under Contract No. DE-AC02-06CH11357. The U.S. Government retains for
+itself, and others acting on its behalf, a paid-up nonexclusive,
+irrevocable worldwide license in said article to reproduce, prepare
+derivative works, distribute copies to the public, and perform
+publicly and display publicly, by or on behalf of the Government.
 }
 }
 }

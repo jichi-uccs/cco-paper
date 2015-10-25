@@ -1,128 +1,15 @@
 \section{Conclusion}
 \label{sec-concl}
 
-This paper presents a systematic approach to automate the overlapping of  communications with local independent computations in large MPI applications, thereby enhancing their performance portability.
-Our optimization workflow starts with analytical performance modeling of the overall application execution flow to identify long-lasting MPI communications to overlap. Next, we conduct a semi-automatic safety and profitability analysis to find optimization opportunities. We complete the optimization by manually applying the necessary transformations in a systematic fashion that can be potentially automated. 
-We applied our approach to optimize 7 NAS NPB applications on both a high-speed and a slow network-connected cluster environment. We achieved 3--88\% speedup on both platforms.
-
-% EOF
-
-%This paper implements the optimization approach that integrates domain knowledge and performance model
-%  to enhance overlapping of computation and communication (CCO).
-%The approach addressed the profitability and safety challenges of the CCO optimization.
-%It formulated how to extract the computation and communication loop to overlap
-%  based on the hierarchical control flow of the application and the already identified hot spots.
-%The optimization analysis uses annotation-based inlining approach to integrate domain knowledge to enhance the accuracy of the safety analysis.
-%Additionally, it addressed the importance of MPI\_Test distribution to the overlapping profitability,
-%  and developed methods that utilizing performances modeling to prune the tuning space for MPI\_Test through binary search.
-
-
-%Our work focuses on
-%  using an analytical performance model
-%    and optimize the interval of interleaved computation and point-to-point or collective communication.
-%In comparison with previous work,
-%  the performance improvement of our approach mainly comes from the proper placement of MPI\_Test within the overlapped computation and communication workflow.
-%The configuration MPI\_Test includes the number of MPI\_Test operations to insert, where to insert, and frequencies of these MPI\_Test,
-%  which could produce a very large tuning space.
-%Let $N$ represent the maximum number of MPI\_Test, $I$ represent the number of instructions to insert MPI\_Test, and $F$ represent the range of MPI\_Test frequency to tune.
-%The tuning space could be as large as $O(N\cdot I\cdot F)$ when tuning blindly.
-%In order to prune the tuning space, in our approach,
-%  we estimate the computation and communication time analytically using \texttt{Roofline} and \texttt{LogGP} models,
-%  and let MPI\_Test evenly distribute within the overlapped runtime of the workflow.
-%As the result, we are able to reduce the tuning space to $O(N)$, i.e. only the total number of MPI\_Test is needed to be tuned,
-%  and the selection of the optimal MPI\_Test number is done using binary search over the $N$ space.
-%Additionally, we show that when the distribution of MPI\_Test is close to the optimal configuration,
-%  the overall performance of the application usually does not change a lot.
-%This indicates that the selection of good distribution of MPI\_Test might not require very accurate modeling of the runtime.
-%So, we used analytical models for computation and communication sacrificing the accuracy of the modeled time for fast mostly-offline performance analysis.
-%My research %presented in this thesis
-%focuses on
-%analyzing and optimizing large-scale scientific applications
-%with hints from users on various architectures
-%from single-core, single-node, to multi-node.
-%For all my approaches,
-%I essentially used programming interfaces
-%to get domain knowledge from users
-%about the runtime input data, code path, and target hardware,
-%to guide code analysis and translation.
-%%enhancing the understanding and help the development of large scale-scientific applications,
-%%  which usually have large number of runtime interactive procedures.
-%
-%My work is divided into three parts for sequential, OpenMP, and MPI applications respectively.
-%% 1.
-%The first is an analytical execution-flow modeling framework
-%  that is able to find the application's hot regions and bottleneck hardware resources.
-%The performance analysis time does not grow with the input data size,
-%  and it does not requires a fully functional hardware and software to exist.
-%% 2.
-%The second is a compiler framework
-%  to enhance inlining for automatic loop parallelization
-%  by erasing procedure boundaries with the help of domain knowledge from users.
-%It is able to integrate domain knowledge to help identifying parallelizable loops,
-%  while without losing parallelism comparing to conventional inlining.
-%% 3.
-%And the third is a source-to-source translation framework
-%to convert MPI-1 point-to-point communication to MPI-3 shared memory or neighborhood collectives.
-%The framework was evaluated by stencil computation,
-%and the generated code has competible performance comparing to the manual implementation.
-%The programming interface is non-intrusive so that the original code could still run on MPI-1 environment.
-%
-%Detailed contribution and future work as described in the following sections.
-
-%\section{Analytical execution-flow modeling}
-%
-%The key contributions for this work are as follows:
-%\begin{itemize}
-%\item % => the BST and BET tree
-%I designed a new intermediate representation (the BET representation)
-%to incorporate dynamic knowledge about an application (e.g. control flow statistics) and
-%analytically model its execution flow.
-%\item % => The hot spot detection algorithm.
-%I developed methods to statistically estimate the hot spots of applications
-%and their performance bottlenecks according to
-%their modeled execution flow on the target hardware.
-%\item % => The hot path detection algorithm.
-%I formulated how to extract the hot paths of an application based on the hierarchical
-%control flow of the application and the already identified hot spots.
-%\end{itemize}
-%
-%The current framework plugged in the roofline model for performance prediction.
-%The future work is to extend the framework to support different models
-%  such as the model for energy consumption.
-%
-%\section{Enhanced inlining}
-%
-%The key contributions my work are as follows:
-%\begin{itemize}
-%\item
-%The research exposes some serious limitations of conventional
-%inlining when using the Polaris compiler~\cite{Blume94polaris:improving} to parallelize a collection of Fortran
-%applications from the PERFECT benchmark suite~\cite{Blume92performanceanalysis}.
-%\item I present a new annotation-based inlining approach to
-%  that is able to break procedure boundaries and integrate domain-specific knowledge from developers
-%  while  avoiding the code explosion issue.
-%\end{itemize}
-%
-%As the framework presented in this thesis supports only loop parallelization,
-%  the future work is to support enhancing more optimizations, especially loop optimizations, using annotation-based inlining.
-%
-%\section{MPI-1 to MPI-3 transformation}
-%
-%The contributions for this work include:
-%\begin{itemize}
-%\item
-%Develop a semi-automatic tool for converting MPI-1 point-to-point communication
-%to MPI-3 shared memory and neighborhood collectives.
-%\item
-%Formalize the information needed to translate MPI-1 to MPI-3 programming models,
-%and design a non-intrusive programming interface
-%to express the MPI-3 models on top of MPI-1 point-to-point communication.
-%\end{itemize}
-%
-%Similar to translating MPI-1 to MPI-3,
-%there are other demands on
-%migrating existing distributed applications to new programming models.
-%One example is to move large local buffer onto inter-node shared memory
-%by translating local memory accesses to MPI one-sided remote memory accesses.
-%Similar programming interfaces and approaches could be designed
-%for the translations.
+This paper presents a systematic approach to automate the overlapping
+of communications with local independent computations in large MPI
+applications, thereby enhancing their performance portability.  Our
+optimization workflow starts with analytical performance modeling of
+the overall application execution flow to identify long-lasting MPI
+communications to overlap. Next, we conduct a semi-automatic safety
+and profitability analysis to find optimization opportunities. We
+complete the optimization by manually applying the necessary
+transformations in a systematic fashion that can be potentially
+automated.  We applied our approach to optimize 7 NAS NPB applications
+on both a high-speed and a slow network-connected cluster
+environment. We achieved 3--88\% speedup on both platforms.

@@ -1,114 +1,138 @@
-% exeflow.tex
-% 9/5/2013 jichi
-
 \section{Execution-flow modeling for MPI applications}
 \label{sec:mpi:exeflow}
 
-To analytically estimate the runtime for MPI applications,
-a communication model is needed for projecting performance of MPI communication offline.
-Based on the LogP theory,
-We developed a communication model
-to estimate the communication time for point-to-point or collective communication
-given the message size and number of nodes.
-The model could be formulated by the following equation:
+To analytically estimate the runtime for MPI applications, a
+communication model is needed for projecting performance of MPI
+communication offline.  Based on the LogP theory, We developed a
+communication model to estimate the communication time for
+point-to-point or collective communication given the message size and
+number of nodes.  The model could be formulated by the following
+equation:
+
 \begin{equation}
 runtime = F_{mpi\_type}(message\_size; node\_number)
 \end{equation}
-It takes the type of the MPI communication,
-number of nodes, and data transfered,
-and output the estimated communication time
-excluding the balancing time.
-The type of the MPI communication including point-to-point send/recv and collective functions.
-In the framework, the communication model is created by profiling kernel MPI benchmarks over the target hardware.
 
-The following subsections will discuss the communication model, the profiled kernel benchmarks,
-and the statistical analysis for constructing the model.
+It takes the type of the MPI communication, number of nodes, and data
+transfered, and output the estimated communication time excluding the
+balancing time.  The type of the MPI communication including
+point-to-point send/recv and collective functions.  In the framework,
+the communication model is created by profiling kernel MPI benchmarks
+over the target hardware.
+
+The following subsections will discuss the communication model, the
+profiled kernel benchmarks, and the statistical analysis for
+constructing the model.
+
 
 \subsection{Communication cost and message size}
-The communication cost can be estimated using LogGP model from
-the process number ($p$),
-message size ($n$),
-and platform-specific constant parameters ($alpha$, $beta$, $gamma$, \ldots).
-In the framework, MPICH is the MPI runtime environment on the target machines.
-In MPICH 3.1,
-the communication cost is usually proportional to the message size for both point-to-point and collective communication.
+
+The communication cost can be estimated using LogGP model from the
+process number ($p$), message size ($n$), and platform-specific
+constant parameters ($alpha$, $beta$, $gamma$, \ldots).  In the
+framework, MPICH is the MPI runtime environment on the target
+machines.  In MPICH 3.1, the communication cost is usually
+proportional to the message size for both point-to-point and
+collective communication.
+
 
 \subsubsection{MPI\_Send and MPI\_Recv}
-According to the LogGP model, the point-to-point communication can be modeled as a linear equation for both small and large message sizes:
+
+According to the LogGP model, the point-to-point communication can be
+modeled as a linear equation for both small and large message sizes:
+
 \begin{equation}
 cost_{p2p} = alpha + n\cdot beta
 \end{equation}
 
+
 \subsubsection{MPI\_Alltoall}
-In MPICH 3.1, the communication algorithm is different for small and large message sizes.
+
+In MPICH 3.1, the communication algorithm is different for small and
+large message sizes.
+
 \begin{equation}
 cost_{a2a}|_{n<threshold} = log p\cdot alpha + (n/2)\cdot log p\cdot beta
 \end{equation}
+
 \begin{equation}
 cost_{a2a}|_{n>threshold} = (p-1)\cdot alpha + n\cdot beta
 \end{equation}
-In each case, the overall cost is proportional to the message size $n$.
+
+In each case, the overall cost is proportional to the message size
+$n$.
+
 
 \subsubsection{MPI\_Alltoallv}
-In MPICH 3.1, the Alltoallv is implemented as decoupled non-blocking send and receives.
-So, the communication cost should be proportional to the overall message size.
+
+In MPICH 3.1, the Alltoallv is implemented as decoupled non-blocking
+send and receives.  So, the communication cost should be proportional
+to the overall message size.
+
 
 \subsubsection{MPI\_Bcast and MPI\_Reduce}
-The cost for broadcast and reduce in MPICH 3.1 is as follows where the cost is proportional to the message size $n$.
+
+The cost for broadcast and reduce in MPICH 3.1 is as follows where the
+cost is proportional to the message size $n$.
+
 \begin{equation}
 cost_{bcast} = log p\cdot alpha + n\cdot log p\cdot beta
 \end{equation}
+
 \begin{equation}
 cost_{reduce} = log p\cdot alpha + n\cdot log p\cdot beta + n\cdot log p\cdot gamma
 \end{equation}
 
-%  Cost = lgp.alpha + n.((p-1)/p).beta
-%\subsubsection{MPI\_Gather}
 
 \subsection{Analytic communication model}
-Given the fact that the communication cost is proportional to the message size
-but could the communication algorithm could change for small or large message size,
-different MPI communication model can be generalized
-as a broken-line linear equation:
+
+Given the fact that the communication cost is proportional to the
+message size but could the communication algorithm could change for
+small or large message size, different MPI communication model can be
+generalized as a broken-line linear equation:
+
 \begin{equation}
 cost(n;p) = \sum_i(alpha_{i,p} + n\cdot beta_{i,p})|_{threshold_i<n<threshold_{i+1}}
 \end{equation}
-Given fixed processor number $p$, the communication cost is a linear equation of
-message size $n$ within a pair of message size thresholds.
-The parameters $alpha$ and $beta$ are determined by the processor number and the range of the thresholds
-and runtime-dependent on the target platform.
+
+Given fixed processor number $p$, the communication cost is a linear
+equation of message size $n$ within a pair of message size thresholds.
+The parameters $alpha$ and $beta$ are determined by the processor
+number and the range of the thresholds and runtime-dependent on the
+target platform.
+
 
 \subsection{Communication cost and communication time}
-The communication cost and communication time are related, but not necessarily the same.
-The communication time is not only effected by the communication cost,
-but also include the wait time to balance different nodes.
-For applications with unbalanced workloads,
-the wait time could also become the performance bottlenecks.
-Currently, the framework focuses only on
-modeling balanced workload which is usually true for scientific applications,
-and the wait time is ignored.
-The communication time is approximated by the communication cost.
+
+The communication cost and communication time are related, but not
+necessarily the same.  The communication time is not only effected by
+the communication cost, but also include the wait time to balance
+different nodes.  For applications with unbalanced workloads, the wait
+time could also become the performance bottlenecks.  Currently, the
+framework focuses only on modeling balanced workload which is usually
+true for scientific applications, and the wait time is ignored.  The
+communication time is approximated by the communication cost.
 Modeling unbalanced workload is left for the future work.
 
+
 \subsection{Kernel MPI applications}
-A kernel MPI benchmark
-is a small application that contains only one type MPI functions to model,
-and report the average communication time over a large number of evaluations for the given message size and node number.
-In the current framework,
-  we wrote kernel benchmarks for send/recv, alltoall, alltoallv, broadcast and reduce.
-  %which covers the communication bottlenecks in the NPB.
-The kernel benchmarks are profiled on the target platform
-to collect message sizes, number of nodes, and communication time.
+
+A kernel MPI benchmark is a small application that contains only one
+type MPI functions to model, and report the average communication time
+over a large number of evaluations for the given message size and node
+number.  In the current framework, we wrote kernel benchmarks for
+send/recv, alltoall, alltoallv, broadcast and reduce.  The kernel
+benchmarks are profiled on the target platform to collect message
+sizes, number of nodes, and communication time.
+
 
 \subsection{Linear regression}
-Linear regression is used to calculate the linear parameters.
-for the message size.
-Given the experiment result,
-  the message thresholds for the broken lines can be estimated
-  from both the result message\_size-runtime figure
-  and the platform-dependent MPI environment variables from \texttt{mpivars}.
-Then, the linear parameters ($alpha$ and $beta$)
-can be calculated by applying linear regression to the message sizes and runtime
-for specific message thresholds, numbers of processor, and MPI communication type.
 
-% EOF
+Linear regression is used to calculate the linear parameters.  for the
+message size.  Given the experiment result, the message thresholds for
+the broken lines can be estimated from both the result
+message\_size-runtime figure and the platform-dependent MPI
+environment variables from \texttt{mpivars}.  Then, the linear
+parameters ($alpha$ and $beta$) can be calculated by applying linear
+regression to the message sizes and runtime for specific message
+thresholds, numbers of processor, and MPI communication type.
