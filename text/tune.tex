@@ -1,6 +1,6 @@
 % tune.tex
 % 9/5/2013 jichi
-\section{Program transformation}
+\section{Program Transformation}
 \label{sec-opt}
 
 After selecting the code regions to optimize,
@@ -25,24 +25,24 @@ through the following steps.
 \subsection{Function outlining}
 Given a loop to optimize, we
 first outline the computation and communication inside the loop into separate functions,
-to make it easier to replicate and reorder them later into different loop iterations. In particular, we divide the statements at each iteration I of the target loop into the MPI communications at iteration I (Comm(I)),
+in order to make it easier to replicate and reorder them later into different loop iterations. In particular, we divide the statements at each iteration I of the target loop into the MPI communications at iteration I (Comm(I)),
 the computation  (Before(I)) that should run before Comm(I), and the computation (After(I)) to evaluate after Comm(I)
-Each group of statements is then outlined into a separate procedure,  with the loop index variables as its function parameters\footnote{These components can alternatively be simply tagged as Comm(I), Before(I), and After(I) if the optimization were to be fully automated; outlining makes it easy to modify the code manually}.
-Take NAS FT in Figure~\ref{fig:ft_loop} as example,  the loop to optimize is divided into
+Each group of statements is then outlined into a separate procedure,  with the loop index variables as its function parameters.\footnote{These components can alternatively be simply tagged as Comm(I), Before(I), and After(I) if the optimization were to be fully automated; outlining makes it easy to modify the code manually.}
+Take NAS FT in Figure~\ref{fig:ft_loop} as an example.  The loop to optimize is divided into
   $Comm(I)$, the MPI communication at iteration I;
-  $Before(I)$, the computation before communication at iteration I,
-  and $After(I)$ the computation after communication at iteration I.
+  $Before(I)$, the computation before communication at iteration I;
+  and $After(I)$, the computation after communication at iteration I.
 
 \subsection{Converting MPI communications}
-Each blocking MPI operation, e.g. {\em alltoall} collectives and point-to-point send-receives,
-is converted to an equivalent non-blocking communication combined with a blocking wait.
-For example,  in Figure~\ref{fig:ft_loop}, the outlined communication function $Comm(I)$,  which invokes $MPI\_Alltoall$ internally, is replaced by $Icomm(I)$ and $Wait(I)$, which are the corresponding non-blocking communication ($MPI\_Ialltoall$) and wait operations converted from $Comm(I)$ respectively.
+Each blocking MPI operation, for example, {\em alltoall} collectives and point-to-point send-receives,
+is converted to an equivalent nonblocking communication combined with a blocking wait.
+For example,  in Figure~\ref{fig:ft_loop}, the outlined communication function $Comm(I)$,  which invokes $MPI\_Alltoall$ internally, is replaced by $Icomm(I)$ and $Wait(I)$, which are the corresponding nonblocking communication ($MPI\_Ialltoall$) and wait operations converted from $Comm(I)$, respectively.
 
 \subsection{Reordering computation and communication}
 
 After the previous steps, the body of the loop to optimize now contains a sequence of specially
 named operations such as
- $Before(I)$, $After(I)$, $Icomm(I)$, and $Wait(I)$
+ $Before(I)$, $After(I)$, $Icomm(I)$, and $Wait(I)$,
   where $I$ is the loop index variable looping from $1$ to $N$.
 %
 % 1:
@@ -82,7 +82,7 @@ named operations such as
 %
 We then %\emph{shift}
   \emph{interleave} the communication and computation operations of consecutive loop iterations,
-  as illustrated in Figure~\ref{fig:cco:reorder},  by following two steps:
+  as illustrated in Figure~\ref{fig:cco:reorder},  in two steps:
 \begin{enumerate}
 \item Move $Before(1)$ and $Icomm(1)$ to the outside before the first iteration of the loop starts,
   and move $Wait(N)$ and $After(N)$ outside after the last loop iteration
@@ -90,7 +90,7 @@ We then %\emph{shift}
 \item Move $Before(I)$ and $Icomm(I)$ above $Wait(I-1)$ and $After(I-1)$
   as shown in Figure~\ref{fig:cco:reorder:d}.
 \end{enumerate}
-After the reordering, the non-blocking communication in the current iteration I (between $Icomm(I)$ and $Wait(I)$)
+After the reordering, the nonblocking communication in the current iteration I (between $Icomm(I)$ and $Wait(I)$)
    can be processed in parallel with the computation in the previous ($After(I-1)$) and next ($Before(I+1)$) iterations.
 
 \subsection{Replicating the communication buffer}
@@ -99,13 +99,15 @@ Applications typically first allocate the necessary communication buffers at the
 the same buffers in the same MPI operations across different loop iterations.
 After applying our optimization, as illustrated in Figure~\ref{fig:cco:shift},
   the communication ($Icomm(i)$ and $Wait(i)$) at each $i$th iteration, where $i \geq 2$,  is overlapped with computation $Before(i+1)$ and $After(i-1)$.
-  Assuming two distinct buffers, {\em InBuf} and {\em OutBuf}, are used for sending and receiving each message respectively, 
- each buffer needs to be replicated into a pair of equal size to ensure distinct buffers are used across the overlapping iterations. 
+  Assuming that two distinct buffers, {\em InBuf} and {\em OutBuf}, are used for sending and receiving each message, respectively, 
+ each buffer needs to be replicated into a pair of equal size to ensure that distinct buffers are used across the overlapping iterations, 
 as illustrated in Figure~\ref{fig:cco:dup}.
 %In the figure, the $InBuf$ and $OutBuf$ represent the memory of the send/receive data of the communication $Icomm$ shared by all loop iterations.
 In particular, we replicate each buffer
-  by allocating additional memory outside of the loop %that has the same size of the original data buffers
-  and then alternatively use a distinct buffer in every pair of consecutive loop iterations.
+  by allocating additional memory outside the loop %that has the same size of the original data buffers
+  and then alternately use a distinct buffer in every pair of consecutive loop iterations.
+% GWP - do you mean alternately?
+
 %n particular, for each buffer used by $Comm(I)$ that used by the overlapping computation, a new buffer of the same size is created;
 %  and then replace the buffers accessed at the odd iteration by the communication
 %                   and those accessed at the even iteration by the computation
@@ -126,14 +128,14 @@ In particular, we replicate each buffer
 %
 % However, if the communication itself takes very short time, then calling MP_Test might have no impact and could slowdown the overall performance.
 
-When using non-blocking MPI operations, some CPU time needs to be allocated, by embedding $MPI\_Test$ calls in the local computation,
+When using nonblocking MPI operations, some CPU time needs to be allocated, by embedding $MPI\_Test$ calls in the local computation,
 to ensure continuous progress of the communications.
 If the local computation is not inside a loop, we insert one or more $MPI\_Test$ calls evenly distributed into the computation.
 %And if insertion of $MPI\_Test$ cause slowdown, it will be removed instead.
 On the other hand, if the local computation is inside a loop,
   we insert $MPI\_Test$ into the beginning of the loop body and use a conditional variable to adjust its frequency.
-An illustration of the inserted code is illustrated in Figure~\ref{fig:cco:test}.
-In both cases, the frequency of $MPI\_Test$ is empirically adjusted as the application is ported to each architecture
+The inserted code is illustrated in Figure~\ref{fig:cco:test}.
+In both cases, the frequency of $MPI\_Test$ is empirically adjusted as the application is ported to each architecture.
 
 
 % https://en.wikibooks.org/wiki/LaTeX/Floats,_Figures_and_Captions
@@ -201,7 +203,7 @@ After(N)
     %\caption{Decouple and overlap the communication of the i-th iteration with the computation of the (i-1)-th and (i+1)-th iterations}
     \label{fig:cco:reorder:d}
   \end{subfigure}
-\caption{The steps to reorder outlined communication and computation functions}
+\caption{Steps to reorder outlined communication and computation functions}
 \label{fig:cco:reorder}
 }%\scriptsize
 \end{figure}
@@ -223,7 +225,7 @@ END DO
 Wait(N, OutBuf)
 After(N, OutBuf)
 \end{verbatim}
-    \caption{The original communication that uses the same input and output $Buf$}
+    \caption{Original communication that uses the same input and output $Buf$}
     \label{fig:cco:dup:a}
   \end{subfigure}%
   \hspace{.01in}
@@ -244,7 +246,7 @@ After(N, N % 2 == 1 ? OutBuf : OutBuf2)
     \caption{Replicate $Buff$ with $Buff2$ of the same size}
     \label{fig:cco:dup:b}
   \end{subfigure}
-\caption{Replicate communication buffers for non-blocking communication}
+\caption{Replicate communication buffers for nonblocking communication}
 \label{fig:cco:dup}
 }%\scriptsize
 \end{figure}

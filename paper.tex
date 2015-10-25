@@ -26,14 +26,14 @@
 %
 % paper title
 %
-\title{Overlapping Communication With Computation in MPI Applications}
+\title{Overlapping Communication with Computation in MPI Applications}
 
-\author{Jichi Guo$^\dag$, Qing Yi$^\dag$, Jiayuan Meng$^\ddag$, Junchao Zhang$^\ddag$, Pavan Balaji$^\ddag$\\
+\author{Jichi Guo,$^\dag$ Qing Yi,$^\dag$ Jiayuan Meng,$^\ddag$ Junchao Zhang,$^\ddag$ Pavan Balaji$^\ddag$\\
 University of Colorado Colorado Springs$^\dag$\\
 Colorado Springs, CO, USA\\
 \{jguo2, qyi\}@uccs.edu \\
 Argonne National Laboratory$^\ddag$\\
-Lemont, IL, USA\\
+Argonne, IL, USA\\
 meng.jiayuan@gmail.com, \{jczhang, balaji\}@anl.gov
 }
 %\authorinfo{}{}{}
@@ -43,26 +43,26 @@ meng.jiayuan@gmail.com, \{jczhang, balaji\}@anl.gov
 \maketitle
 
 \begin{abstract}
-The performance of distributed memory applications, many of which written in MPI, critically depends on how well the
+The performance of distributed-memory applications, many of which are written in MPI, critically depends on how well the
 applications can ameliorate the long latency of remote memory accesses by overlapping them with ongoing computations,
 thereby minimizing wait time.
 This paper presents a study of the various optimization techniques to enable such overlapping in large MPI applications
-and presents a framework towards systematically  enabling a majority of such optimizations.
+and presents a framework for systematically  enabling a majority of such optimizations.
 Our framework first uses analytical performance modeling of the application execution flow,
  combined with application profiling, to automatically
 identify potential communication hot spots that may induce long wait time.
 %and any nearby computation that may be overlapped with the communication time.
-Then, for each communication hot spot,
-it searches the call graph to find surrounding loops that includes sufficient local computation
+Next, for each communication hot spot,
+it searches the call graph to find surrounding loops that include sufficient local computation
 to overlap with the communication.
-Finally,  blocking MPI communications are decoupled into non-blocking operations when necessary, and their surrounding loop
-transformed to hide the communication latencies behind local computations.
+Then,  blocking MPI communications are decoupled into nonblocking operations when necessary, and their surrounding loop
+is transformed to hide the communication latencies behind local computations.
 %We use the MPI\_Test operation inserted into the transformed code
 %  to dynamically adjust the communication frequency. % jichi: ``progress'' is a terminology to describe the poll-based MPI communication engine
 %The execution frequency of MPI\_Test if in loops is tuned for different input data and runtime environment using binary search.
 %Finally, modify the workflow.
-We evaluated our framework using 7 MPI applications from the \texttt{NAS} Benchmark suite.
-Our optimizations are able to attain 3\% to 72\% speedup over the original implementations.
+We evaluated our framework using 7 MPI applications from the \texttt{NAS} benchmark suite.
+Our optimizations can attain 3\% to 72\% speedup over the original implementations.
 \end{abstract}
 
 

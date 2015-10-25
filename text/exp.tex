@@ -1,16 +1,16 @@
 % exp.tex
 % 9/5/2013 jichi
 
-\section{Experiment results}
+\section{Experiment Results}
 \label{sec-exp}
 To evaluate the accuracy of our hot-spot communication predictions
   and the performance implications of our manually applied optimizations to better overlap computation with communication,
-we applied our approach to model and optimize 7 MPI applications form NAS NPB~\cite{npb}
-  on two clusters shown in Figure~\ref{tab:hw}:
-the first Intel platform is a large HPC cluster with very fast inter-node communication through Infiniband,
-  while the second HP platform is in a small data center where the inter-node communication is through relatively slow Ethernet.
+we applied our approach to model and optimize 7 MPI applications from the NAS NPB~\cite{npb}
+  on two clusters shown in Figure~\ref{tab:hw}.
+The first Intel platform is a large high-performance computing cluster with very fast internode communication through InfiniBand.
+  The second platform is in a small data center where the internode communication is through relatively slow Ethernet.
 Both clusters use MPICH 3.1.1~\cite{mpich2} as the underlying MPI library.
-Because our current analytical performance model cannot estimate intra-node MPI communication time,
+Because our current analytical performance model cannot estimate intranode MPI communication time,
   we have allocated a single MPI process per node on both clusters.
   % so that MPI communication is inter-node.
 %\todo{
@@ -26,39 +26,39 @@ Because our current analytical performance model cannot estimate intra-node MPI 
 % Disco: https://www.google.com/search?q=disco+uccs&ie=utf-8&oe=utf-8
 % Blues: http://www.lcrc.anl.gov/about/Blues
 \begin{table}
+\caption{Experiment platforms}
 \begin{center}
 \begin{tabular}{c|c c}
 \hline
 Server & Intel & HP ProLiant BL460c Gen6 \\
 \hline
-Processor &  Intel Xeon & Intel Xeon \\
+          &  Intel Xeon & Intel Xeon \\
 Instruction set  &  x86 & x64 \\
-Frequency &  2.6GHz & 3.2GHz \\
+Frequency &  2.6 GHz & 3.2 GHz \\
 Compiler  &  ICC/Ifort 13.1 & GCC/Gfortran 4.4.7 \\
-Network   &  Infiniband Qlogic QDR & 1Gbps Ethernet \\
+Network   &  InfiniBand Qlogic QDR & 1 Gbps Ethernet \\
 % for disco, 24nodes are on 3 racks with 8 nodes on each rack
 Total nodes &  301 & 24 on 3 racks\\
-Maximum memory &  64GB & 48GB \\
+Maximum memory &  64 GB & 48 GB \\
 %Hyperthread &  disabled & enabled \\
 \hline
 \hline
 \end{tabular}
 \end{center}
-\caption{Experiment platforms}
 \label{tab:hw}
 \end{table}
 
-For each MPI application, we first use our extended SKOPE performance modeling framework to find the most time-consuming MPI communication in the application.
+For each MPI application, we first used our extended SKOPE performance modeling framework to find the most time-consuming MPI communication in the application.
 Then, we manually applied the computation-communication optimization to the enclosing loop surrounding the identified communications.
-We measure the performance improvements from the optimizations using input data
- provided by the NPB benchmarks and using a range of 2 - 9 nodes for each application.
+We measured the performance improvements from the optimizations using input data
+ provided by the NPB benchmarks and using a range of 2 to 9 nodes for each application.
 %which are 3/9 nodes for BT and SP,and 2/4/8 nodes for the others NPB applications.
 %jichi: as I only had access to at most 10 nodes on DISCO that were not used by other people, I was not able to do experiment for more nodes.
 %Here, BT/SP used different configurations since they required the number of nodes to be times of 3 instead of 2.
 % What time is measured?
 % how much is the variation?
 % Average = 19 on blues and 18 on discos, and maximum is 88% in blues and 76 on discos
-Besides using the built-in timers within NPB applications to collect their overall performance,
+Besides using the built-in timers within the NPB applications to collect their overall performance,
   we manually instrumented the source code of the applications to report the performance of  individual communications.
 %For each NPB application, we measure each configuration exact once instead of multiple times
 %  since these applications are internally implemented to take multiple times of iterations to evaluate their communication kernels.
@@ -83,17 +83,17 @@ To evaluate the accuracy of our modeling of MPI communications,
   we compared the set of communication hot spots selected using our model with those found by profiling
   the NPB applications, using class B input on 4 nodes.
 %\done{jichi: I also tested A/C for my first two applications (FT and IS). But I cannot declare this conclusion for all configurations for other NPB applications.}
-The differences of hotspot selection for all NPB applications are shown in Table~\ref{tab:npb:hot}.
-When selecting the top time-consuming MPI communications with the requirement that their overall required time is at least 80\% of the application's overall communication time,
-our predictive modeling had selected the same set of hot communications as found using application profiling.
+The different hot-spot selection for the NPB applications are shown in Table~\ref{tab:npb:hot}.
+When selecting the top time-consuming MPI communications, we required that their overall time be at least 80\% of the application's overall communication time.
+In this case, our predictive modeling selected the same set of hot communications as found using application profiling.
 %The table does not include NPB BT and NPB SP whose communication are non-blocking that cannot be profiled,
 %  and it does not have the ranks for non-blocking \texttt{MPI\_Irecv} in NPB CG and NPB MG.
 %Our modeling work successfully find all correct hot spots.
-When asked to select a given number of the most time consuming communications, the output by our predictive modeling differs by at most 2 selections compared with using profiling,
+When asked to select a given number of the most time-consuming communications, however, the output by our predictive modeling differs by at most 2 selections compared with using profiling,
 %  which could happen when certain hot communications have very similar communication time.
 for the NAS LU benchmark.
-Here the most time consuming communications are pairs of sends/receives at four symmetric directions, which were estimated to take the same time by our predictive modeling.
-However, their actual runtime collected through profiling differ by 37\%, as the execution of the processes are unbalanced, resulting in extra wait time to synchronize the corresponding MPI\_Send/MPI\_Recv operations.
+Here the most time-consuming communications are pairs of sends/receives at four symmetric directions, which were estimated to take the same time by our predictive modeling.
+However, their actual runtime collected through profiling differ by 37\%, because the execution of the processes is unbalanced, resulting in extra wait time to synchronize the corresponding MPI\_Send/MPI\_Recv operations.
 Figure~\ref{fig:model:ft:B} compares our projected communication time with the actual measured time for NAS FT, using two and four processors.  Here in spite of the small error rates in projecting the absolute values of the communication time, our modeling framework was able to accurately capture the relative importances of the various communication operations.
 %The X-axis represents the different hot communications in NAS FT;
 %  the Y-axis on the left represents the actual total runtime of all selected hot spots,
@@ -144,6 +144,11 @@ Figure~\ref{fig:model:ft:B} compares our projected communication time with the a
 
 % NPB class = B, NPROCS = 4
 \begin{table}
+\caption{
+Differences between the projected hot-spot selection and
+the measured hot-spot selection based on profiling with 80\% threshold for class B data on 4 nodes. Zero means
+the set of $N$ hot spots equals the top $N$ hot spots.
+}%\caption
 %{\scriptsize
 \begin{center}
 \begin{tabular}{c|r|r|r|r|r|r|r|r}
@@ -161,11 +166,6 @@ MG      & 1 & 1 & 0 & 1 & 1 & 0 &   &   \\  % MPI_Send
 \end{tabular}
 \end{center}
 %}%\scriptsize
-\caption{
-Differences between the projected hot spot selection and
-the measured hot spot selection based on profiling with 80\% threshold for class B data on 4 nodes. Zero means
-the set of $N$ hot spots equals the top $N$ hot spots.
-}%\caption
 \label{tab:npb:hot}
 \end{table}
 
@@ -211,7 +211,7 @@ the set of $N$ hot spots equals the top $N$ hot spots.
 %\label{tab:hot:ft}
 %\end{table}
 
-\subsection{Impact Of Optimizations}
+\subsection{Impact of Optimizations}
 %\begin{figure}
 %{\scriptsize
 %\centering
@@ -224,7 +224,7 @@ the set of $N$ hot spots equals the top $N$ hot spots.
 {\scriptsize
 \centering
 \includegraphics[width=.48\textwidth]{fig/blues/npb_blues_B.png}
-\caption{Optimization speedups on the Infiniband cluster.}
+\caption{Optimization speedups on the InfiniBand cluster.}
 \label{fig:npb:x86}
 }%\scriptsize
 \end{figure}
@@ -248,15 +248,15 @@ the set of $N$ hot spots equals the top $N$ hot spots.
 
 Figures~\ref{fig:npb:x86} and \ref{fig:npb:x64}
 show the speedups we attained by enabling better computation-communication overlapping for the NPB applications.
-In particular, for each benchmark, the performance of the original application and the optimized code is measured using input class B on 2, 4, 8, and 9 nodes,  with one MPI process bound to each node, 
+In particular, for each benchmark, the performance of the original application and the optimized code is measured by using input class B on 2, 4, 8, and 9 nodes,  with one MPI process bound to each node, 
 with the exception of NAS BT and SP, which require the number of processes to be a multiple of 3 and so are configured to run on 3 and 9 nodes only.
-The overall elapsed time of each application is measured using NPB's built-in timer, which reports the elapsed time of multiple iterations with exclusion of the initialization time.
+The overall elapsed time of each application is measured by using NPB's built-in timer, which reports the elapsed time of multiple iterations with the exclusion of the initialization time.
 
 
-Among all the NPB applications, FT and IS are the only benchmarks that use {\em alltoall} collectives as the main communication operation, while the other benchmarks mostly use point-to-point send/receives.
-Our optimization attained 3-88\% speedup for all applications.
-The maximum 88\% performance improvement is observed from the NAS FT benchmark, which uses a time-consuming $MPI\_Alltoall$ operation, enclosed inside the outermost loop of the application,  to exchange a large amount of data.
-The lowest speedup (3\%) is observed from NAS MG, which does not have sufficient local computation in the surrounding loop of the MPI communication to overlap with communication. \todo { I think we need to discuss more the difference between using the two different platforms}
+Among all the NPB applications, FT and IS are the only benchmarks that use {\em alltoall} collectives as the main communication operation; the other benchmarks mostly use point-to-point send/receives.
+Our optimization attained 3--88\% speedup for all applications.
+The maximum 88\% performance improvement is observed with the NAS FT benchmark, which uses a time-consuming $MPI\_Alltoall$ operation, enclosed inside the outermost loop of the application,  to exchange a large amount of data.
+The lowest speedup (3\%) is observed with NAS MG, which does not have sufficient local computation in the surrounding loop of the MPI communication to overlap with communication. \todo { I think we need to discuss more the difference between using the two different platforms}
 
 %Another application NAS IS has the similar structure whose main loop is also the same as its communication loop.
 %However, its most time-consuming communication is $MPI\_Alltoallv$ and the sizes of the communication data vary a lot at runtime.

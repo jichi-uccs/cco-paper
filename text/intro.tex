@@ -11,22 +11,22 @@
 % - The computation hardware is idle when doing communication
 % - Computation bound / communication bound
 %
-As computing platforms migrate towards clusters of heterogeneous processors connected by varying
+As computing platforms migrate toward clusters of heterogeneous processors connected by varying
 network capacities, applications often need to manage the distributed memories of the processors
-via explicit message passing runtimes, e.g., MPI.
-Since the latency and bandwidth of the communication network is often hard to predict a priori, application performance is
-often critically determined by their abilities to flexibly overlap communications with local computations, thereby minimizing
+via explicit message-passing runtimes, for example, MPI.
+Since the latency and bandwidth of the communication network are often hard to predict a priori, application performance is
+often critically determined by the ability to flexibly overlap communications with local computations, thereby minimizing
 wait time.
 
 To illustrate the optimization, Figure~\ref{fig:ft_loop} shows the structure of the NAS FT benchmark~\cite{npb},
-  which applies FFT transformation to a 3D matrix through a loop that interleaves the computation of scaling  the input matrix,
-with a collective communication of MPI\_Alltoall to exchange data among the processes, which is then followed by a final transposition
+  which applies fast Fourier transform (FFT) to a 3D matrix through a loop that interleaves the computation of scaling  the input matrix
+with a collective communication of MPI\_Alltoall to exchange data among the processes. This is then followed by a final transposition
 of the resulting matrix.
 The clear separation of computation and communication phases makes the algorithm design easy to implement and maintain.
 Additionally, the communication buffers can be reused across different loop iterations, saving memory.
-However, the blocking MPI communication requires all processes to wait while the MPI\_Alltoall operation is in progress.
-Consequently, unless executed on a platform with the fastest network connections, the performance of the application is likely to suffer
-due to the excessive wait time.
+However, the blocking MPI communication requires that all processes wait while the MPI\_Alltoall operation is in progress.
+Consequently, unless the application is executed on a platform with the fastest network connections, its performance is likely to suffer
+because of the excessive wait time.
 
 % https://en.wikibooks.org/wiki/LaTeX/Floats,_Figures_and_Captions
 \begin{figure}
@@ -46,27 +46,26 @@ due to the excessive wait time.
     %\caption{Decouple and overlap the communication of the i-th iteration with the computation of the (i-1)-th and (i+1)-th iterations}
     \label{fig:ft_cco}
   \end{subfigure}
-  \caption{The structure of NAS FT (1D layout) before (a) and after (b) overlapping computation and communication.
+  \caption{Structure of NAS FT (1D layout) before (a) and after (b) overlapping computation and communication.
            \emph{Before} and \emph{After} in the figures are computation loops before and after the communication.}
 \label{fig:ft}
 \end{figure}
 
 Figure~\ref{fig:ft_cco} illustrates how the structure in~\ref{fig:ft_loop} may be modified to better overlap computation with communication.
 In particular,
-   the MPI\_Alltoall operation is decoupled into two finer-grained operations: a non-blocking MPI\_Ialltoall and a blocking MPI\_Wait.
+   the MPI\_Alltoall operation is decoupled into two finer-grained operations: a nonblocking MPI\_Ialltoall and a blocking MPI\_Wait.
 Then, the loop is modified so that Before(i), which multiplies a local matrix with a time-evolution array and then saves a transpose of the matrix into a local buffer to be communicated to other processors,  and MPI\_Ialltoall(i),  which exchange the local transposes among different processes, 
- are essentially moved so that they are evaluated before $MPI\_Wait(i-1)$, which waits for the completion of MPI communication of the previous iteration, and $After(i-1)$, which processes the just received remote data (of the $i-1$th iteration) and then print the result into an output file. 
-By using two distinct buffers to store the data used in consecutive MPI communications,  the output dependences between After(i-1) and Before(i)/MPI\_Ialltoall(i) can be
-entirely eliminated, thereby guaranteeing the safety of optimization.
+ are essentially moved so that they are evaluated before $MPI\_Wait(i-1)$, which waits for the completion of MPI communication of the previous iteration, and $After(i-1)$, which processes the just received remote data (of the $i-1$th iteration), and then print the result into an output file. 
+By using two distinct buffers to store the data used in consecutive MPI communications,  the output dependencoes between After(i-1) and Before(i)/MPI\_Ialltoall(i) can be
+eliminated, thereby guaranteeing the safety of optimization.
 
-Finally,
-   \emph{MPI\_Test} operations are inserted into the local computation to ensure the progress of the non-blocking communications\footnote{
+   \emph{MPI\_Test} operations are inserted into the local computation to ensure the progress of the nonblocking communications.\footnote{
   Although MPI communications do not need full usage of CPU, they need some CPU time,
  e.g., to manage communication buffers,
 which is supplied only when operations such as MPI\_Test and MPI\_wait are invoked.}
 By overlapping the MPI communications with the local computations, the transformed code
 allows the application to perform well even on systems with slow network connections, although
-non-blocking communications generally take longer time to finish than blocking ones,
+nonblocking communications generally take longer time to finish than blocking ones,
 and more memory may be needed to hold the data during communications.
 
 \begin{figure}[h]
@@ -81,19 +80,19 @@ and more memory may be needed to hold the data during communications.
 Figure~\ref{fig:overview} shows our workflow for systematically enabling communication-computation overlapping (CCO) in large MPI
 applications and thereby enhancing their performance portability.
 The workflow contains three key components:  (1) the \emph{performance modeling} component,
-which analyzes the runtime statistics of an MPI application to extract a {\emph Bayesian Execution Tree\cite{jichi:ipdps14}} representation of
+which analyzes the runtime statistics of an MPI application to extract a {\emph Bayesian execution tree\cite{jichi:ipdps14}} representation of
 its execution flow, including the frequencies of various runtime code paths and their performance characteristics such as computation intensities,
-working set sizes,  communication characteristics of MPI operations;
+working set sizes, and  communication characteristics of MPI operations;
 (2) the \emph{CCO analysis} component, which identifies {\emph hot} computation and communication regions
  that are likely to benefit from the optimization and  summarizes the result of profitability and safety analysis of the optimizations;
 and (3) the \emph{CCO optimization and tuning} component, which applies the appropriate program transformations by replacing the blocking MPI operations with
-non-blocking ones, by reordering the computations and communications involved, and
-  and by inserting MPI\_Test operations with a frequency determined by empirical tuning of the optimized code.
-Note that to guarantee the profitability of the optimization,
-any communication slowdown from the use of the non-blocking operations must be fully overlapped with the local computation,
-and the insertion of MPI\_Test operations should only cause marginal slowdown of the local computation so that its effect is
+nonblocking ones, by reordering the computations and communications involved and
+  by inserting MPI\_Test operations with a frequency determined by empirical tuning of the optimized code.
+Note that in order to guarantee the profitability of the optimization,
+any communication slowdown from the use of the nonblocking operations must be fully overlapped with the local computation,
+and the insertion of MPI\_Test operations should cause only marginal slowdown of the local computation so that its effect is
 insignificant when compared with the reduction of the original communication time.
-Our framework currently uses empirical tuning of the optimized code to select appropriate optimization configurations and to skip non-profitable optimizations.
+Our framework currently uses empirical tuning of the optimized code to select appropriate optimization configurations and to skip nonprofitable optimizations.
 %The computation intensity is represented by the numbers of fixed-point and floating-point instructions.
 %The memory accesses include the allocated memory sizes and numbers of loads and stores.
 %The communication behaviors consist of the MPI functions being invoked,
@@ -110,10 +109,10 @@ Our framework currently uses empirical tuning of the optimized code to select ap
 %Finally, when the communication or computation to overlap takes short time,
 %  the overlap speed up might not be large enough to overcome the above slowdown.
 
-Our main contributions include:
+Our main contributions are the following:
 \begin{itemize}
- \item We present a framework that integrates analytical performance modeling of large MPI applications, semantic inlining of developer-supplied domain knowledge, and pattern-based transformation to systematically enable better overlapping of MPI communications with independent local computations to enhance the performance portability of MPI applications. We currently manually applied the necessary program transformations (the last stage of the optimization) but expect to automate this step in our future work. 
- \item We applied our approach to optimize 7 NAS NPB applications on both a high-speed and a slow network-connected cluster environment and achieved 3-88\% speedup on both platforms.
+ \item We present a framework that integrates analytical performance modeling of large MPI applications, semantic inlining of developer-supplied domain knowledge, and pattern-based transformation in order to systematically enable better overlapping of MPI communications with independent local computations to enhance the performance portability of MPI applications. We currently manually applied the necessary program transformations (the last stage of the optimization) but expect to automate this step in our future work. 
+  \item We applied our approach to optimize 7 NAS Parallel Benchmarks (NPB) applications on both a high-speed and a slow network-connected cluster environment and achieved 3--88\% speedup on both platforms.
 \end{itemize}
 
 
@@ -122,8 +121,8 @@ Section~\ref{sec-model} presents our analytical performance modeling component f
 Section~\ref{sec-analysis} discusses how to determine the safety of computation-communication overlap through optimization analysis.
 Section~\ref{sec-opt} summarizes strategies we used to perform the actual optimizations and the tuning of their configurations.
 Section~\ref{sec-exp} evaluates our framework using 9 NAS application benchmarks~\cite{npb}.
-Finally, Section~\ref{sec-related} discusses related work, and clusions are drawn in
-Section~\ref{sec-concl}.
+Section~\ref{sec-related} discusses related work, and
+Section~\ref{sec-concl} presents our conclusions.
 
 % EOF
 

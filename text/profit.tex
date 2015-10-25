@@ -12,49 +12,49 @@ determine both the safety and the profitability of overlapping an MPI operation 
     In particular, based on the BET representation of the user application, this step identifies the top $N$ most time-consuming MPI \emph{calls}, which take more than $P\%$ of the overall communication time, where both $N$ and $P$ are user-configurable parameters and were set by default with $N=10$ and $P=80$.
 The selection is accomplished by simply sorting the pre-estimated communication time of all MPI  calls in the \texttt{BET} and then selecting the top ones.
 For example, for the NAS FT application shown in Figure~\ref{fig:ft_bet},
-a single MPI call, the \texttt{MPI\_Alltoall} at the bottom of the BET, is selected as
+a single MPI call, the \texttt{MPI\_Alltoall} at the bottom of the BET, is selected since
  it takes more than 95\% of the overall communication time.
 \item
-  For each identified MPI communication to optimize, select a loop of computation that can be potentially overlapped with the communication to improve performance, by  locating the closest enclosing loops of the MPI communication in the \texttt{BET},
-e.g., node\#2 in Figure~\ref{fig:ft_bet} for the NAS FT application, to potentially overlap with the communication.  If the enclosing loop does not exist, the communication is given up as an optimization target.
+  For each identified MPI communication to optimize, select a loop of computation that can be potentially overlapped with the communication to improve performance, by  locating the closest enclosing loops of the MPI communication in the \texttt{BET}---for example,
+node\#2 in Figure~\ref{fig:ft_bet} for the NAS FT application, to potentially overlap with the communication.  If the enclosing loop does not exist, the communication is given up as an optimization target.
 \item
 Apply dependence analysis to check the safety of overlapping the selected computation and communication.
 \end{enumerate}
 
-A key challenge in optimizing large applications is that MPI communications are often scattered across procedural boundaries,
+A key challenge in optimizing large applications is that MPI communications are often scattered across procedural boundaries
 and the computation that can be overlapped with them is often some distance away and similarly across abstraction boundaries,
-By using the SKOPE framework and through the BET representation of the whole user application, we are able to inter-procedurally select MPI communication hot spots as well as their surrounding local computations as potential optimization targets.
+By using the SKOPE framework and through the BET representation of the whole user application, we are able to interprocedurally select MPI communication hot spots as well as their surrounding local computations as potential optimization targets.
 
 To determine the safety of the optimization for the selected code regions,
   we first inline all function calls within the region and then apply traditional loop dependence analysis to the inlined code.
 In particular, based on results of profitability analysis using our extended SKOPE framework, we insert the following pragmas to guide additional safety analysis of the optimization using the ROSE C/C++/Fortran compiler~\cite {ROSE}.
 \begin{enumerate}
-\item \texttt{\#pragma cco do}, illustrated at line~1 of Figure~\ref{fig:code:ft}, which is inserted before the target loop to optimize selected using our extended SKOPE framework.
+\item \texttt{\#pragma cco do}, illustrated at line~1 of Figure~\ref{fig:code:ft}, which is inserted before the target loop to optimize selected targets using our extended SKOPE framework.
 \item \texttt{\#pragma cco ignore},
- illustrated at line~3 in Figure~\ref{fig:code:ft}, which is manually inserted before each function call that can be safely ignored when performing dependence analysis; that is, these function calls will not implicate the safety of any reordering optimization, when the function call is not reachable at runtime but involves I/O statements for debugging purposes.. Examples of such function calls include the $timer\_start()$ and $timer\_stop()$ in Figure~\ref{fig:code:ft}.
+ illustrated at line~3 in Figure~\ref{fig:code:ft}, which is manually inserted before each function call that can be safely ignored when performing dependence analysis. That is, these function calls will not implicate the safety of any reordering optimization, when the function call is not reachable at runtime but involves I/O statements for debugging purposes. Examples of such function calls include the $timer\_start()$ and $timer\_stop()$ in Figure~\ref{fig:code:ft}.
 
 \item \texttt{\#pragma cco override},  illustrated at the first line of Figure~\ref{fig:annot:a2a} and \ref{fig:annot:ft},
 %{\todo remove: for the specific the runtime code path, since no code path is specified here?}
 which defines the memory side effects of the following function call.
-The override definitions, if specified, allow dependence analysis to proceed across procedural boundaries without actual inlining of the procedure implementations. They are also inserted manually but could be automatically generated through the integration of advanced inter-procedural side effect analysis~\cite{kennedy:cpld88}.
+The override definitions, if specified, allow dependence analysis to proceed across procedural boundaries without actual inlining of the procedure implementations. They are also inserted manually but could be automatically generated through the integration of advanced interprocedural side effect analysis~\cite{kennedy:cpld88}.
 
 \end{enumerate}
 While traditional inlining can be used to overcome the difficulty imposed by procedural boundaries, sometimes the
- the low-level implementation details of the callee are too complex to be accurately deciphered by traditional compiler dependence analysis. Our manually inserted \emph{ignore} and \emph{override} pragmas are used particularly to overcome this difficulty.
+ low-level implementation details of the callee are too complex to be accurately deciphered by traditional compiler dependence analysis. Our manually inserted \emph{ignore} and \emph{override} pragmas are used particularly to overcome this difficulty.
  Figure~\ref{fig:annot:a2a} shows an example override definition for \texttt{MPI\_Alltoall} in NAS FT,
   where we use the $read$ and $write$ pseudo statements to indicate read and write memory accesses.
 Based on the domain knowledge of the application that send and receive data have atomic types instead of user-defined types,
   its memory side effect can be expressed as data accesses to consequent memories in source and target data.
-Figure~\ref{fig:annot:ft} shows another example for the $fft()$ function in NAS FT.
+Figure~\ref{fig:annot:ft} shows another example of the $fft()$ function in NAS FT.
 The original function have several branches for different data layout,
   while the override definition has only 1D layout that is the target code path to optimize.
 
 We manually override function inlining according to the following criteria:
 \begin{itemize}
-\item The definition of the function is not available or contains too many low-level implementation details that are likely to over complicate the inlined code.
-For example, we manually write memory side effect definition for all MPI function calls.
-\item The runtime code path of the function call allows the side effects of the invocation to be much simplified through specialization than if automatically determined after inlining.
-For example, in NAS FT, there are 6 branches in the procedure \texttt{fft}
+\item The definition of the function is not available or contains too many low-level implementation details that are likely to overcomplicate the inlined code.
+For example, we manually write a memory side effect definition for all MPI function calls.
+\item The runtime code path of the function call allows the side effects of the invocation to be simplified through specialization far more than if automatically determined after inlining.
+For example, in NAS FT, the procedure \texttt{fft} has 6 branches
   for solving different dimensions of the FFT problems (0D, 1D, or 2D),
   while only one branch will be taken for each test.
 By manually overriding the original definition, we can eliminate the unreachable branches.
@@ -301,7 +301,7 @@ subroutine MPI_Alltoall(sendbuf, sendcount, sendtype,
 end subroutine
 \end{verbatim}
 }%\scriptsize
-\caption{Memory side-effect of $MPI\_Alltoall()$ with simple datatype to override its original definition}
+\caption{Memory side effect of $MPI\_Alltoall()$ with simple datatype to override its original definition}
 \label{fig:annot:a2a}
 \end{figure}
 
