@@ -18,7 +18,7 @@ paper.pdf: $(wildcard Makefile *.tex *.bib *.sty */*)
 	$(LATEX) $< || (rm -f $@; exit 1)
 
 clean:
-	rm -f *.{aux,bbl,blg,log,out}
+	rm -f *.{aux,blg,log,out}
 
 paper.detex.txt: paper.tex
 	> $@ detex $^

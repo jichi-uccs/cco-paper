@@ -150,15 +150,23 @@ each application is measured by using NPB's built-in timer, which
 reports the elapsed time of multiple iterations with the exclusion of
 the initialization time.
 
-Among all the NPB applications, FT and IS are the only benchmarks that
-use {\em alltoall} collectives as the main communication operation;
-the other benchmarks mostly use point-to-point send/receives.  Our
-optimization attained 3--88\% speedup for all applications.  The
-maximum 88\% performance improvement is observed with the NAS FT
+Our optimization attained 3--88\% speedup for all the NPB applications, 
+with more significant speedups for FT and IS, which are the only two benchmarks that
+use {\em alltoall} collectives as the main communication operation, 
+and less significant speedups for the other benchmarks, which mostly use point-to-point send/receives.  
+The maximum 88\% performance improvement is observed with the NAS FT
 benchmark, which uses a time-consuming $MPI\_Alltoall$ operation,
 enclosed inside the outermost loop of the application, to exchange a
 large amount of data.  The lowest speedup (3\%) is observed with NAS
 MG, which does not have sufficient local computation in the
 surrounding loop of the MPI communication to overlap with
-communication. \todo {I think we need to discuss more the difference
-  between using the two different platforms}
+communication. 
+
+
+While our optimization was able to attain a consistent level of performance improvement on both platforms, 
+the best speedups are observed at different runtime configurations. 
+For example, the best speedup for NAS FT was attained when using 8 processors on the infiniband cluster
+but when using two processors on the Ethernet cluster, as the communication latency on the Ethernet is much longer than 
+that of the Infiniband network, which in turn affects the amount of local computation time required to overlap with the communication.
+Overall,  the possible speedup attained is bound by the latency of the communication being optimized and the amount of available
+local computation to overlap with the communication time. A larger amount of local independent computation is generally required to fully compensate the latencies of a slower network (e.g., Ethernet) than that of a faster network (e.g., infiniband).
