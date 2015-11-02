@@ -9,7 +9,7 @@ desktop.ini
 *.aux
 *.bbl
 *.blg
-#*.log
+*.log
 #*.out
 
 # Paper
