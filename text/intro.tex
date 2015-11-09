@@ -54,7 +54,7 @@ MPI\_Ialltoall and a blocking MPI\_Wait.  Then, the loop is modified
 so that Before(i), which multiplies a local matrix with a
 time-evolution array and then saves a transpose of the matrix into a
 local buffer to be communicated to other processors, and
-MPI\_Ialltoall(i), which exchange the local transposes among different
+MPI\_Ialltoall(i), which exchanges the local transposes among different
 processes, are essentially moved so that they are evaluated before
 $MPI\_Wait(i-1)$, which waits for the completion of MPI communication
 of the previous iteration, and $After(i-1)$, which processes the just
@@ -64,7 +64,7 @@ the data used in consecutive MPI communications, the output
 dependencoes between After(i-1) and Before(i)/MPI\_Ialltoall(i) can be
 eliminated, thereby guaranteeing the safety of optimization.
 
-\emph{MPI\_Test} operations are inserted into the local computation to
+Finally, \emph{MPI\_Test} operations are inserted into the local computation to
 ensure the progress of the nonblocking
 communications.\footnote{Although MPI communications do not need full
   usage of CPU, they need some CPU time, e.g., to manage communication
@@ -111,7 +111,15 @@ reduction of the original communication time.  Our framework currently
 uses empirical tuning of the optimized code to select appropriate
 optimization configurations and to skip nonprofitable optimizations.
 
-Our main contributions are the following:
+The idea of overlapping computation and communication in MPI applications have been
+well studied in the past~\cite{danalis:sc05,fishgold:ipdps06}, including both using analytical performance 
+models~\cite{iancu:ppopp07}
+and using compiler analysis~\cite{danalis:ics09} to assist the optimization. 
+Our work is unique in that it fully integrates both the performance modeling and compiler analysis to collectively
+determine both the profitability and safety of the overlapping optimization. Additionally, it
+focuses on a special pattern of loop-based
+communication-computation overlapping in scientific applications, which has not been addressed
+by existing literature.  Our main contributions are the following:
 
 \begin{itemize}
 
