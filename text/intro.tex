@@ -1,20 +1,20 @@
 \section{Introduction}
 \label{sec:intro}
 
-As computing platforms migrate towards clusters of increasingly larger scale of microprocessors, 
+As computing platforms migrate towards clusters of increasingly larger scale of microprocessors,
  applications need to manage the distributed memories of the processors via explicit
-message-passing runtimes, for example, MPI, to attain high performance. 
-The relative latency and bandwidth of the communication network in relation to the compute capacity of processors 
-are often hard to predict a priori and may change dramatically from one system to the next. 
-Even on supercomputers comprised of homogeneous nodes connected via the fastest infiniband network, 
-system noise is increasing on each node because of aspects such as power management, deeper memory hierarchies, and sharing of hardware such as caches and network. The ``equal work means equal time" paradigm is no longer relevant on most systems, and load imbalance increasingly becomes the common scenario even on applications that are symmetrically structured.  
-The situation of course is worsened by orders of magnitude on clusters of computers connected by ethernet of varying capacities, e.g., the cloud. Bulk-synchronous or blocking communication is no longer a valid option for high performance MPI applications.  
+message-passing runtimes, for example, MPI, to attain high performance.
+The relative latency and bandwidth of the communication network in relation to the compute capacity of processors
+are often hard to predict a priori and may change dramatically from one system to the next.
+Even on supercomputers comprised of homogeneous nodes connected via the fastest infiniband network,
+system noise is increasing on each node because of aspects such as power management, deeper memory hierarchies, and sharing of hardware such as caches and network. The ``equal work means equal time" paradigm is no longer relevant on most systems, and load imbalance increasingly becomes the common scenario even on applications that are symmetrically structured.
+The situation of course is worsened by orders of magnitude on clusters of computers connected by ethernet of varying capacities, e.g., the cloud. Bulk-synchronous or blocking communication is no longer a valid option for high performance MPI applications.
 Application performance is often critically determined by its ability to flexibly overlap communications with local computations,
 thereby minimizing wait time.
 
 
 This paper aims to automatically enable the use of nonblocking latency-hiding techniques to overlap local computation with remote communication in MPI applications, thereby enhancing their overall efficiency and performance portability.
-%through a framework that systematically combines analytical performance modeling of the application execution flow and compiler-assisted safety and profitability analysis. 
+%through a framework that systematically combines analytical performance modeling of the application execution flow and compiler-assisted safety and profitability analysis.
 To illustrate the optimization, Figure~\ref{fig:ft_loop} shows the
 structure of the NAS FT benchmark~\cite{npb}, which applies fast
 Fourier transform (FFT) to a 3D matrix through a loop that interleaves
@@ -67,7 +67,7 @@ received remote data (of the $i-1$th iteration), and then print the
 result into an output file.  By using two distinct buffers to store
 the data used in consecutive MPI communications, the output
 dependencoes between After(i-1) and Before(i)/MPI\_Ialltoall(i) can be
-eliminated, thereby guaranteeing the safety of optimization.
+eliminated, thereby guaranteeing the correctness of optimization.
 
 Finally, \emph{MPI\_Test} operations are inserted into the local computation to
 ensure the progress of the nonblocking
@@ -117,9 +117,9 @@ uses empirical tuning of the optimized code to select appropriate
 optimization configurations and to skip nonprofitable optimizations.
 
 The idea of overlapping computation and communication in MPI applications have been
-well studied in the past~\cite{danalis:sc05,fishgold:ipdps06}, including both using analytical performance 
+well studied in the past~\cite{danalis:sc05,fishgold:ipdps06}, including both using analytical performance
 models~\cite{iancu:ppopp07}
-and using compiler analysis~\cite{danalis:ics09} to assist the optimization. 
+and using compiler analysis~\cite{danalis:ics09} to assist the optimization.
 Our work is unique in that it fully integrates both the performance modeling and compiler analysis to collectively
 determine both the profitability and safety of the overlapping optimization. Additionally, it
 focuses on a special pattern of loop-based
