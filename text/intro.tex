@@ -121,10 +121,11 @@ well studied in the past~\cite{danalis:sc05,fishgold:ipdps06}, including both us
 models~\cite{iancu:ppopp07}
 and using compiler analysis~\cite{danalis:ics09} to assist the optimization.
 Our work is unique in that it fully integrates both the performance modeling and compiler analysis to collectively
-determine both the profitability and safety of the overlapping optimization. Additionally, it
-focuses on a special pattern of loop-based
+determine both the profitability and safety of the overlapping optimization.
+Additionally, it
+focuses on a special inter-procedural pattern of loop-based
 communication-computation overlapping in scientific applications, which has not been addressed
-by existing literature.  Our main contributions are the following:
+by existing literature. Our main contributions are the following:
 
 \begin{itemize}
 
@@ -143,6 +144,15 @@ by existing literature.  Our main contributions are the following:
   cluster environment and achieved 3--88\% speedup on both platforms.
 
 \end{itemize}
+
+In particular, we use performance modeling to find the candidate hot code paths to optimize.
+Comparing to profilers that usually provides measurement for static code blocks,
+  our modeling framework also distinguishes dynamic paths involving the same code block,
+  which is used to identify the inter-procedural communication pattern.
+And then, we use compiler analysis to make sure our optimization will not violate dependence constraints.
+Currently we manually applied the optimization transformation for each NPB application,
+  because we find these applications to have different MPI communication functions and computation loops,
+  which makes it challenging to have a single fully-automatic transformation to work for all NPB applications.
 
 The remainder of the paper is organized as follows.
 Section~\ref{sec-model} presents our analytical performance modeling
