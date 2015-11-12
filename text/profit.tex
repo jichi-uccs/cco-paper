@@ -1,9 +1,8 @@
 \section{Optimization Analysis}
 \label {sec-analysis}
 
-We use the following steps to determine both the safety and the
-profitability of overlapping an MPI operation with some local
-computation.
+The objective of our optimization analysis is to automatically identify which MPI communications to optimize
+and  what local computations can be safely overlapped with the communication, through the following three steps.
 
 \begin{enumerate}
 
@@ -41,24 +40,25 @@ A key challenge in optimizing large applications is that MPI
 communications are often scattered across procedural boundaries and
 the computation that can be overlapped with them is often some
 distance away and similarly across abstraction boundaries, By using
-the SKOPE framework and through the BET representation of the whole
-user application, we are able to interprocedurally select MPI
+the Skope framework and through the BET representation of the whole
+user application, we are able to inter-procedurally select MPI
 communication hot spots as well as their surrounding local
 computations as potential optimization targets.
+%After using our extended analytical performance modeling of Skope to automatically select 
+%the MPI operations to optimize, the loop surrounding each MPI operation can be directly
+%located by traversing upwards the BET representation of the application.  
+Then, an optimization pragma,  \texttt{\#pragma cco do}, 
+illustrated at line~1 of Figure~\ref{fig:code:ft}, is inserted automatically before each selected code region
+to instruct the compiler to perform additional analysis to determine the safety of optimization.
 
-To determine the safety of the optimization for the selected code
-regions, we first inline all function calls within the region and then
-apply traditional loop dependence analysis to the inlined code.  In
-particular, based on results of profitability analysis using our
-extended SKOPE framework, we insert the following pragmas to guide
-additional safety analysis of the optimization using the ROSE
-C/C++/Fortran compiler~\cite {ROSE}.
+We use standard loop dependence analysis within the ROSE C/C++/Fortran compiler~\cite {ROSE} to automatically 
+determine the safety of the reordering optimization to each selected code
+region and make the compiler inline all function calls within the region when possible; 
+that is, when source code of the callee is available. 
+For other function calls where inlining is not advisable to the compiler, we insert the following pragmas to provide
+additional guidance to the loop dependence analysis. 
 
 \begin{enumerate}
-
-\item \texttt{\#pragma cco do}, illustrated at line~1 of
-  Figure~\ref{fig:code:ft}, which is inserted before the target loop
-  to optimize selected targets using our extended SKOPE framework.
 
 \item \texttt{\#pragma cco ignore}, illustrated at line~3 in
   Figure~\ref{fig:code:ft}, which is manually inserted before each
@@ -80,12 +80,13 @@ C/C++/Fortran compiler~\cite {ROSE}.
 
 \end{enumerate}
 
-While traditional inlining can be used to overcome the difficulty
-imposed by procedural boundaries, sometimes the low-level
+The above annotations are currently manually inserted to overcome situations where
+traditional function inlining is insufficient to overcome the difficulty
+imposed by procedural boundaries, either because the source code of the callee is unavailable 
+or the low-level
 implementation details of the callee are too complex to be accurately
-deciphered by traditional compiler dependence analysis. Our manually
-inserted \emph{ignore} and \emph{override} pragmas are used
-particularly to overcome this difficulty.  Figure~\ref{fig:annot:a2a}
+deciphered by traditional compiler dependence analysis, which is a known issue in compiler analysis~\cite{POET:ICPP11}. 
+Figure~\ref{fig:annot:a2a}
 shows an example override definition for \texttt{MPI\_Alltoall} in NAS
 FT, where we use the $read$ and $write$ pseudo statements to indicate
 read and write memory accesses.  Based on the domain knowledge of the

@@ -11,10 +11,10 @@ computations and network communications.  This information then is
 used to automatically identify potential communication bottlenecks as
 candidates for optimization in the later steps.
 
-The purpose of our execution flow modeling is to estimate the time
-required to complete each MPI communication in relation to adjacent
-computations on the local node.  To represent runtime execution paths
-and estimate the time required to execute the local computation of
+%The purpose of our execution flow modeling is to estimate the time
+%required to complete each MPI communication in relation to adjacent
+%computations on the local node.  
+To represent and estimate the time required to execute the local computation of
 each path, we use the \texttt{Bayesian Execution Tree} (\texttt{BET})
 from the Skope analytical performance modeling
 framework~\cite{jichi:ipdps14}.  Each BET essentially represents
@@ -94,8 +94,7 @@ data,
 
 \subsection{Modeling MPI Communications}
 
-To predict the MPI communication overhead with local
-computations, we have extended the Skope framework with the LogGP
+To predict the MPI communication overhead, we have extended the Skope framework with the LogGP
 model~\cite{loggp} to additionally model the latency (elapsed time) of
 each MPI operation using the following four parameters:
 

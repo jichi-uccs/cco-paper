@@ -84,7 +84,7 @@ hold the data during communications.
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.35\textwidth]{fig/framework.png} % half page
-\caption{Workflow of the CCO optimization approach}
+\caption{Optimization Workflow}
 \label{fig:overview}
 \end{figure}
 
@@ -120,12 +120,17 @@ The idea of overlapping computation and communication in MPI applications have b
 well studied in the past~\cite{danalis:sc05,fishgold:ipdps06}, including both using analytical performance
 models~\cite{iancu:ppopp07}
 and using compiler analysis~\cite{danalis:ics09} to assist the optimization.
+Similar to other existing work, we also manually applied the optimizing transformations for each application.
 Our work is unique in that it fully integrates both the performance modeling and compiler analysis to collectively
 determine both the profitability and safety of the overlapping optimization.
 Additionally, it
 focuses on a special inter-procedural pattern of loop-based
 communication-computation overlapping in scientific applications, which has not been addressed
-by existing literature. Our main contributions are the following:
+by existing literature. 
+Compared to using profiling to directly measure and identify code blocks to optimize, 
+ our analytical modeling framework is able to collectively consider all the dynamic paths through each code block,
+to more accurately identify important inter-procedural communication patterns.
+Our main contributions are the following:
 
 \begin{itemize}
 
@@ -145,14 +150,6 @@ by existing literature. Our main contributions are the following:
 
 \end{itemize}
 
-In particular, we use performance modeling to find the candidate hot code paths to optimize.
-Comparing to profilers that usually provides measurement for static code blocks,
-  our modeling framework also distinguishes dynamic paths involving the same code block,
-  which is used to identify the inter-procedural communication pattern.
-And then, we use compiler analysis to make sure our optimization will not violate dependence constraints.
-Currently we manually applied the optimization transformation for each NPB application,
-  because we find these applications to have different MPI communication functions and computation loops,
-  which makes it challenging to have a single fully-automatic transformation to work for all NPB applications.
 
 The remainder of the paper is organized as follows.
 Section~\ref{sec-model} presents our analytical performance modeling
