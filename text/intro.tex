@@ -6,9 +6,9 @@ As computing platforms migrate towards clusters of increasingly larger scale of 
 message-passing runtimes, for example, MPI, to attain high performance.
 The relative latency and bandwidth of the communication network in relation to the compute capacity of processors
 are often hard to predict a priori and may change dramatically from one system to the next.
-Even on supercomputers comprised of homogeneous nodes connected via the fastest infiniband network,
+Even on supercomputers comprised of homogeneous nodes,
 system noise is increasing on each node because of aspects such as power management, deeper memory hierarchies, and sharing of hardware such as caches and network. The ``equal work means equal time" paradigm is no longer relevant on most systems, and load imbalance increasingly becomes the common scenario even on applications that are symmetrically structured.
-The situation of course is worsened by orders of magnitude on clusters of computers connected by ethernet of varying capacities, e.g., the cloud. Bulk-synchronous or blocking communication is no longer a valid option for high performance MPI applications.
+Consequently, bulk-synchronous communication, where all processes synchronize frequently, is no longer a valid option for high performance MPI applications.
 Application performance is often critically determined by its ability to flexibly overlap communications with local computations,
 thereby minimizing wait time.
 
@@ -73,8 +73,8 @@ Finally, \emph{MPI\_Test} operations are inserted into the local computation to
 ensure the progress of the nonblocking
 communications.\footnote{Although MPI communications do not need full
   usage of CPU, they need some CPU time, e.g., to manage communication
-  buffers, which is supplied only when operations such as MPI\_Test
-  and MPI\_wait are invoked.}  By overlapping the MPI communications
+  progress, which is supplied only when operations such as MPI\_Test
+  and MPI\_Wait are invoked.}  By overlapping the MPI communications
 with the local computations, the transformed code allows the
 application to perform well even on systems with slow network
 connections, although nonblocking communications generally take longer
