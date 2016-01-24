@@ -1,0 +1,34 @@
+REVISION: 
+  . - abstract mentions 3% to 72% improvements, the rest of the paper mentions 3 to 88%
+
+  . intro& Related work: On the novelty of the work: path to automation (compiler work): discover reordering allowed by dependence and profitable from performance modeling.
+  .  Need to justify the generality of the pattern: It’s clearly easy to see how the idea would work on different communications in different loops, but the paper does not tackle the rather common case that a single loop has a chain of dependent communications (eg in finite element assembly, where several different terms are assembled).
+
+  . Clarify more what is automated and what is not; also how much work and how difficult it is to fully automate the process via compilers. 
+   adding some more complete discussion concerning the effort needed to turn the proposed methodology into a real tool, and 
+   discussing whether providing the MPI user with more structured communication/computation patterns could improve both programmer productivity and methodology efficiency. 
+
+  . can we justify that NAS benchmarks are not "simple benchmarks"; i.e., they represent realistic large scale scientific applications?
+*** this work still seems very much in progress, and it is not clear how much additional work would be required to apply it to large-scale codes (either on the side of the framework or the application). 
+**** The technique is shown to be applicable to simple benchmarks, but this provides little or no confidence that it would be useful in more realistic and motivating applications.  
+
+  . Clarify more on dependence analysis and its limits, in terms of why needing the memory side-effect annotations. Clarify more on the case of CG. 
+  ""The optimization analysis in its current form requires considerable user input and code annotation, although the authors claim that a lot of it could be automated. Similarly, the program transformations are not fully automated yet. 
+  ""There are few details on dependence analysis and what its limits are (but it seems it needs a lot of help in the form of memory side-effect annotations), for example in the case of data-driven communication patterns, which is very common in structured/unstructured mesh computations; although the CG benchmark is being tested, we do not get to know how the halo exchange before the matrix-vector multiplication is handled.
+
+ Related work:  compare: "Our own experience with full-scale applications (with many halo exchanges per timestep for example, spread across different configurable modules) is that static analysis is just not robust enough and some kind of runtime scheme is the only practical solution.  Thus the related work that I am interested in is that on runtime techniques (Legion/Realm, Charm++ and others)."
+
+IV(C): how the communication and computation steps are interleaved, essentially by example.  What is the scheduling algorithm being used here? How does this interleaving algorithm generalize to examples where the loop body contains several (dependent) communication steps? How is this algorithm related to software pipelining?  Fig 9(d) shows a two-stage software pipeline.  Are there examples that result in more pipeline stages (ie spread across more than two iterations of the enclosing loop)?
+
+Experimental results: * the work is only done on very small scale scenarios: 2 to 9 nodes.
+* profiling was done using class B data size of the benchmark. There is a lack of sensitivity analysis of input data set size
+* Fig 1. text font is not readable.
+* In section V. 7 MPI applications from the NAS NPB [3] on two clusters shown in TABLE I.
+The paper says that BT and SP “require the number of processes to be a multiple of 3” . But they are configured to use 4 and 9 nodes shown in Fig. 14 and 15.
+right after Fig. 11, TABLE 1 is referred to as FIGURE 1
+- authors should probably mention somewhere the situation depicted in Fig. 12 is often referred to as double/triple buffering
+
+
+
+
+
