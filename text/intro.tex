@@ -66,20 +66,20 @@ of the previous iteration, and $After(i-1)$, which processes the just
 received remote data (of the $i-1$th iteration), and then print the
 result into an output file.  By using two distinct buffers to store
 the data used in consecutive MPI communications, the output
-dependencoes between After(i-1) and Before(i)/MPI\_Ialltoall(i) can be
-eliminated, thereby guaranteeing the correctness of optimization.
+dependence between After(i-1) and Before(i)/MPI\_Ialltoall(i) can be
+eliminated, guaranteeing the correctness of optimization.
 
 Finally, \emph{MPI\_Test} operations are inserted into the local computation to
 ensure the progress of the nonblocking
-communications.\footnote{Although MPI communications do not need full
+communication.\footnote{Although MPI communications do not need full
   usage of CPU, they need some CPU time, e.g., to manage communication
   progress, which is supplied only when operations such as MPI\_Test
-  and MPI\_Wait are invoked.}  By overlapping the MPI communications
-with the local computations, the transformed code allows the
+  and MPI\_Wait are invoked.}  By overlapping the MPI communication
+with the local computation, the transformed code allows the
 application to perform well even on systems with slow network
 connections, although nonblocking communications generally take longer
-time to finish than blocking ones, and more memory may be needed to
-hold the data during communications.
+time than their blocking counterparts, and more memory may be needed to
+hold the data during communication.
 
 \begin{figure}[h]
 \centering
@@ -89,8 +89,8 @@ hold the data during communications.
 \end{figure}
 
 Figure~\ref{fig:overview} shows our workflow for systematically
-enabling communication-computation overlapping (CCO) in large MPI
-applications and thereby enhancing their performance portability.  The
+enabling communication-computation overlapping (CCO) in MPI
+applications to enhance their performance portability.  The
 workflow contains three key components: (1) the \emph{performance
   modeling} component, which analyzes the runtime statistics of an MPI
 application to extract a {\emph Bayesian execution
@@ -99,20 +99,22 @@ including the frequencies of various runtime code paths and their
 performance characteristics such as computation intensities, working
 set sizes, and communication characteristics of MPI operations; (2)
 the \emph{CCO analysis} component, which identifies {\emph hot}
-computation and communication regions that are likely to benefit from
-the optimization and summarizes the result of profitability and safety
-analysis of the optimizations; and (3) the \emph{CCO optimization and
+computation and communication regions  
+and performs profitability and safety
+analysis of potentially applying the optimization to these regions; and (3) the \emph{CCO
   tuning} component, which applies the appropriate program
-transformations by replacing the blocking MPI operations with
-nonblocking ones, by reordering the computations and communications
-involved and by inserting MPI\_Test operations with a frequency
-determined by empirical tuning of the optimized code.  Note that in
-order to guarantee the profitability of the optimization, any
+transformations 
+%by replacing the blocking MPI operations with
+%nonblocking ones, by reordering the computations and communications involved and by inserting 
+and inserts MPI\_Test operations with a frequency
+determined by empirical tuning of the optimized code.  
+In order to guarantee the profitability of the optimization, any
 communication slowdown from the use of the nonblocking operations must
 be fully overlapped with the local computation, and the insertion of
 MPI\_Test operations should cause only marginal slowdown of the local
-computation so that its effect is insignificant when compared with the
-reduction of the original communication time.  Our framework currently
+computation.
+% so that its effect is insignificant in comparison with the reduction of the original communication time.  
+Our framework currently
 uses empirical tuning of the optimized code to select appropriate
 optimization configurations and to skip nonprofitable optimizations.
 
@@ -121,6 +123,7 @@ well studied in the past~\cite{danalis:sc05,fishgold:ipdps06}, including both us
 models~\cite{iancu:ppopp07}
 and using compiler analysis~\cite{danalis:ics09} to assist the optimization.
 Similar to other existing work, we also manually applied the optimizing transformations for each application.
+\todo {revise here to clarify complains from reviewers}
 Our work is unique in that it fully integrates both the performance modeling and compiler analysis to collectively
 determine both the profitability and safety of the overlapping optimization.
 Additionally, it

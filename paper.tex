@@ -56,11 +56,11 @@ that may induce long wait time.  Next, for each communication hot
 spot, we search the execution flow graph to find surrounding loops that
 include sufficient local computation to overlap with the
 communication.  Then, blocking MPI communications are decoupled into
-nonblocking operations when necessary, and their surrounding loop is
+nonblocking operations when necessary, and their surrounding loops are
 transformed to hide the communication latencies behind local
 computations.  We evaluated our framework using 7 MPI applications
-from the \texttt{NAS} benchmark suite.  Our optimizations can attain
-3\% to 72\% speedup over the original implementations.
+from the NPB \texttt{NAS} benchmark suite.  Our optimizations can attain
+3-88\% speedup over the original implementations.
 \end{abstract}
 
 
