@@ -44,11 +44,8 @@ excessive wait time.
     \caption{After optimization}
     \label{fig:ft_cco}
   \end{subfigure}
-  \caption{Optimizing NAS FT (1D layout) by
-    overlapping computation with communication. }
-% \emph{Before} and
-%    \emph{After} in the figures are computation loops before and after
-%    the communication.}
+  \caption{Optimizing NAS FT by
+    overlapping computation with communication (Before(i)/After(i) are computations before/after the MPI communication of the $i$th loop iteration)}
 \label{fig:ft}
 \end{figure}
 
@@ -123,8 +120,8 @@ well studied in the past~\cite{danalis:sc05,fishgold:ipdps06}, including both us
 models~\cite{iancu:ppopp07}
 and using compiler analysis~\cite{danalis:ics09} to assist the optimization.
 Similar to other existing work, we also manually applied the optimizing transformations for each application.
-Our work is a step closer to complete automation in that it fully integrates analytical performance modeling and compiler dependence analysis to automatically
-determine (with developer guidance) both the profitability and safety of the overlapping optimization. %, although with some small amount of manual assistance from developers. 
+Our work is a step closer to complete automation in that it fully integrates both analytical performance modeling and compiler dependence analysis to automatically
+determine (with optional developer guidance) the profitability and safety of the overlapping optimization. %, although with some small amount of manual assistance from developers. 
 The special inter-procedural pattern of loop-based
 communication-computation overlapping addressed by our work is common in scientific applications but has not been addressed
 by existing literature. While our example in Figure~\ref{fig:ft} contains only a singe communication inside the loop body, the optimization works similarly 
@@ -137,14 +134,13 @@ Our main technical contributions are the following:
 
 \begin{itemize}
 
-\item Our framework is able to automate the profitability and safety analysis of 
-overlapping MPI communications with computations, using advanced analytical performance
+\item Our framework tackles a common case of enhancing the overlapping of computation-communication that has not been previously addressed for MPI applications and 
+is able to fully automate the profitability and safety analysis of the optimization, using advanced analytical performance
 modeling (which collectively considers all the dynamic paths through each code block) and compiler dependence analysis
-(which supports automated semantic inlining of developer-supplied knowledge). Fully automating interprocedural
-analysis of large scientific applications is in general considered ineffective or impractical, as not all source code
-of the application is available, and many low-level implementation details are almost impossible to decipher~\cite{POET:ICPP11}. Our integration
-of performance modeling and compiler analysis can be fully automated, but we open up the framework
-to accept extensive developer input to make it more powerful/practical. We currently manually apply the necessary program transformations, 
+(which supports automated semantic inlining of developer-supplied knowledge). Developer guidance is required only to improve the
+accuracy of the analysis for large scientific applications, as not all source code
+of these applications is available, and many low-level implementation details are almost impossible to decipher~\cite{POET:ICPP11}. 
+ We currently manually apply the necessary program transformations, 
   because code need to be carefully moved across procedural boundaries. We believe this process can be automated with some developer
 guidance, which is our future work. 
 
