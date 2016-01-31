@@ -22,12 +22,10 @@ and  what local computations can be safely overlapped with the communication, th
   selected since it takes more than 95\% of the overall communication
   time.
 
-\item For each identified MPI communication to optimize, select a loop
-  of computation that can be potentially overlapped with the
-  communication to improve performance, by locating the closest
+\item For each identified MPI communication to optimize, locate the closest
   enclosing loops of the MPI communication in the \texttt{BET}---for
   example, node\#2 in Figure~\ref{fig:ft_bet} for the NAS FT
-  application, to potentially overlap with the communication.  If the
+  application---to potentially overlap with the communication.  If the
   enclosing loop does not exist, the communication is given up as an
   optimization target.
 
@@ -42,88 +40,99 @@ the computation that can be overlapped with them is often some
 distance away and similarly across abstraction boundaries, By using
 the Skope framework and through the BET representation of the whole
 user application, we are able to inter-procedurally select MPI
-communication hot spots as well as their surrounding local
-computations as potential optimization targets.
-%After using our extended analytical performance modeling of Skope to automatically select 
-%the MPI operations to optimize, the loop surrounding each MPI operation can be directly
-%located by traversing upwards the BET representation of the application.  
+communications as well as their surrounding loops as potential optimization targets.
 Then, an optimization pragma,  \texttt{\#pragma cco do}, 
 illustrated at line~1 of Figure~\ref{fig:code:ft}, is inserted automatically before each selected code region
 to instruct the compiler to perform additional analysis to determine the safety of optimization.
 
-We use standard loop dependence analysis within the ROSE C/C++/Fortran compiler~\cite {ROSE} to automatically 
+We use loop dependence analysis within the ROSE C/C++/Fortran compiler~\cite {ROSE} to automatically 
 determine the safety of the reordering optimization to each selected code
-region and make the compiler inline all function calls within the region when possible; 
-that is, when source code of the callee is available. 
-For other function calls where inlining is not advisable to the compiler, we insert the following pragmas to provide
-additional guidance to the loop dependence analysis. 
+region. By making the compiler inline all function calls within the region, the entire optimization analysis can be fully automated, if the compiler can find the source code of all the functions invoked inside the loop being optimized; when the source code of some of these function are not available for analysis, the compiler would opt to be conservative and deem the optimization unsafe. If such conservativeness is not desirable, the developer can 
+insert the following pragmas to provide additional guidance to the loop dependence analysis. 
 
 \begin{enumerate}
 
 \item \texttt{\#pragma cco ignore}, illustrated at line~3 in
-  Figure~\ref{fig:code:ft}, which is manually inserted before each
+  Figure~\ref{fig:code:ft}, which can be inserted before each
   function call that can be safely ignored when performing dependence
   analysis. That is, these function calls will not implicate the
-  safety of any reordering optimization, when the function call is not
-  reachable at runtime but involves I/O statements for debugging
-  purposes. Examples of such function calls include the
+  safety of any reordering optimization.
+  % when the function call is not
+  %reachable at runtime but involves I/O statements for debugging
+  %purposes. 
+  Examples of such function calls include the
   $timer\_start()$ and $timer\_stop()$ in Figure~\ref{fig:code:ft}.
 
 \item \texttt{\#pragma cco override}, illustrated at the first line of
   Figure~\ref{fig:annot:a2a} and \ref{fig:annot:ft}, which defines the
   memory side effects of the following function call.  The override
-  definitions, if specified, allow dependence analysis to proceed
-  across procedural boundaries without actual inlining of the
-  procedure implementations. They are also inserted manually but could
-  be automatically generated through the integration of advanced
-  interprocedural side effect analysis~\cite{kennedy:cpld88}.
+  definitions, when manually specified, allow dependence analysis to proceed
+  across procedural boundaries without requiring the source code or the inlining of the functions invoked. 
+  %They are also inserted manually but could
+  %be automatically generated through the integration of advanced
+  %interprocedural side effect analysis~\cite{kennedy:cpld88}.
 
 \end{enumerate}
 
-The above annotations are currently manually inserted to overcome situations where
-traditional function inlining is insufficient to overcome the difficulty
-imposed by procedural boundaries, either because the source code of the callee is unavailable 
+For this paper, we manually inserted the above annotations to overcome situations where the source code of the callee is unavailable, 
 or the low-level
 implementation details of the callee are too complex to be accurately
-deciphered by traditional compiler dependence analysis, which is a known issue in compiler analysis~\cite{POET:ICPP11}. 
+deciphered by traditional compiler dependence analysis (e.g., the underlying implementations of MPI operations). 
+%which is a known issue in compiler analysis~\cite{POET:ICPP11}. 
 Figure~\ref{fig:annot:a2a}
-shows an example override definition for \texttt{MPI\_Alltoall} in NAS
-FT, where we use the $read$ and $write$ pseudo statements to indicate
-read and write memory accesses.  Based on the domain knowledge of the
-application that send and receive data have atomic types instead of
-user-defined types, its memory side effect can be expressed as data
-accesses to consequent memories in source and target data.
-Figure~\ref{fig:annot:ft} shows another example of the $fft()$
-function in NAS FT.  The original function have several branches for
+shows an example override definition for \texttt{MPI\_Alltoall}, where we use the $read$ and $write$ pseudo statements to indicate
+read and write memory accesses.  Here based on the domain knowledge of the
+application that the data being sent/received have atomic types instead of
+user-defined types, the memory side effect of the operation can be expressed as data
+accesses to consequent memories in source and target data. We similarly composed
+  memory side effect definitions for the other MPI operations. 
+
+Traditional loop dependence analysis in compilers is based on the disambiguation of subscripted array references, 
+by solving diophantine equations parameterized by the surrounding loop index variables, to determine whether each pair of 
+array references may refer to the same memory location at two arbitrary loop iterations~\cite{AK:Book01}. The analysis therefore
+becomes ineffective when memory references are not expressed using array notations or when the subscript of an array reference cannot be expressed as a linear combination of the surrounding loop index variables. Additionally, since the compiler does not have any information about the runtime control flow of a program, it assumes all control paths can happen at runtime, and no unknown system calls (e.g., timer\_start and timer\_stop in Figure~\ref{fig:code:ft}) can be reordered. Our annotation mechanisms are provided to developers to optionally overcome such conservativeness when desired. In our experience of optimizing the NAS application benchmarks, we have used these annotations to serve the following purposes. 
+
+\begin{itemize}
+\item Define the memory side effects of MPI operations and system calls that can be ignored (e.g., Figure~\ref{fig:annot:a2a} and Figure~\ref{fig:code:ft}).
+%\item When the same array data are declared with different dimensions
+%  in the caller and callee, the manual override definition can
+%  normalize data accesses by converting linearized array accesses to
+%  easier-to-analyze coordinates.
+
+\item Specialize the memory side effect of a function call when only a single runtime code path is known to be executed by the function call,  to prevent the compiler considering all possible code paths through the default inlining mechanism.  For
+  example, in NAS FT, the procedure \texttt{fft} has 6 branches for
+  solving different dimensions of the FFT problem (0D, 1D, or 2D),
+  while only one branch will be taken at each invocation.  By manually
+  overriding the default inlining, we can eliminate the unreachable
+  branches from being considered.
+  Figure~\ref{fig:annot:ft} shows the annotation we used to override the $fft()$
+function in NAS FT.  Here the original function have several branches for
 different data layout, while the override definition has only 1D
 layout that is the target code path to optimize.
 
-We manually override function inlining according to the following
-criteria:
 
-\begin{itemize}
-
-\item The definition of the function is not available or contains too
-  many low-level implementation details that are likely to
-  overcomplicate the inlined code.  For example, we manually write a
-  memory side effect definition for all MPI function calls.
-
-\item The runtime code path of the function call allows the side
-  effects of the invocation to be simplified through specialization
-  far more than if automatically determined after inlining.  For
-  example, in NAS FT, the procedure \texttt{fft} has 6 branches for
-  solving different dimensions of the FFT problems (0D, 1D, or 2D),
-  while only one branch will be taken for each test.  By manually
-  overriding the original definition, we can eliminate the unreachable
-  branches.
-
-\item When the same array data are declared with different dimensions
-  in the caller and callee, the manual override definition can
-  normalize data accesses by converting linearized array accesses to
-  easier-to-analyze coordinates.
 
 \end{itemize}
 
+
+\begin{figure}[h]
+{\scriptsize
+\begin{verbatim}
+$cco override
+subroutine MPI_Alltoall(sendbuf, sendcount, sendtype,
+  > recvbuf, recvcount, recvtype, comm, ierror)
+  do i = 1, sendcount
+    read sendbuf(i)
+  end do
+  do i = 1, recvcount
+    write recvbuf(i)
+  end do
+end subroutine
+\end{verbatim}
+}
+\caption{Memory side effect of $MPI\_Alltoall()$ with simple datatype to override its original definition}
+\label{fig:annot:a2a}
+\end{figure}
 
 \begin{figure}[h]
 {\scriptsize
@@ -148,7 +157,7 @@ criteria:
 18 end do
 \end{verbatim}
 }
-\caption{Source code with directives of the loop in NAS FT to optimize}
+\caption{Annotated code of the loop in NAS FT to optimize}
 \label{fig:code:ft}
 \end{figure}
 
@@ -164,7 +173,7 @@ subroutine fft(dir, x1, x2)
 end subroutine
 \end{verbatim}
 }
-\caption{1D layout code path to override the original $fft()$ definition}
+\caption{1D layout code path to override the default inlining}
 \label{fig:annot:ft}
 \end{figure}
 
@@ -197,21 +206,3 @@ end subroutine
 \label{fig:code:transpose2}
 \end{figure}
 
-\begin{figure}[h]
-{\scriptsize
-\begin{verbatim}
-$cco override
-subroutine MPI_Alltoall(sendbuf, sendcount, sendtype,
-  > recvbuf, recvcount, recvtype, comm, ierror)
-  do i = 1, sendcount
-    read sendbuf(i)
-  end do
-  do i = 1, recvcount
-    write recvbuf(i)
-  end do
-end subroutine
-\end{verbatim}
-}
-\caption{Memory side effect of $MPI\_Alltoall()$ with simple datatype to override its original definition}
-\label{fig:annot:a2a}
-\end{figure}

@@ -12,11 +12,13 @@ REVISION:
   . can we justify that NAS benchmarks are not "simple benchmarks"; i.e., they represent realistic large scale scientific applications?
 *** this work still seems very much in progress, and it is not clear how much additional work would be required to apply it to large-scale codes (either on the side of the framework or the application). 
 **** The technique is shown to be applicable to simple benchmarks, but this provides little or no confidence that it would be useful in more realistic and motivating applications.  
+
  **** compiler optimization analysis
-  . Clarify more on dependence analysis and its limits, in terms of why needing the memory side-effect annotations. Clarify more on the case of CG. 
+  V Clarify more on dependence analysis and its limits, in terms of why needing the memory side-effect annotations. Clarify more on the case of CG. 
   ""The optimization analysis in its current form requires considerable user input and code annotation, although the authors claim that a lot of it could be automated. Similarly, the program transformations are not fully automated yet. 
   ""There are few details on dependence analysis and what its limits are (but it seems it needs a lot of help in the form of memory side-effect annotations), for example in the case of data-driven communication patterns, which is very common in structured/unstructured mesh computations; although the CG benchmark is being tested, we do not get to know how the halo exchange before the matrix-vector multiplication is handled.
 
+ **** program transformation
 
 IV(C): how the communication and computation steps are interleaved, essentially by example.  What is the scheduling algorithm being used here? How does this interleaving algorithm generalize to examples where the loop body contains several (dependent) communication steps? How is this algorithm related to software pipelining?  Fig 9(d) shows a two-stage software pipeline.  Are there examples that result in more pipeline stages (ie spread across more than two iterations of the enclosing loop)?
 
