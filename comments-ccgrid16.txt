@@ -22,7 +22,7 @@ REVISION:
 
 IV(C): how the communication and computation steps are interleaved, essentially by example.  What is the scheduling algorithm being used here? How does this interleaving algorithm generalize to examples where the loop body contains several (dependent) communication steps? How is this algorithm related to software pipelining?  Fig 9(d) shows a two-stage software pipeline.  Are there examples that result in more pipeline stages (ie spread across more than two iterations of the enclosing loop)?
 
-Experimental results: * the work is only done on very small scale scenarios: 2 to 9 nodes.
+ *** Experimental results: * the work is only done on very small scale scenarios: 2 to 9 nodes.
 * profiling was done using class B data size of the benchmark. There is a lack of sensitivity analysis of input data set size
 * Fig 1. text font is not readable.
 * In section V. 7 MPI applications from the NAS NPB [3] on two clusters shown in TABLE I.

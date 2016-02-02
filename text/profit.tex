@@ -29,9 +29,9 @@ and  what local computations can be safely overlapped with the communication, th
   enclosing loop does not exist, the communication is given up as an
   optimization target.
 
-\item Apply dependence analysis to check the safety of overlapping the
-  selected computation and communication.
-
+\item  Suppose comm(I) is the MPI communication being considered for optimization at each loop iteration. 
+Apply loop dependence analysis to identify the statements (Before(I)) that compute data to be transferred in comm(I) (that is, those that have dependence into comm(I)), and the statements (After(I)) that  use the data transferred from comm(i) (that is, those that have dependence from comm(I)). Determine whether comm(I) is independent of After(I-1) and Before(I+1); that is, whether
+it is safe to overlap comm(I) across loop iterations. If yes, the loop is selected for optimization. 
 \end{enumerate}
 
 A key challenge in optimizing large applications is that MPI
@@ -177,32 +177,32 @@ end subroutine
 \label{fig:annot:ft}
 \end{figure}
 
-\begin{figure}[h]
-{\scriptsize
-\begin{verbatim}
-subroutine transpose_x_yz(l1, l2, xin, xout)
-  call transpose2_local(dims(1,l1),
-  > dims(2,l1)*dims(3,l1),xin,xout)
-  call transpose2_global(xout,xin)
-  call transpose2_finish(dims(1,l1),
-  > dims(2,l1)*dims(3,l1),xin,xout)
-end subroutine
-\end{verbatim}
-}
-\caption{Source code of \texttt{transpose\_x\_yz}}
-\label{fig:code:transpose}
-\end{figure}
+%\begin{figure}[h]
+%{\scriptsize
+%\begin{verbatim}
+%subroutine transpose_x_yz(l1, l2, xin, xout)
+%  call transpose2_local(dims(1,l1),
+%  > dims(2,l1)*dims(3,l1),xin,xout)
+%  call transpose2_global(xout,xin)
+%  call transpose2_finish(dims(1,l1),
+%  > dims(2,l1)*dims(3,l1),xin,xout)
+%end subroutine
+%\end{verbatim}
+%}
+%\caption{Source code of \texttt{transpose\_x\_yz}}
+%\label{fig:code:transpose}
+%\end{figure}
 
-\begin{figure}[h]
-{\scriptsize
-\begin{verbatim}
-subroutine transpose2_global(xin, xout)
-  call mpi_alltoall(xin, ntdivnp/np, dc_type, xout,
-  > ntdivnp/np, dc_type, commslice1, ierr)
-end subroutine
-\end{verbatim}
-}
-\caption{Original source code of \texttt{transpose2\_global}}
-\label{fig:code:transpose2}
-\end{figure}
+%\begin{figure}[h]
+%{\scriptsize
+%\begin{verbatim}
+%subroutine transpose2_global(xin, xout)
+%  call mpi_alltoall(xin, ntdivnp/np, dc_type, xout,
+%  > ntdivnp/np, dc_type, commslice1, ierr)
+%end subroutine
+%\end{verbatim}
+%}
+%\caption{Original source code of \texttt{transpose2\_global}}
+%\label{fig:code:transpose2}
+%\end{figure}
 

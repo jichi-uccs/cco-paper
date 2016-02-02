@@ -1,30 +1,39 @@
 \section{Program Transformation}
 \label{sec-opt}
 
-After selecting the code regions to optimize, we currently manually
+After being selected by our automatic compiler dependence analysis, each loop 
+to be optimized includes at least one MPI communication $c$ inside the loop body, and two sets of statements, 
+Before(c) and After(c), that are safe to be overlapped with $c$ across loop iterations. If the Loop body contains 
+multiple MPI communications, say $c1$ followed by $c2$, both of which are selected for optimization, then $c1$ and $c2$
+must be independent across different loop iterations, as $c1 \in Before(c2)$ and $c2 \in After(c1)$ must hold, and to be
+both selected  for optimization, we must have $c1(I)$ (the MPI communication c1 at loop iteration I) and $After(c1,I+1) (the statements after c1 at loop iteration I-1)$ being independent, and $Before(c2,I-1)$ and $c2(I)$ being independent. 
+Consequently, $c1$ and $c2$ can be optimized independently of each other without violating any dependence constraints. Therefore, in the following, we consider only a single MPI communication and its surrounding loop for optimization. 
+
+For each MPI communication $c$ and its surrounding loop to optimize, we currently manually
 transform the source code to systematically enable the overlapping of
-computation and communication through the following steps.
+computation and communication. The main difficulty of fully automating the optimization is to identify the 
+actual statements corresponding to $c$, $Before(c)$, and $After(c)$ respectively when they are scattered across
+multiple procedures,  and some of these procedures cannot be inlined in the compiler analysis phase, e.g., due to 
+the need for code path specialization as demonstrated in Figure~\ref{fig:annot:ft}. 
+Otherwise, our future work will automate the following currently manually applied steps. 
 
-
-\subsection{Function outlining}
-
-Given a loop to optimize, we first outline the computation and
-communication inside the loop into separate functions, in order to
-make it easier to replicate and reorder them later into different loop
-iterations. In particular, we divide the statements at each iteration
-I of the target loop into the MPI communications at iteration I
-(Comm(I)), the computation (Before(I)) that should run before Comm(I),
-and the computation (After(I)) to evaluate after Comm(I) Each group of
-statements is then outlined into a separate procedure, with the loop
-index variables as its function parameters.\footnote{These components
-  can alternatively be simply tagged as Comm(I), Before(I), and
-  After(I) if the optimization were to be fully automated; outlining
-  makes it easy to modify the code manually.}  Take NAS FT in
-Figure~\ref{fig:ft_loop} as an example.  The loop to optimize is
-divided into $Comm(I)$, the MPI communication at iteration I;
-$Before(I)$, the computation before communication at iteration I; and
-$After(I)$, the computation after communication at iteration I.
-
+%we first outline the computation and
+%communication inside the loop into separate functions, in order to
+%make it easier to replicate and reorder them later into different loop
+%iterations. 
+%In particular, we divide the statements at each iteration
+%I of the target loop into the MPI communications at iteration I
+%(Comm(I)), the computation (Before(I)) that should run before Comm(I),
+%and the computation (After(I)) to evaluate after Comm(I) Each group of
+%statements is then outlined into a separate procedure, with the loop
+%index variables as its function parameters.\footnote{These components
+%  can alternatively be simply tagged as Comm(I), Before(I), and
+%  After(I) if the optimization were to be fully automated; outlining
+%  makes it easy to modify the code manually.}  Take NAS FT in
+%Figure~\ref{fig:ft_loop} as an example.  The loop to optimize is
+%divided into $Comm(I)$, the MPI communication at iteration I;
+%$Before(I)$, the computation before communication at iteration I; and
+%$After(I)$, the computation after communication at iteration I.
 
 \subsection{Converting MPI communications}
 
