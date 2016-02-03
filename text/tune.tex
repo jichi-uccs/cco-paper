@@ -6,11 +6,11 @@ to be optimized includes at least one MPI communication $c$ inside the loop body
 Before(c) and After(c), that are safe to be overlapped with $c$ across loop iterations. If the Loop body contains 
 multiple MPI communications, say $c1$ followed by $c2$, both of which are selected for optimization, then $c1$ and $c2$
 must be independent across different loop iterations, as $c1 \in Before(c2)$ and $c2 \in After(c1)$ must hold, and to be
-both selected  for optimization, we must have $c1(I)$ (the MPI communication c1 at loop iteration I) and $After(c1,I+1)$ (the statements after c1 at loop iteration I-1) being independent, and $Before(c2,I-1)$ and $c2(I)$ being independent. 
+both selected  for optimization, we must have $c1(I)$ (the MPI communication c1 at loop iteration I) and $After(c1,I-1)$ (the statements after c1 at loop iteration I-1) being independent, and  similarly $c2(I)$ and $Before(c2,I+1)$  being independent. 
 Consequently, $c1$ and $c2$ can be optimized independently of each other without violating any dependence constraints. Therefore, in the following, we consider only a single MPI communication and its surrounding loop for optimization. 
 
-For each MPI communication $c$ and its surrounding loop to optimize, we currently manually
-transform the source code to systematically enable the overlapping of
+For each MPI communication and its surrounding loop to optimize, we currently manually
+transform the source code to enable the overlapping of
 computation and communication. The main difficulty of fully automating the optimization is to identify the 
 actual statements corresponding to $Comm(I)$, $Before(I)$, and $After(I)$ respectively, as shown in Figure~\ref{fig:cco:reorder}(a),
 when they are scattered across multiple procedures,  and some of these procedures cannot be inlined in the compiler analysis phase, e.g., due to 
@@ -51,10 +51,10 @@ Figure~\ref{fig:cco:reorder}(b).
 
 \subsection{Reordering computation and communication}
 
-Tag each statement in the loop body as belong to $Before(I)$,
+Tag each statement in the loop body as belonging to $Before(I)$,
 $After(I)$, $Icomm(I)$, or $Wait(I)$, where $I$ is the index
 variable of the surrounding loop, as shown in Figure~\ref{fig:cco:reorder}(b).
-Then, \emph{interleave} the $Icomm(I)$ with $Before(I+1)$ and $After(I-1)$, as illustrated in
+Then, \emph{interleave} $Icomm(I)$ with $Before(I+1)$ and $After(I-1)$, as illustrated in
 Figure~\ref{fig:cco:reorder} (d), in two steps:
 
 \begin{enumerate}
@@ -68,45 +68,13 @@ Figure~\ref{fig:cco:reorder} (d), in two steps:
   $After(I-1)$ as shown in Figure~\ref{fig:cco:reorder:d}.
 
 \end{enumerate}
+Figure~\ref{fig:cco:shift} shows the new scheduling of the various computation and communication components after the reordering.
+ Note that for each iteration $I$, $Before(I)$, $Icomm(I)$, $Wait(I)$ and $After(I)$ are evaluated in the same order as in the original
+ computation. The main difference is that $After(I-1)$ and $Before(I+1)$ are now placed in between $Icomm(I)$ and $Wait(I)$, 
+ so that the non-blocking communication $Icomm(I)$ can now be processed in parallel with $After(I-1)$ and $Before(I+1)$,
+ thereby facilitating overlapping of computation and communication. If $Before(I+1)$ or $After(I-1)$ contains other MPI communications
+that are independent of $comm(I)$, the same rescheduling modification can be applied to these communications in the same fashion, where $Icomm(I)$ and $wait(I)$ would belong to the $Before(I)$ or $After(I)$ components of these new communications. 
 
-After the reordering, the nonblocking communication in the current
-iteration I (between $Icomm(I)$ and $Wait(I)$) can be processed in
-parallel with the computation in the previous ($After(I-1)$) and next
-($Before(I+1)$) iterations.
-
-
-\subsection{Replicating the communication buffer}
-
-Each MPI operation needs a dedicated buffer to hold the data being
-communicated.  Applications typically first allocate the necessary
-communication buffers at the initialization stage and then reuse the
-same buffers in the same MPI operations across different loop
-iterations.  After applying our optimization, as illustrated in
-Figure~\ref{fig:cco:shift}, the communication ($Icomm(i)$ and
-$Wait(i)$) at each $i$th iteration, where $i \geq 2$, is overlapped
-with computation $Before(i+1)$ and $After(i-1)$.  Assuming that two
-distinct buffers, {\em InBuf} and {\em OutBuf}, are used for sending
-and receiving each message, respectively, each buffer needs to be
-replicated into a pair of equal size to ensure that distinct buffers
-are used across the overlapping iterations, as illustrated in
-Figure~\ref{fig:cco:dup}.  In particular, we replicate each buffer by
-allocating additional memory outside the loop and then alternately use
-a distinct buffer in every pair of consecutive loop iterations.
-
-
-\subsection{Inserting MPI\_Tests}
-
-When using nonblocking MPI operations, some CPU time needs to be
-allocated, by embedding $MPI\_Test$ calls in the local computation, to
-ensure continuous progress of the communications.  If the local
-computation is not inside a loop, we insert one or more $MPI\_Test$
-calls evenly distributed into the computation.  On the other hand, if
-the local computation is inside a loop, we insert $MPI\_Test$ into the
-beginning of the loop body and use a conditional variable to adjust
-its frequency.  The inserted code is illustrated in
-Figure~\ref{fig:cco:test}.  In both cases, the frequency of
-$MPI\_Test$ is empirically adjusted as the application is ported to
-each architecture.
 
 \begin{figure}
 {\scriptsize
@@ -166,7 +134,7 @@ END DO
 Wait(N)
 After(N)
 \end{verbatim}
-    \caption{Interleave consequent iterations}
+    \caption{Interleave consecutive iterations}
     \label{fig:cco:reorder:d}
   \end{subfigure}
 \caption{Steps to reorder communication and computation}
@@ -181,28 +149,61 @@ After(N)
 \label{fig:cco:shift}
 \end{figure}
 
+\subsection{Replicating the communication buffer}
+
+Each MPI operation needs a dedicated buffer to hold the data being
+communicated.  Applications typically first allocate the necessary
+communication buffers at the initialization stage and then reuse the
+same buffers in the MPI operations across different loop
+iterations.  After applying our optimization, as illustrated in
+Figure~\ref{fig:cco:shift}, the communication ($Icomm(i)$ and
+$Wait(i)$) at each $i$th iteration, where $i \geq 2$, is overlapped
+with computation $Before(i+1)$ and $After(i-1)$.  Assuming that two
+distinct buffers, {\em InBuf} and {\em OutBuf}, are used for sending
+and receiving each message, respectively, each buffer needs to be
+replicated into a pair of equal size to ensure that distinct buffers
+are used across the overlapping iterations, as illustrated in
+Figure~\ref{fig:cco:dup}.  In particular, we replicate each buffer by
+allocating additional memory outside the loop and then alternately use
+a distinct buffer in every pair of consecutive loop iterations.
+
+
+
+\subsection{Inserting MPI\_Tests}
+
+When using nonblocking MPI operations, some CPU time needs to be
+allocated, by embedding $MPI\_Test$ calls in the local computation, to
+ensure continuous progress of the communications.  If the local
+computation is not inside a loop, we insert one or more $MPI\_Test$
+calls evenly distributed into the computation.  On the other hand, if
+the local computation is inside a loop, we insert $MPI\_Test$ into the
+beginning of the loop body and use a conditional variable to adjust
+its frequency.  The inserted code is illustrated in
+Figure~\ref{fig:cco:test}.  In both cases, the frequency of
+$MPI\_Test$ is empirically adjusted as the application is ported to
+each architecture.
+
 \begin{figure}
 {\scriptsize
   \centering
-  \begin{subfigure}[b]{.35\textwidth}
+  \begin{subfigure}[b]{.4\textwidth}
 \begin{verbatim}
 Before(1, InBuf)
 Icomm(1, InBuf)
 DO I = 2 .. N
   Before(I, InBuf)
   Wait(I - 1)
-  Icomm(I, InBuf
-         , OutBuf)
+  Icomm(I, InBuf, OutBuf)
   After(I - 1, OutBuf)
 END DO
 Wait(N, OutBuf)
 After(N, OutBuf)
 \end{verbatim}
-    \caption{Original communication that uses the same input and output $Buf$}
+    \caption{Original code using one pair of input/output buffers}
     \label{fig:cco:dup:a}
   \end{subfigure}
-  \hspace{.01in}
-  \begin{subfigure}[b]{.35\textwidth}
+  \vspace{.01in}
+  \begin{subfigure}[b]{.4\textwidth}
 \begin{verbatim}
 Before(1, InBuf)
 Icomm(1, InBuf)
@@ -216,10 +217,10 @@ END DO
 Wait(N, N % 2 == 1 ? OutBuf : OutBuf2)
 After(N, N % 2 == 1 ? OutBuf : OutBuf2)
 \end{verbatim}
-    \caption{Replicate $Buff$ with $Buff2$ of the same size}
+    \caption{After replicating the input/output buffers}
     \label{fig:cco:dup:b}
   \end{subfigure}
-\caption{Replicate communication buffers for nonblocking communication}
+\caption{Replicate buffers for nonblocking communication}
 \label{fig:cco:dup}
 }
 \end{figure}
@@ -234,7 +235,7 @@ DO I = 1 ... L
 END DO
 \end{verbatim}
 }
-\caption{Insert MPI\_Test into the hot computation loop at specific frequency $Freq$}
+\caption{Insert MPI\_Test into a loop at specific frequency $Freq$}
 \label{fig:cco:test}
 \end{figure}
 
