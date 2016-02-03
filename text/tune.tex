@@ -6,14 +6,14 @@ to be optimized includes at least one MPI communication $c$ inside the loop body
 Before(c) and After(c), that are safe to be overlapped with $c$ across loop iterations. If the Loop body contains 
 multiple MPI communications, say $c1$ followed by $c2$, both of which are selected for optimization, then $c1$ and $c2$
 must be independent across different loop iterations, as $c1 \in Before(c2)$ and $c2 \in After(c1)$ must hold, and to be
-both selected  for optimization, we must have $c1(I)$ (the MPI communication c1 at loop iteration I) and $After(c1,I+1) (the statements after c1 at loop iteration I-1)$ being independent, and $Before(c2,I-1)$ and $c2(I)$ being independent. 
+both selected  for optimization, we must have $c1(I)$ (the MPI communication c1 at loop iteration I) and $After(c1,I+1)$ (the statements after c1 at loop iteration I-1) being independent, and $Before(c2,I-1)$ and $c2(I)$ being independent. 
 Consequently, $c1$ and $c2$ can be optimized independently of each other without violating any dependence constraints. Therefore, in the following, we consider only a single MPI communication and its surrounding loop for optimization. 
 
 For each MPI communication $c$ and its surrounding loop to optimize, we currently manually
 transform the source code to systematically enable the overlapping of
 computation and communication. The main difficulty of fully automating the optimization is to identify the 
-actual statements corresponding to $c$, $Before(c)$, and $After(c)$ respectively when they are scattered across
-multiple procedures,  and some of these procedures cannot be inlined in the compiler analysis phase, e.g., due to 
+actual statements corresponding to $Comm(I)$, $Before(I)$, and $After(I)$ respectively, as shown in Figure~\ref{fig:cco:reorder}(a),
+when they are scattered across multiple procedures,  and some of these procedures cannot be inlined in the compiler analysis phase, e.g., due to 
 the need for code path specialization as demonstrated in Figure~\ref{fig:annot:ft}. 
 Otherwise, our future work will automate the following currently manually applied steps. 
 
@@ -37,26 +37,25 @@ Otherwise, our future work will automate the following currently manually applie
 
 \subsection{Converting MPI communications}
 
-Each blocking MPI operation, for example, {\em alltoall} collectives
-and point-to-point send-receives, is converted to an equivalent
-nonblocking communication combined with a blocking wait.  For example,
-in Figure~\ref{fig:ft_loop}, the outlined communication function
-$Comm(I)$, which invokes $MPI\_Alltoall$ internally, is replaced by
-$Icomm(I)$ and $Wait(I)$, which are the corresponding nonblocking
-communication ($MPI\_Ialltoall$) and wait operations converted from
-$Comm(I)$, respectively.
+Convert each blocking MPI operation, for example, {\em alltoall} collectives
+and point-to-point send-receives, in Comm(I) to an equivalent
+nonblocking communication combined with a blocking wait, as illustrated in
+Figure~\ref{fig:cco:reorder}(b).
+%For example,
+%in Figure~\ref{fig:ft_loop}, the outlined communication function
+%$Comm(I)$, which invokes $MPI\_Alltoall$ internally, is replaced by
+%$Icomm(I)$ and $Wait(I)$, which are the corresponding nonblocking
+%communication ($MPI\_Ialltoall$) and wait operations converted from
+%$Comm(I)$, respectively.
 
 
 \subsection{Reordering computation and communication}
 
-After the previous steps, the body of the loop to optimize now
-contains a sequence of specially named operations such as $Before(I)$,
-$After(I)$, $Icomm(I)$, and $Wait(I)$, where $I$ is the loop index
-variable looping from $1$ to $N$.
-
-We then \emph{interleave} the communication and computation operations
-of consecutive loop iterations, as illustrated in
-Figure~\ref{fig:cco:reorder}, in two steps:
+Tag each statement in the loop body as belong to $Before(I)$,
+$After(I)$, $Icomm(I)$, or $Wait(I)$, where $I$ is the index
+variable of the surrounding loop, as shown in Figure~\ref{fig:cco:reorder}(b).
+Then, \emph{interleave} the $Icomm(I)$ with $Before(I+1)$ and $After(I-1)$, as illustrated in
+Figure~\ref{fig:cco:reorder} (d), in two steps:
 
 \begin{enumerate}
 
@@ -152,6 +151,7 @@ After(N)
 \end{verbatim}
     \caption{Move first and last iterations}
     \label{fig:cco:reorder:c}
+    \vspace{.1in}
   \end{subfigure}
   \begin{subfigure}[b]{.25\textwidth}
 \begin{verbatim}
@@ -169,15 +169,22 @@ After(N)
     \caption{Interleave consequent iterations}
     \label{fig:cco:reorder:d}
   \end{subfigure}
-\caption{Steps to reorder outlined communication and computation functions}
+\caption{Steps to reorder communication and computation}
 \label{fig:cco:reorder}
 }
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.49\textwidth]{fig/ft_shift.png}
+\caption{Overlapped computation and communications}
+\label{fig:cco:shift}
 \end{figure}
 
 \begin{figure}
 {\scriptsize
   \centering
-  \begin{subfigure}[b]{.20\textwidth}
+  \begin{subfigure}[b]{.35\textwidth}
 \begin{verbatim}
 Before(1, InBuf)
 Icomm(1, InBuf)
@@ -195,7 +202,7 @@ After(N, OutBuf)
     \label{fig:cco:dup:a}
   \end{subfigure}
   \hspace{.01in}
-  \begin{subfigure}[b]{.28\textwidth}
+  \begin{subfigure}[b]{.35\textwidth}
 \begin{verbatim}
 Before(1, InBuf)
 Icomm(1, InBuf)
@@ -231,9 +238,3 @@ END DO
 \label{fig:cco:test}
 \end{figure}
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.49\textwidth]{fig/ft_shift.png}
-\caption{Overlapped computation and communication operations}
-\label{fig:cco:shift}
-\end{figure}
