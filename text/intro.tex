@@ -34,13 +34,12 @@ excessive wait time.
 \begin{figure}
   \centering
   \begin{subfigure}[b]{0.25\textwidth}
-    \includegraphics[width=0.8\textwidth,height=2.3in]{fig/ft_loop.png}
+    \includegraphics[width=1\textwidth]{fig/ft_loop.png}
     \caption{Before optimization}
     \label{fig:ft_loop}
   \end{subfigure}%
-  \hspace{-.6in}
-  \begin{subfigure}[b]{0.3\textwidth}
-    \includegraphics[width=1\textwidth,height=2.3in]{fig/ft_cco.png}
+  \begin{subfigure}[b]{0.232\textwidth}
+    \includegraphics[width=1\textwidth]{fig/ft_cco.png}
     \caption{After optimization}
     \label{fig:ft_cco}
   \end{subfigure}
@@ -97,20 +96,20 @@ including the frequencies of various runtime code paths and their
 performance characteristics such as computation intensities, working
 set sizes, and communication characteristics of MPI operations; (2)
 the \emph{CCO analysis} component, which identifies {\emph hot}
-computation and communication regions  
+computation and communication regions
 and performs profitability and safety
 analysis to determine whether to optimize these regions; and (3) the \emph{CCO
   tuning} component, which applies the appropriate program
-transformations 
+transformations
 %by replacing the blocking MPI operations with
-%nonblocking ones, by reordering the computations and communications involved and by inserting 
+%nonblocking ones, by reordering the computations and communications involved and by inserting
 and inserts MPI\_Test operations with a frequency
-determined by empirical tuning of the optimized code.  
+determined by empirical tuning of the optimized code.
 For each optimization to be profitable, any
 communication slowdown from the use of the nonblocking operations must
 be fully overlapped with the local computation, and the insertion of
 MPI\_Test operations should cause only marginal slowdown of the computation.
-% so that its effect is insignificant in comparison with the reduction of the original communication time.  
+% so that its effect is insignificant in comparison with the reduction of the original communication time.
 Our framework currently
 uses empirical tuning to select appropriate
 optimization configurations and to skip nonprofitable optimizations.
@@ -121,28 +120,28 @@ models~\cite{iancu:ppopp07}
 and using compiler analysis~\cite{danalis:ics09} to assist the optimization.
 Similar to other existing work, we also manually applied the optimizing transformations for each application.
 Our work is a step closer to complete automation in that it fully integrates both analytical performance modeling and compiler dependence analysis to automatically
-determine (with optional developer guidance) the profitability and safety of the overlapping optimization. %, although with some small amount of manual assistance from developers. 
+determine (with optional developer guidance) the profitability and safety of the overlapping optimization. %, although with some small amount of manual assistance from developers.
 The special inter-procedural pattern of loop-based
 communication-computation overlapping addressed by our work is common in scientific applications but has not been addressed
-by existing literature. While our example in Figure~\ref{fig:ft} contains only a singe communication inside the loop body, the optimization works similarly 
-when the body contains a chain of dependent communications, by overlapping them with independent computations of the previous iterations.  
+by existing literature. While our example in Figure~\ref{fig:ft} contains only a singe communication inside the loop body, the optimization works similarly
+when the body contains a chain of dependent communications, by overlapping them with independent computations of the previous iterations.
 
-%Compared to using profiling to directly measure and identify code blocks to optimize, 
+%Compared to using profiling to directly measure and identify code blocks to optimize,
 % our analytical modeling framework is able to collectively consider all the dynamic paths through each code block,
 %to more accurately identify important inter-procedural communication patterns.
 Our main technical contributions are the following:
 
 \begin{itemize}
 
-\item Our framework tackles a common case of enhancing the overlapping of computation-communication that has not been previously addressed for MPI applications and 
+\item Our framework tackles a common case of enhancing the overlapping of computation-communication that has not been previously addressed for MPI applications and
 is able to fully automate the profitability and safety analysis of the optimization, using advanced analytical performance
 modeling (which collectively considers all the dynamic paths through each code block) and compiler dependence analysis
 (which supports automated semantic inlining of developer-supplied knowledge). Developer guidance is required only to improve the
 accuracy of the analysis for large scientific applications, as not all source code
-of these applications is available, and many low-level implementation details are almost impossible to decipher~\cite{POET:ICPP11}. 
- We currently manually apply the necessary program transformations, 
+of these applications is available, and many low-level implementation details are almost impossible to decipher~\cite{POET:ICPP11}.
+ We currently manually apply the necessary program transformations,
   because code need to be carefully moved across procedural boundaries. We believe this process can be automated with some developer
-guidance, which is our future work. 
+guidance, which is our future work.
 
 \item We applied our approach to optimize 7 NAS Parallel Benchmarks
   (NPB) applications on both a high-speed and a slow network-connected
