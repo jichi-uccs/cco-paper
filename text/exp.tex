@@ -1,17 +1,17 @@
-\section{Experiment Results}
+\section{Experimental Results}
 \label{sec-exp}
 
-To evaluate the accuracy of our hot-spot communication predictions and
-the performance implications of our manually applied optimizations to
+To evaluate the accuracy of our MPI communication modeling and
+the performance implications of our optimizations to
 better overlap computation with communication, we applied our approach
 to model and optimize 7 MPI applications from the NAS NPB~\cite{npb}
-on two clusters shown in Figure~\ref{tab:hw}.  The first Intel
-platform is a large high-performance computing cluster with very fast
+on two clusters shown in Table~\ref{tab:hw}.  The first Intel
+platform is a high-performance computing cluster with very fast
 internode communication through InfiniBand.  The second platform is in
 a small data center where the internode communication is through
 relatively slow Ethernet.  Both clusters use MPICH 3.1.1~\cite{mpich2}
 as the underlying MPI library.  Because our current analytical
-performance model cannot estimate intranode MPI communication time, we
+performance model cannot estimate intra-node MPI communication time, we
 have allocated a single MPI process per node on both clusters.
 
 \begin{table}
@@ -35,18 +35,19 @@ Max memory &  64 GB & 48 GB \\
 \label{tab:hw}
 \end{table}
 
-For each MPI application, we first used our extended SKOPE performance
+For each MPI application, we first used our extended Skope
 modeling framework to find the most time-consuming MPI communication
-in the application.  Then, we manually applied the
-computation-communication optimization to the enclosing loop
-surrounding the identified communications.  We measured the
+in the application.  Then, after using the ROSE compiler to determine the safety of 
+overlapping each communication with its surrounding loop, we manually applied the 
+optimization to the enclosing loop.  We measured the
 performance improvements from the optimizations using input data
 provided by the NPB benchmarks and using a range of 2 to 9 nodes for
 each application.  Besides using the built-in timers within the NPB
 applications to collect their overall performance, we manually
 instrumented the source code of the applications to report the
-performance of individual communications.
-
+performance of individual communications. We used the class B input of the NAS
+benchmarks in most of our studies, as the bigger input sizes (class C and class D) 
+took too long to run using the relatively small number of nodes available on our platforms. 
 
 \subsection{Accuracy of Hot Communication Prediction}
 
@@ -141,18 +142,18 @@ MG      & 1 & 1 & 0 & 1 & 1 & 0 &   &   \\  % MPI_Send
 
 Figures~\ref{fig:npb:x86} and \ref{fig:npb:x64} show the speedups we
 attained by enabling better computation-communication overlapping for
-the NPB applications.  In particular, for each benchmark, the
-performance of the original application and the optimized code is
+the NPB applications.  For each benchmark, the
+performance of the original and the optimized code is
 measured by using input class B on 2, 4, 8, and 9 nodes, with one MPI
 process bound to each node, with the exception of NAS BT and SP, which
-require the number of processes to be a multiple of 3 and so are
-configured to run on 3 and 9 nodes only.  The overall elapsed time of
-each application is measured by using NPB's built-in timer, which
-reports the elapsed time of multiple iterations with the exclusion of
-the initialization time.
+require the number of processes to be $N^2$, where N is the number of nodes, and so are
+evaluated using 4 and 9 processes only.  The overall elapsed time of
+each application is measured by using NPB's built-in timer. 
+% which reports the elapsed time of multiple iterations with the exclusion of
+%the initialization time.
 
 Our optimization attained 3--88\% speedup for all the NPB applications, 
-with more significant speedups for FT and IS, which are the only two benchmarks that
+with more significant speedups for FT and IS, which 
 use {\em alltoall} collectives as the main communication operation, 
 and less significant speedups for the other benchmarks, which mostly use point-to-point send/receives.  
 The maximum 88\% performance improvement is observed with the NAS FT
@@ -169,5 +170,5 @@ the best speedups are observed at different runtime configurations.
 For example, the best speedup for NAS FT was attained when using 8 processors on the infiniband cluster
 but when using two processors on the Ethernet cluster, as the communication latency on the Ethernet is much longer than 
 that of the Infiniband network, which in turn affects the amount of local computation time required to overlap with the communication.
-Overall,  the possible speedup attained is bound by the latency of the communication being optimized and the amount of available
+Overall,  the possible speedup attained is bounded by the latency of the communication being optimized and the amount of available
 local computation to overlap with the communication time. A larger amount of local independent computation is generally required to fully compensate the latencies of a slower network (e.g., Ethernet) than that of a faster network (e.g., infiniband).

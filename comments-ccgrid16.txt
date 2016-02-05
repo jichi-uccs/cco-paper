@@ -9,6 +9,8 @@ REVISION:
   V Clarify more what is automated and what is not; also how much work and how difficult it is to fully automate the process via compilers. 
    adding some more complete discussion concerning the effort needed to turn the proposed methodology into a real tool, and 
 
+V Fig 1. text font is not readable.
+
   . can we justify that NAS benchmarks are not "simple benchmarks"; i.e., they represent realistic large scale scientific applications?
 *** this work still seems very much in progress, and it is not clear how much additional work would be required to apply it to large-scale codes (either on the side of the framework or the application). 
 **** The technique is shown to be applicable to simple benchmarks, but this provides little or no confidence that it would be useful in more realistic and motivating applications.  
@@ -20,14 +22,16 @@ REVISION:
 
  **** program transformation
 
-IV(C): how the communication and computation steps are interleaved, essentially by example.  What is the scheduling algorithm being used here? How does this interleaving algorithm generalize to examples where the loop body contains several (dependent) communication steps? How is this algorithm related to software pipelining?  Fig 9(d) shows a two-stage software pipeline.  Are there examples that result in more pipeline stages (ie spread across more than two iterations of the enclosing loop)?
+  V : how the communication and computation steps are interleaved, essentially by example.  What is the scheduling algorithm being used here? How does this interleaving algorithm generalize to examples where the loop body contains several (dependent) communication steps? How is this algorithm related to software pipelining?  Fig 9(d) shows a two-stage software pipeline.  Are there examples that result in more pipeline stages (ie spread across more than two iterations of the enclosing loop)?
 
  *** Experimental results: * the work is only done on very small scale scenarios: 2 to 9 nodes.
-* profiling was done using class B data size of the benchmark. There is a lack of sensitivity analysis of input data set size
-* Fig 1. text font is not readable.
-* In section V. 7 MPI applications from the NAS NPB [3] on two clusters shown in TABLE I.
-The paper says that BT and SP “require the number of processes to be a multiple of 3” . But they are configured to use 4 and 9 nodes shown in Fig. 14 and 15.
-right after Fig. 11, TABLE 1 is referred to as FIGURE 1
+  * profiling was done using class B data size of the benchmark. There is a lack of sensitivity analysis of input data set size
+
+  V * In section V. 7 MPI applications from the NAS NPB [3] on two clusters shown in TABLE I.
+  V The paper says that BT and SP “require the number of processes to be a multiple of 3” . But they are configured to use 4 and 9 nodes shown in Fig. 14 and 15.
+
+  V right after Fig. 11, TABLE 1 is referred to as FIGURE 1
+
 - authors should probably mention somewhere the situation depicted in Fig. 12 is often referred to as double/triple buffering
 
 
