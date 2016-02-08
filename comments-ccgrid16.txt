@@ -37,7 +37,7 @@ V Fig 1. text font is not readable.
 
  **** Related work:  
   compare: "Our own experience with full-scale applications (with many halo exchanges per timestep for example, spread across different configurable modules) is that static analysis is just not robust enough and some kind of runtime scheme is the only practical solution.  Thus the related work that I am interested in is that on runtime techniques (Legion/Realm, Charm++ and others)."
-  . On the novelty of the work: path to automation (compiler work): discover reordering allowed by dependence and profitable from performance modeling.
+  V On the novelty of the work: path to automation (compiler work): discover reordering allowed by dependence and profitable from performance modeling.
   .  Need to justify the generality of the pattern: It’s clearly easy to see how the idea would work on different communications in different loops, but the paper does not tackle the rather common case that a single loop has a chain of dependent communications (eg in finite element assembly, where several different terms are assembled).
 
 

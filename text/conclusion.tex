@@ -2,12 +2,12 @@
 \label{sec-concl}
 
 This paper presents a systematic approach to automate the overlapping
-of communications with local independent computations in large MPI
+of communications with independent computations in large MPI
 applications, thereby enhancing their performance portability.  Our
 optimization workflow starts with analytical performance modeling of
 the overall application execution flow to identify long-lasting MPI
-communications to overlap. Next, we conduct a semi-automatic safety
-and profitability analysis to find optimization opportunities. We
+communications to overlap. Next, we conduct automated safety
+and profitability analysis (with developer assistance) to find optimization opportunities. We
 complete the optimization by manually applying the necessary
 transformations in a systematic fashion that can be potentially
 automated.  We applied our approach to optimize 7 NAS NPB applications
