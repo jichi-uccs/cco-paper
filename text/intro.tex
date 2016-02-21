@@ -1,14 +1,14 @@
 \section{Introduction}
 \label{sec:intro}
 
-As computing platforms migrate towards clusters of increasingly larger scale of microprocessors,
+As computing platforms migrate to clusters of increasingly larger scale of microprocessors,
  applications need to manage the distributed memories of the processors via explicit
 message-passing runtimes, for example, MPI, to attain high performance.
 The relative latency and bandwidth of the communication network in relation to the compute capacity of processors
 are often hard to predict a priori and may change dramatically from one system to the next.
-Even on supercomputers comprised of homogeneous nodes,
+Even on supercomputers comprising homogeneous nodes,
 system noise is increasing on each node because of aspects such as power management, deeper memory hierarchies, and sharing of hardware such as caches and network. The ``equal work means equal time" paradigm is no longer relevant on most systems, and load imbalance increasingly becomes the common scenario even on applications that are symmetrically structured.
-Consequently, bulk-synchronous communication, where all processes synchronize frequently, is no longer a valid option for high performance MPI applications.
+Consequently, bulk-synchronous communication, where all processes synchronize frequently, is no longer a valid option for high-performance MPI applications.
 Application performance is often critically determined by its ability to flexibly overlap communications with local computations,
 thereby minimizing wait time.
 
@@ -65,23 +65,24 @@ result into an output file.  By using two distinct buffers to store
 the data used in consecutive MPI communications, the output
 dependence between After(i-1) and Before(i)/MPI\_Ialltoall(i) can be
 eliminated, guaranteeing the correctness of optimization.
+%GAIL - it is a bit confusing when and why you use -- and don't use -- italics in the preceding paragraph and later when referring to MPI operations. 
 
-Finally, \emph{MPI\_Test} operations are inserted into the local computation to
+\emph{MPI\_Test} operations then are inserted into the local computation to
 ensure the progress of the nonblocking
 communication.\footnote{Although MPI communications do not need full
-  usage of CPU, they need some CPU time, e.g., to manage communication
+  usage of the CPUs, they need some CPU time, e.g., to manage communication
   progress, which is supplied only when operations such as MPI\_Test
   and MPI\_Wait are invoked.}  By overlapping the MPI communication
 with the local computation, the transformed code allows the
 application to perform well even on systems with slow network
 connections, although nonblocking communications generally take longer
-time than their blocking counterparts, and more memory may be needed to
+than their blocking counterparts do, and more memory may be needed to
 hold the data during communication.
 
 \begin{figure}[h]
 \centering
 \includegraphics[width=0.35\textwidth]{fig/framework.png} % half page
-\caption{Optimization Workflow}
+\caption{Optimization workflow.}
 \label{fig:overview}
 \end{figure}
 
@@ -90,12 +91,12 @@ enabling communication-computation overlapping (CCO) in MPI
 applications to enhance their performance portability.  The
 workflow contains three key components: (1) the \emph{performance
   modeling} component, which analyzes the runtime statistics of an MPI
-application to extract a {\emph Bayesian execution
-  tree\cite{jichi:ipdps14}} representation of its execution flow,
+application to extract a \emph{Bayesian execution
+  tree}~\cite{jichi:ipdps14} representation of its execution flow,
 including the frequencies of various runtime code paths and their
 performance characteristics such as computation intensities, working
 set sizes, and communication characteristics of MPI operations; (2)
-the \emph{CCO analysis} component, which identifies {\emph hot}
+the \emph{CCO analysis} component, which identifies \emph{hot}
 computation and communication regions
 and performs profitability and safety
 analysis to determine whether to optimize these regions; and (3) the \emph{CCO
@@ -114,16 +115,16 @@ Our framework currently
 uses empirical tuning to select appropriate
 optimization configurations and to skip nonprofitable optimizations.
 
-The idea of overlapping computation and communication in MPI applications have been
-well studied in the past~\cite{danalis:sc05,fishgold:ipdps06}, including both using analytical performance
+The idea of overlapping computation and communication in MPI applications has been
+well studied~\cite{danalis:sc05,fishgold:ipdps06}, including both using analytical performance
 models~\cite{iancu:ppopp07}
 and using compiler analysis~\cite{danalis:ics09} to assist the optimization.
 Similar to other existing work, we also manually applied the optimizing transformations for each application.
-Our work is a step closer to complete automation in that it fully integrates both analytical performance modeling and compiler dependence analysis to automatically
+Our work is a step closer to complete automation in that it fully integrates analytical performance modeling and compiler dependence analysis to automatically
 determine (with optional developer guidance) the profitability and safety of the overlapping optimization. %, although with some small amount of manual assistance from developers.
-The special inter-procedural pattern of loop-based
-communication-computation overlapping addressed by our work is common in scientific applications but has not been addressed
-by existing literature. While our example in Figure~\ref{fig:ft} contains only a singe communication inside the loop body, the optimization works similarly
+The special interprocedural pattern of loop-based
+communication-computation overlapping addressed by our work is common in scientific applications but has not been addressed in the literature.
+While our example in Figure~\ref{fig:ft} contains only a singe communication inside the loop body, the optimization works similarly
 when the body contains a chain of dependent communications, by overlapping them with independent computations of the previous iterations.
 
 %Compared to using profiling to directly measure and identify code blocks to optimize,
@@ -134,11 +135,11 @@ Our main technical contributions are the following:
 \begin{itemize}
 
 \item Our framework tackles a common case of enhancing the overlapping of computation-communication that has not been previously addressed for MPI applications and
-is able to fully automate the profitability and safety analysis of the optimization, using advanced analytical performance
+is able to fully automate the profitability and safety analysis of the optimization, by using advanced analytical performance
 modeling (which collectively considers all the dynamic paths through each code block) and compiler dependence analysis
 (which supports automated semantic inlining of developer-supplied knowledge). Developer guidance is required only to improve the
-accuracy of the analysis for large scientific applications, as not all source code
-of these applications is available, and many low-level implementation details are almost impossible to decipher~\cite{POET:ICPP11}.
+accuracy of the analysis for large scientific applications, because not all source code
+of these applications is available and many low-level implementation details are almost impossible to decipher~\cite{POET:ICPP11}.
  We currently manually apply the necessary program transformations,
   because code need to be carefully moved across procedural boundaries. We believe this process can be automated with some developer
 guidance, which is our future work.
