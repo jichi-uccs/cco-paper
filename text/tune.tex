@@ -1,13 +1,15 @@
 \section{Program Transformation}
 \label{sec-opt}
 
-After being selected by our automatic compiler dependence analysis, each loop 
+After being selected by our automatic compiler analysis component, each loop 
 to be optimized includes at least one MPI communication $c$ inside the loop body, and two sets of statements, 
 Before(c) and After(c), that are safe to be overlapped with $c$ across loop iterations. If the Loop body contains 
 multiple MPI communications, say $c1$ followed by $c2$, both of which are selected for optimization, then $c1$ and $c2$
 must be independent across different loop iterations, as $c1 \in Before(c2)$ and $c2 \in After(c1)$ must hold, and to be
 both selected  for optimization, we must have $c1(I)$ (the MPI communication c1 at loop iteration I) and $After(c1,I-1)$ (the statements after c1 at loop iteration I-1) being independent, and  similarly $c2(I)$ and $Before(c2,I+1)$  being independent. 
-Consequently, $c1$ and $c2$ can be optimized independently of each other without violating any dependence constraints. Therefore, in the following, we consider only a single MPI communication and its surrounding loop for optimization. 
+Consequently, $c1$ and $c2$ must be independent of each other across loop iterations. 
+So they can be optimized one after another without violating any dependence constraints, with 
+each optimization considering only a single MPI communication and its surrounding loop, discussed in the following.
 
 For each MPI communication and its surrounding loop to optimize, we currently manually
 transform the source code to enable the overlapping of
@@ -39,8 +41,8 @@ Otherwise, our future work will automate the following currently manually applie
 
 Convert each blocking MPI operation, for example, {\em alltoall} collectives
 and point-to-point send-receives, in Comm(I) to an equivalent
-nonblocking communication combined with a blocking wait, as illustrated in
-Figure~\ref{fig:cco:reorder}(b).
+nonblocking communication combined with a blocking wait, as illustrated in converting
+Figure~\ref{fig:cco:reorder:a} to~\ref{fig:cco:reorder:b}.
 %For example,
 %in Figure~\ref{fig:ft_loop}, the outlined communication function
 %$Comm(I)$, which invokes $MPI\_Alltoall$ internally, is replaced by
@@ -55,7 +57,7 @@ Tag each statement in the loop body as belonging to $Before(I)$,
 $After(I)$, $Icomm(I)$, or $Wait(I)$, where $I$ is the index
 variable of the surrounding loop, as shown in Figure~\ref{fig:cco:reorder}(b).
 Then, \emph{interleave} $Icomm(I)$ with $Before(I+1)$ and $After(I-1)$, as illustrated in
-Figure~\ref{fig:cco:reorder} (d), in two steps:
+Figure~\ref{fig:cco:reorder:d}, in two steps:
 
 \begin{enumerate}
 

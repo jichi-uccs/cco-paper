@@ -120,10 +120,10 @@ well studied~\cite{danalis:sc05,fishgold:ipdps06}, including both using analytic
 models~\cite{iancu:ppopp07}
 and using compiler analysis~\cite{danalis:ics09} to assist the optimization.
 Similar to other existing work, we also manually applied the optimizing transformations for each application.
-Our work is a step closer to complete automation in that it fully integrates analytical performance modeling and compiler dependence analysis to automatically
-determine (with optional developer guidance) the profitability and safety of the overlapping optimization. %, although with some small amount of manual assistance from developers.
-The special interprocedural pattern of loop-based
-communication-computation overlapping addressed by our work is common in scientific applications but has not been addressed in the literature.
+However, our work is a step closer to complete automation than existing work in that our work fully integrates analytical performance modeling and compiler dependence analysis to automatically
+determine (with optional developer guidance) the profitability and safety of the overlapping optimization. 
+Furthermore, while the special interprocedural pattern of loop-based
+communication-computation overlapping addressed by our work is common in scientific applications,  it has not been addressed previously in the literature.
 While our example in Figure~\ref{fig:ft} contains only a singe communication inside the loop body, the optimization works similarly
 when the body contains a chain of dependent communications, by overlapping them with independent computations of the previous iterations.
 
@@ -139,7 +139,7 @@ is able to fully automate the profitability and safety analysis of the optimizat
 modeling (which collectively considers all the dynamic paths through each code block) and compiler dependence analysis
 (which supports automated semantic inlining of developer-supplied knowledge). Developer guidance is required only to improve the
 accuracy of the analysis for large scientific applications, because not all source code
-of these applications is available and many low-level implementation details are almost impossible to decipher~\cite{POET:ICPP11}.
+of these applications is available and many low-level implementation details are impossible to fully automatically decipher~\cite{POET:ICPP11}.
  We currently manually apply the necessary program transformations,
   because code need to be carefully moved across procedural boundaries. We believe this process can be automated with some developer
 guidance, which is our future work.
@@ -154,7 +154,7 @@ guidance, which is our future work.
 The remainder of the paper is organized as follows.
 Section~\ref{sec-model} presents our analytical performance modeling
 component for automatically identifying communication and computation
-hot spots in MPI applications Section~\ref{sec-analysis} discusses how
+hot spots in MPI applications. Section~\ref{sec-analysis} discusses how
 to automatically determine the safety of the optimization through
 compiler analysis.  Section~\ref{sec-opt} summarizes strategies we
 used to perform the actual optimizations and the tuning of their

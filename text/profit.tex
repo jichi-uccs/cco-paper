@@ -35,9 +35,9 @@ it is safe to overlap comm(I) across loop iterations. If yes, the loop is select
 \end{enumerate}
 
 A key challenge in optimizing large applications is that MPI
-communications are often scattered across procedural boundaries and
+communications are often scattered across procedural boundaries, and
 the computation that can be overlapped with them is often some
-distance away and similarly across abstraction boundaries, By using
+distance away and similarly across abstraction boundaries. By using
 the Skope framework and through the BET representation of the whole
 user application, we are able to inter-procedurally select MPI
 communications as well as their surrounding loops as potential optimization targets.
@@ -83,8 +83,8 @@ Figure~\ref{fig:annot:a2a}
 shows an example override definition for \texttt{MPI\_Alltoall}, where we use the $read$ and $write$ pseudo statements to indicate
 read and write memory accesses.  Here based on the domain knowledge of the
 application that the data being sent/received have atomic types instead of
-user-defined types, the memory side effect of the operation can be expressed as data
-accesses to consequent memories in source and target data. We similarly composed
+user-defined types, the memory side effect of the operation can be expressed as consecutive read and write memory references
+ to the communication buffers ($sendbuf$ and $recvbuf$). We similarly composed
   memory side effect definitions for the other MPI operations. 
 
 Traditional loop dependence analysis in compilers is based on the disambiguation of subscripted array references, 
@@ -93,7 +93,7 @@ array references may refer to the same memory location at two arbitrary loop ite
 becomes ineffective when memory references are not expressed using array notations or when the subscript of an array reference cannot be expressed as a linear combination of the surrounding loop index variables. Additionally, since the compiler does not have any information about the runtime control flow of a program, it assumes all control paths can happen at runtime, and no unknown system calls (e.g., timer\_start and timer\_stop in Figure~\ref{fig:code:ft}) can be reordered. Our annotation mechanisms are provided to developers to optionally overcome such conservativeness when desired. In our experience of optimizing the NAS application benchmarks, we have used these annotations to serve the following purposes. 
 
 \begin{itemize}
-\item Define the memory side effects of MPI operations and system calls that can be ignored (e.g., Figure~\ref{fig:annot:a2a} and Figure~\ref{fig:code:ft}).
+\item Define the memory side effects of MPI operations and system calls that can be ignored (e.g., Figure~\ref{fig:annot:a2a} and Figure~\ref{fig:code:ft}), the source code of which is not available to the compiler.
 %\item When the same array data are declared with different dimensions
 %  in the caller and callee, the manual override definition can
 %  normalize data accesses by converting linearized array accesses to
@@ -130,7 +130,7 @@ subroutine MPI_Alltoall(sendbuf, sendcount, sendtype,
 end subroutine
 \end{verbatim}
 }
-\caption{Memory side effect of $MPI\_Alltoall()$ with simple datatype to override its original definition}
+\caption{Example: describe the memory side effect of $MPI\_Alltoall()$ for simple data types}
 \label{fig:annot:a2a}
 \end{figure}
 
@@ -157,7 +157,7 @@ end subroutine
 18 end do
 \end{verbatim}
 }
-\caption{Annotated code of the loop in NAS FT to optimize}
+\caption{Example: annotating a loop to optimize for NAS FT}
 \label{fig:code:ft}
 \end{figure}
 
@@ -173,7 +173,7 @@ subroutine fft(dir, x1, x2)
 end subroutine
 \end{verbatim}
 }
-\caption{1D layout code path to override the default inlining}
+\caption{Example: using 1D layout code path to override the default inlining for NAS FT}
 \label{fig:annot:ft}
 \end{figure}
 
