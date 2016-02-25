@@ -1,9 +1,9 @@
 \section{Experimental Results}
 \label{sec-exp}
 
-To evaluate the accuracy of our MPI communication modeling and
-the performance implications of our optimizations to
-better overlap computation with communication, we applied our approach
+To evaluate the accuracy of our analytical modeling of MPI applications and
+the performance implications of our optimizations in automatically
+overlapping computation with communication, we applied our approach
 to model and optimize 7 MPI applications from the NAS NPB~\cite{npb}
 on two clusters shown in Table~\ref{tab:hw}.  The first Intel
 platform is a high-performance computing cluster with very fast
@@ -51,17 +51,18 @@ took too long to run using the relatively small number of nodes available on our
 
 \subsection{Accuracy of Hot Communication Prediction}
 
-To evaluate the accuracy of our modeling of MPI communications, we
-compared the set of communication hot spots selected using our model
+To evaluate the accuracy of our modeling of MPI communications, 
+Table~\ref{tab:npb:hot} shows the differences in hot communication selections for the NPB
+applications, by comparing the set of communication hot spots selected using our model
 with those found by profiling the NPB applications, using class B
-input on 4 nodes.  The different hot-spot selection for the NPB
-applications are shown in Table~\ref{tab:npb:hot}.  When selecting the
+input on 4 nodes. 
+  When selecting the
 top time-consuming MPI communications, we required that their overall
 time be at least 80\% of the application's overall communication time.
 In this case, our predictive modeling selected the same set of hot
 communications as found using application profiling.  When asked to
 select a given number of the most time-consuming communications,
-however, the output by our predictive modeling differs by at most 2
+the output by our predictive modeling differs by at most 2
 selections compared with using profiling, for the NAS LU benchmark.
 Here the most time-consuming communications are pairs of
 sends/receives at four symmetric directions, which were estimated to
@@ -69,6 +70,7 @@ take the same time by our predictive modeling.  However, their actual
 runtime collected through profiling differ by 37\%, because the
 execution of the processes is unbalanced, resulting in extra wait time
 to synchronize the corresponding MPI\_Send/MPI\_Recv operations.
+
 Figure~\ref{fig:model:ft:B} compares our projected communication time
 with the actual measured time for NAS FT, using two and four
 processors.  Here in spite of the small error rates in projecting the
@@ -166,7 +168,7 @@ communication.
 
 
 While our optimization was able to attain a consistent level of performance improvement on both platforms, 
-the best speedups are observed at different runtime configurations. 
+the best speedups are observed when using different runtime configurations on these platforms. 
 For example, the best speedup for NAS FT was attained when using 8 processors on the infiniband cluster
 but when using two processors on the Ethernet cluster, as the communication latency on the Ethernet is much longer than 
 that of the Infiniband network, which in turn affects the amount of local computation time required to overlap with the communication.

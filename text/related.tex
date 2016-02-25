@@ -31,12 +31,13 @@ of MPI applications, by automatically determining the safety of reordering optim
 dependence analysis and the profitability of optimizations from 
 analytical performance modeling. Our work particularly focuses on automatically enabling 
 a special form of loop-based
-communication-computation overlapping in scientific applications. 
+communication-computation overlapping in scientific applications, a form that has not been addressed
+by existing work. 
 
 %To reason about the profitability of optimizing MPI applications,
 Sancho et al.~\cite{sancho:sc06} combined empirical tuning with
 networking models to quantify the potential benefit of overlapping
-communication and computation in large-scale scientific applications.
+communication and computation.
 Potluri et al.~\cite{potluri:ics10} empirically quantified the
 overlapping of MPI-2 operations in a seismic modeling application.  Hu
 et al.~\cite{hu:npc08,song:ppopp14} identified the consumer-producer

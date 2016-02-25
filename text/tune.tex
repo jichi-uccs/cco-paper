@@ -89,6 +89,7 @@ DO I = 1 .. N
   After(I)
 END DO
 \end{verbatim}
+\vspace{-.1in}
     \caption{Input loop}
     \label{fig:cco:reorder:a}
     \vspace{.1in}
@@ -102,6 +103,7 @@ DO I = 1 .. N
   After(I)
 END DO
 \end{verbatim}
+\vspace{-.1in}
     \caption{Decouple blocking comm}
     \label{fig:cco:reorder:b}
     \vspace{.1in}
@@ -119,6 +121,7 @@ END DO
 Wait(N)
 After(N)
 \end{verbatim}
+\vspace{-.1in}
     \caption{Move first and last iterations}
     \label{fig:cco:reorder:c}
     \vspace{.1in}
@@ -136,6 +139,7 @@ END DO
 Wait(N)
 After(N)
 \end{verbatim}
+\vspace{-.1in}
     \caption{Interleave consecutive iterations}
     \label{fig:cco:reorder:d}
   \end{subfigure}
