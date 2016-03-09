@@ -58,8 +58,8 @@ time-evolution array and then saves a transpose of the matrix into a
 local buffer to be communicated to other processors, and
 MPI\_Ialltoall(i), which exchanges the local transposes among different
 processes, are essentially moved so that they are evaluated before
-$MPI\_Wait(i-1)$, which waits for the completion of MPI communication
-of the previous iteration, and $After(i-1)$, which processes the just
+MPI\_Wait(i-1), which waits for the completion of MPI communication
+of the previous iteration, and After(i-1), which processes the just
 received remote data (of the $i-1$th iteration) and then prints the
 result into an output file.  By using two distinct buffers to store
 the data used in consecutive MPI communications, the output
