@@ -1,8 +1,10 @@
 \section{Related Work}
 \label{sec-related}
 
-Existing work on enhancing the efficiency of MPI applications has 
-focused mostly on communication mechanisms underlying the many 
+Our work focuses on application-level performance
+enhancement by enabling automated overlapping of MPI communications
+with independent local computations. It therefore serves a different purpose than
+existing work on enhancing the communication efficiency of the many 
 MPI operations, for example, alternative protocols for point-to-point
 communications~\cite{brightwell:eurompi03,denis:eurompi11}, collective
 operations~\cite{traff:eurompi14:ocd,traff:eurompi14:mcd,graham:eurompi08,mittal:ppopp12},
@@ -11,11 +13,11 @@ remote direct memory access
 balancing~\cite{nian:niss09,kale:eurompi14}, and the
 elimination of redundant communications through software caching and
 the exploitation of data
-locality~\cite{buntinas:icpp09,isujita:eurompi14,ozog:ics13}.  In
-contrast, our work focuses on application-level performance
-enhancement by enabling automated overlapping of MPI communications
-with independent local computations.
+locality~\cite{buntinas:icpp09,isujita:eurompi14,ozog:ics13}.  
 
+Our work aims to automatically determine the safety of MPI application optimizations through compiler 
+dependence analysis and the profitability of the optimizations from 
+analytical performance modeling. 
 Iancu et al.~\cite{iancu:ppopp07} tried to automatically determine
 message sizes and schedules for MPI communications through an
 analytical model of system scale and load to avoid network congestion.
@@ -26,10 +28,8 @@ an MPI-aware compiler can automatically assess the safety of several
 optimizations, which were then manually applied in their paper.
 Various patterns of computation-communication overlapping and
 automated optimization schemes have also been
-discussed~\cite{danalis:sc05,fishgold:ipdps06}.  Our work also aims to automate the optimization
-of MPI applications, by automatically determining the safety of reordering optimizations through compiler 
-dependence analysis and the profitability of optimizations from 
-analytical performance modeling. Our work particularly focuses on automatically enabling 
+discussed~\cite{danalis:sc05,fishgold:ipdps06}.  
+Our work particularly focuses on automatically enabling 
 a special form of loop-based
 communication-computation overlapping in scientific applications, a form that has not been addressed
 by existing work. 

@@ -93,7 +93,7 @@ array references may refer to the same memory location at two arbitrary loop ite
 becomes ineffective when memory references are not expressed using array notations or when the subscript of an array reference cannot be expressed as a linear combination of the surrounding loop index variables. Additionally, since the compiler does not have any information about the runtime control flow of a program, it assumes all control paths can happen at runtime, and no unknown system calls (e.g., timer\_start and timer\_stop in Figure~\ref{fig:code:ft}) can be reordered. Our annotation mechanisms are provided to developers to optionally overcome such conservativeness when desired. In our experience of optimizing the NAS application benchmarks, we have used these annotations to serve the following purposes. 
 
 \begin{itemize}
-\item Define the memory side effects of MPI operations and system calls that can be ignored (e.g., Figure~\ref{fig:annot:a2a} and Figure~\ref{fig:code:ft}), the source code of which is not available to the compiler.
+\item Define the memory side effects of MPI operations and system calls that can be ignored (e.g., Figure~\ref{fig:annot:a2a} and Figure~\ref{fig:code:ft}), the source code of which is not available to the compiler. These annotations can be reused across MPI applications without additional work by the developers.
 %\item When the same array data are declared with different dimensions
 %  in the caller and callee, the manual override definition can
 %  normalize data accesses by converting linearized array accesses to
@@ -108,7 +108,7 @@ becomes ineffective when memory references are not expressed using array notatio
   Figure~\ref{fig:annot:ft} shows the annotation we used to override the $fft()$
 function in NAS FT.  Here the original function have several branches for
 different data layout, while the override definition has only 1D
-layout that is the target code path to optimize.
+layout that is the target code path to optimize. These annotations can be automated with developer approval by having the compiler directly interpret the modeling output of Skope.
 
 
 
@@ -132,6 +132,7 @@ end subroutine
 }
 \caption{Example: describe the memory side effect of $MPI\_Alltoall()$ for simple data types}
 \label{fig:annot:a2a}
+\vspace{-.1in}
 \end{figure}
 
 \begin{figure}[h]
