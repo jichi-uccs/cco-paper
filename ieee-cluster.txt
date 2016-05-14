@@ -1,0 +1,11 @@
+5/14/2016
+
+* TITLE
+Compiler-Assisted Overlapping of Communication and Computation in MPI Applications
+
+* TRACK
+Application
+Networks/Communication
+
+* ABSTRACT
+The performance of distributed-memory applications, many of which are written in MPI, critically depends on how well the applications can ameliorate the long latency of data movement by overlapping them with ongoing computations, thereby minimizing wait time. This paper presents a study of the various optimization techniques to enable such overlapping in large MPI applications and presents a framework that uses an analytical performance model and an optimizing compiler to systematically enable a majority of such optimizations. In particular, we first generate an analytical performance model of the application execution flow to automatically identify potential communication hot spots that may induce long wait time. Next, for each communication hot spot, we search the execution flow graph to find surrounding loops that include sufficient local computation to overlap with the communication. Then, blocking MPI communications are decoupled into non-blocking operations when necessary, and their surrounding loop is transformed to hide the communication latencies behind local computations. We evaluated our framework using 7 MPI applications from the NAS benchmark suite. Our optimizations can attain 3% to 72% speedup over the original implementations.
