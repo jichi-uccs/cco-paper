@@ -1,0 +1,83 @@
+Review of pap226s1 by Reviewer 1 top
+
+Summary
+
+   This paper presents a three-step procedure for automating the overlap of computation and communication in an MPI code. The overall idea of automating computation-communication overlap is quite interesting, but the current state of their implementation has very little practical use.
+
+
+Detailed Comments
+
+   This paper presents a three-step procedure for automating the overlap of computation and communication in an MPI code. The first step is performance modeling using Skope that uses a Bayesian execution tree to analyze runtime statistics which they obtain from gcov. The second step is an profitability and safety analysis using ROSE for the identified computation and communication regions. The third is a tuning component, which applies the appropriate program transformations. Experiments are performed for 7 benchmarks from the NPB NAS suite. FFT shows the most benefit of 88% speed up, while MG shows only 3%.
+
+   The overall idea of automating computation-communication overlap is quite interesting, but the current state of their implementation has very little practical use. FFT on a small number of nodes is an ideal test case for such kind of studies, so it is not surprising that 88% speed up is achieved for this case. For the more realistic workloads such as multigrid, the current method seems to perform poorly. A majority of scientific application codes are much more complex than the NAS MG benchmark, so there is little hope that the current approach will help these codes. How does the current framework overlap with computation in the form of recursive function calls? How does the current framework handle overlap in a multithreaded environment? As a proof of concept, I think this work is showing promising results and the idea is something worth looking into. I just don't think IEEE Cluster is the right place to show this work given it's immature state.
+
+
+   Comments:
+   It would be interesting to see what happens to Table 2 when the 80% threshold is changed to something else.
+   pp.4: MPI_Alltoal > MPI_Alltoall
+   Fig.5: volve > evolve
+
+
+Review of pap226s1 by Reviewer 2 top
+
+Summary
+
+   The paper presents a framework for the automatic optimization of MPI applications, by overlapping communications with computations. It is based on an analytical performance model of the application to automatically identify communication hotspots, and the identification of potential loops with sufficient computation that can be to be overlapped with communication.
+
+
+Detailed Comments
+
+   The paper presents a framework for optimizing MPI applications, by overlapping communications with computations. The framework first generates an analytical performance model of the application to automatically identify communication spots that may lead to high latency. Then, it searches for the execution flow graph surrounding such spots to identify loops that may include sufficient computation to be overlapped with communication. If such loops are found, blocking MPI communications are decoupled into non-blocking operations and the surrounding loops are transformed to hide communication latencies while performing local computations. The framework is evaluated by means of seven MPI-based applications from the NAS Parallel Benchmarks (NPB) suite, on a slow and a high-speed network-connected cluster environment, achieving speed-ups of up to 88% on both environments.
+
+   The paper discusses the analytical performance model used to identify communication and computation hot spots in MPI applications, the automatic determination of safe optimizations through compiler analysis, and strategies to perform the optimizations together with tuning of their configurations.
+
+   The paper is well written; it fits well in the Applications, Algorithms & Libraries area of the IEEE Cluster 2016 Conference. Although the paper discusses related work, its authors seem to be unaware of http://bamboo.ucsd.edu: “Bamboo is a custom source-to-source translator, built using the ROSE Compiler Infrastructure, that transforms MPI C/C++ source into a data-driven form that automatically overlaps communication with available computation.” Bamboo seems to be very close to what this contribution tries to accomplish and needs to be added (and commented) in the related work session.
+
+
+Review of pap226s1 by Reviewer 3 top
+
+Summary
+
+   This paper introduces an attempt to build a framework of automatic overlapping
+   of computation and communication in MPI applications.
+   It proposes performance models to support selecting communications to overlap,
+   and a compiler technique to check the safety of the overlapping.
+   At this point, the transformation itself needs to be done manually.
+
+
+Detailed Comments
+
+   - Though the authors claim that this paper proposes methods to analyze safety and profitability of overlapping communications with computations, method for analyzing profitability is not described precisely. The paper introduces how the cost for MPI operations and computations can be estimated. However, the profitability of overlap should be analyzed with additional information such as the overhead of MPI_Test, the possible overlap-ratio of the MPI operation, etc. Therefore, there should be more detailed description about how this framework helps the programmers in the decision of applying overlap.
+
+   - In the selection of "time-consuming MPI calls", it is not clear that how the MPI calls are chosen, because the sum of the communication time of top N most time-consuming MPI calls may be less or more than the P% of the overall communication time. How those threshold works? Top N MPI calls no matter what the value of P is, or top N' calls that exceeds P% of the overall communication time?
+
+   - While this kind of technology is important in very large scale parallel computers, the experimental environment is quite small. As the size of the system increases, the gap of estimated performance and empirical performance becomes larger. Therefore, there should be additional description about the applicability of this approach in much larger scale environment.
+
+   - Parameter "n" is used for "the size of the message" and "the number of nodes". Different names should be used.
+
+   - Definition of "c" in section IV is not clear. Is it a communication or an iteration?
+
+   - Figure 8 needs more description.
+
+   - In Figure 9, Icomm(1, INBUF) seems to be Icomm(1, INBUF, OUTBUFF).
+
+
+Review of pap226s1 by Reviewer 4 top
+
+Summary
+
+   This paper is looking at applications ability to overlap communication and computation costs. They present an analytical performance model, method to identify communication hotspots, and then a process to decouple blocking communication calls and transform associated loops to hide communication latency. A range of MPI applications are analyzed. The Skope framework is used as a base and extended to account for communications.
+
+
+Detailed Comments
+
+   The paper is well written and explained.
+
+   To calculate alpha and beta, are the microbenchmarks run dynamically during the framework or is that part of a pre-processing step?
+
+   My main concern is the scope of the experimental tests. It would be interesting to see a wider range of applications with more varied workloads. The NAS MG benchmark may not be the most representative of realist applications that would benefit from this tool.
+
+
+Committee Comments for Authors   top
+
+   None
