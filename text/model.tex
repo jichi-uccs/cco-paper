@@ -126,7 +126,7 @@ as:
 cost_{p2p}(n;alpha,beta) = alpha + n\cdot beta .
 \end{equation}
 
-To model the \texttt{MPI\_Alltoal} operation, we use the following two
+To model the \texttt{MPI\_Alltoall} operation, we use the following two
 formulas.
 
 \begin{equation}
@@ -150,10 +150,10 @@ by adding the communication time of all code blocks along the path,
 using the following formula.
 
 \begin{equation}
-  cost_{n} = \sum\limits_{i}^{n} cost(i) * freq(i)
+  cost_{m} = \sum\limits_{i}^{m} cost(i) * freq(i)
 \end{equation}
 
-Specifically, the total communication time of a path of $n$ nodes in
+Specifically, the total communication time of a path of $m$ nodes in
 the BET can be computed as the sum of the latency of each
 individual MPI operation multiplied by its execution frequency
 $freq(i)$.  Here, $freq(i)$ is calculated as the same of the frequency of the BET node that contains the MPI operation, and

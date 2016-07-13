@@ -15,12 +15,13 @@ elimination of redundant communications through software caching and
 the exploitation of data
 locality~\cite{buntinas:icpp09,isujita:eurompi14,ozog:ics13}.  
 
-Our work aims to automatically determine the safety of MPI application optimizations through compiler 
-dependence analysis and the profitability of the optimizations from 
-analytical performance modeling. 
-Iancu et al.~\cite{iancu:ppopp07} tried to automatically determine
+The Bamboo source-to-source translator~\cite{Bamboo:SC12} also aims to automatically translate MPI applications to latency-tolerant forms but relies on developer annotations to identify MPI regions to optimize. 
+In contrast, our work automatically determines
+%the safety of MPI application optimizations through compiler dependence analysis and 
+the profitability of the optimizations from analytical performance modeling. 
+Iancu et al.~\cite{iancu:ppopp07} automatically selected
 message sizes and schedules for MPI communications through an
-analytical model of system scale and load to avoid network congestion.
+analytical model of system scale and load. % to avoid network congestion.
 Danalis et al.~\cite{danalis:ics09} investigated compiler
 optimizations to potentially automate the overlapping of 
 computations and MPI communications, by formulating the side effects of key MPI operations so that
