@@ -10,8 +10,8 @@ and  what local computations can be safely overlapped with the communication, th
   performance bottlenecks based on the modeling of communication cost
   and the execution flow modeling of the entire application described
   in Section~\ref{sec-model}.  In particular, based on the BET
-  representation of the user application, this step identifies the top
-  $N$ most time-consuming MPI \emph{calls}, which take more than $P\%$
+  representation of the user application, this step identifies from the top
+  $N$ most time-consuming MPI \emph{calls} those that collectively take $\geq P\%$
   of the overall communication time, where both $N$ and $P$ are
   user-configurable parameters and were set by default with $N=10$ and
   $P=80$.  The selection is accomplished by simply sorting the

@@ -107,8 +107,8 @@ each MPI operation using the following four parameters:
 
 \end{enumerate}
 
-Among the four parameters, $alpha$ and $beta$ can be calculated from
-characteristics of the underlying network.  In particular, we compute
+Among the four parameters, $alpha$ and $beta$ can be calculated  ahead of time from
+characteristics of the underlying network. We compute
 $beta$ as the reciprocal of the network bandwidth and $alpha$ by using
 microbenchmarks to measure the latency of \texttt{MPI\_Send} and
 \texttt{MPI\_Recv} operations on the target platform.  The other two

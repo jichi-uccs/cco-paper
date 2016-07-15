@@ -4,22 +4,20 @@ Optional:
  1.    It would be interesting to see what happens to Table 2 when the 80% threshold is changed to something else.
  5.  the profitability of overlap should be analyzed with additional information such as the overhead of MPI_Test, the possible overlap-ratio of the MPI operation, etc. Therefore, there should be more detailed description about how this framework helps the programmers in the decision of applying overlap.
  7.  description about the applicability of this approach in much larger scale environment.
+ 10  - Figure 8 needs more description.
 
 Please answer:
- 6. In the selection of "time-consuming MPI calls", it is not clear that how the MPI calls are chosen, because the sum of the communication time of top N most time-consuming MPI calls may be less or more than the P% of the overall communication time. How those threshold works? Top N MPI calls no matter what the value of P is, or top N' calls that exceeds P% of the overall communication time?
 
 
 Fixed:
  2.  pp.4: MPI_Alltoal > MPI_Alltoall ===> fixed
  3.  Fig.5: volve > evolve ==> fixed
  4. related work, its authors seem to be unaware of http://bamboo.ucsd.edu: “Bamboo is a custom source-to-source translator, built using the ROSE Compiler Infrastructure, that transforms MPI C/C++ source into a data-driven form that automatically overlaps communication with available computation.” Bamboo seems to be very close to what this contribution tries to accomplish and needs to be added (and commented) in the related work session. ==> fixed
+ 6. In the selection of "time-consuming MPI calls", it is not clear that how the MPI calls are chosen, because the sum of the communication time of top N most time-consuming MPI calls may be less or more than the P% of the overall communication time. How those threshold works? Top N MPI calls no matter what the value of P is, or top N' calls that exceeds P% of the overall communication time?
  8.   - Parameter "n" is used for "the size of the message" and "the number of nodes". Different names should be used. ===> fixed
-
- 9.  - Definition of "c" in section IV is not clear. Is it a communication or an iteration?
- 10  - Figure 8 needs more description.
- 11  - In Figure 9, Icomm(1, INBUF) seems to be Icomm(1, INBUF, OUTBUFF). 
- 12 To calculate alpha and beta, are the microbenchmarks run dynamically during the framework or is that part of a pre-processing step?
-
+ 9.  - Definition of "c" in section IV is not clear. Is it a communication or an iteration? ==> the sentence clearly says communication c; added comma to make it more clear
+ 11  - In Figure 9, Icomm(1, INBUF) seems to be Icomm(1, INBUF, OUTBUFF). ==> fixed
+ 12 To calculate alpha and beta, are the microbenchmarks run dynamically during the framework or is that part of a pre-processing step? ==> added "ahead of time". 
 
 
 

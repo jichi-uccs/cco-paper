@@ -2,7 +2,7 @@
 \label{sec-opt}
 
 After being selected by our automatic compiler analysis component, each loop 
-to be optimized includes at least one MPI communication $c$ inside the loop body, and two sets of statements, 
+to be optimized includes at least one MPI communication, $c$, inside the loop body, and two sets of statements, 
 Before(c) and After(c), that are safe to be overlapped with $c$ across loop iterations. If the Loop body contains 
 multiple MPI communications, say $c1$ followed by $c2$, both of which are selected for optimization, then $c1$ and $c2$
 must be independent across different loop iterations, as $c1 \in Before(c2)$ and $c2 \in After(c1)$ must hold, and to be
@@ -195,7 +195,7 @@ each architecture.
   \begin{subfigure}[b]{.4\textwidth}
 \begin{verbatim}
 Before(1, InBuf)
-Icomm(1, InBuf)
+Icomm(1, InBuf, OutBuf)
 DO I = 2 .. N
   Before(I, InBuf)
   Wait(I - 1)
@@ -212,7 +212,7 @@ After(N, OutBuf)
   \begin{subfigure}[b]{.4\textwidth}
 \begin{verbatim}
 Before(1, InBuf)
-Icomm(1, InBuf)
+Icomm(1, InBuf, OutBuf)
 DO I = 2 .. N
   Before(I, I % 2 ==  1 ? InBuf : InBuf2)
   Wait(I - 1)
