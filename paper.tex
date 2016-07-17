@@ -8,7 +8,7 @@
 
 % Format:  http://icpp2016.cs.wcupa.edu/cfp.html
 % IEEEtrans without parameters is also used by our previous iCPP paper.
-\documentclass[10pt,doublecolumn,conference]{IEEEtran}
+\documentclass[10pt, conference, compsocconf]{IEEEtran}
 
 %replace XXX with the submission number you are given from the ASPLOS submission site.
 %\newcommand{\asplossubmissionnumber}{267}
@@ -18,7 +18,7 @@
 \usepackage{color}
 
 %\renewcommand{\baselinestretch}{0.99}
-\newcommand{\todo}[1]{\textcolor{red}{#1}}
+%\newcommand{\todo}[1]{\textcolor{red}{#1}}
 
 \begin{document}
 
@@ -27,14 +27,28 @@
 %
 \title{Compiler-Assisted Overlapping of Communication and Computation in MPI Applications}
 
-\author{Jichi Guo,$^\dag$ Qing Yi,$^\dag$ Jiayuan Meng,$^\ddag$ Junchao Zhang,$^\ddag$ Pavan Balaji$^\ddag$\\
-University of Colorado Colorado Springs$^\dag$\\
-Colorado Springs, CO, USA\\
-\{jguo2, qyi\}@uccs.edu \\
-Argonne National Laboratory$^\ddag$\\
-Lemont, IL, USA\\
-meng.jiayuan@gmail.com, \{jczhang, balaji\}@anl.gov
-}
+\author{\IEEEauthorblockN{Jichi Guo, Qing Yi}
+  \IEEEauthorblockA{University of Colorado, Colorado Springs \\
+  Colorado Springs, CO, USA\\
+  \{jguo2, qyi\}@uccs.edu}
+  \and 
+  \IEEEauthorblockN {Jiayuan Meng}
+  \IEEEauthorblockA {Google Inc.  \\
+  Mountain View, CA, USA \\
+         meng.jiayuan@gmail.com}
+  \and 
+  \IEEEauthorblockN{Junchao Zhang, Pavan Balaji}
+  \IEEEauthorblockA{Argonne National Laboratory \\
+  Lemont, IL, USA\\
+  \{jczhang, balaji\}@anl.gov}}
+%\author{Jichi Guo,$^\dag$ Qing Yi,$^\dag$ Jiayuan Meng,$^\ddag$ Junchao Zhang,$^\ddag$ Pavan Balaji$^\ddag$\\
+%University of Colorado Colorado Springs$^\dag$\\
+%Colorado Springs, CO, USA\\
+%\{jguo2, qyi\}@uccs.edu \\
+%Argonne National Laboratory$^\ddag$\\
+%Lemont, IL, USA\\
+%meng.jiayuan@gmail.com, \{jczhang, balaji\}@anl.gov
+%}
 %\authorinfo{}{}{}
 
 % PLEASE ADD INSTITUTIONS
@@ -62,31 +76,36 @@ from the NPB \texttt{NAS} benchmark suite.  Our optimizations can attain
 3-88\% speedup over the original implementations.
 \end{abstract}
 
+\begin{IEEEkeywords}
+Computer Applications; Computer performance; Parallel machines; Automatic programming
+\end{IEEEkeywords}
 
-\lstdefinelanguage{sklt}{
-  morecomment=[s]{/*}{*/},
-  morecomment=[l]{//},
-  morekeywords={
-    dummy,
-    def, call, from, import,
-    stream, for, forall, switch, case, if, else, return, break, continue,
-    st, ld, comp, ilp, blk, block,
-    int, long, float, double, char, string,
-    for_threads, grid, thread_block, commit,
-    comm, send, recv, bcast, barrier, allreduce, sendrecv, all2all, reduce,
-  },
-}
+\IEEEpeerreviewmaketitle
 
-\lstset{
-  language=sklt,
-  keywordstyle=\bf,
-  %keywordstyle=\em\bfseries,
-  basicstyle=\ttfamily\scriptsize,
-  numbers=left,
-  numberstyle=\tiny,
-  stepnumber=2,
-  numbersep=3pt,
-}
+%\lstdefinelanguage{sklt}{
+%  morecomment=[s]{/*}{*/},
+%  morecomment=[l]{//},
+%  morekeywords={
+%    dummy,
+%    def, call, from, import,
+%    stream, for, forall, switch, case, if, else, return, break, continue,
+%    st, ld, comp, ilp, blk, block,
+%    int, long, float, double, char, string,
+%    for_threads, grid, thread_block, commit,
+%    comm, send, recv, bcast, barrier, allreduce, sendrecv, all2all, reduce,
+%  },
+%}
+%
+%\lstset{
+%  language=sklt,
+%  keywordstyle=\bf,
+%  %keywordstyle=\em\bfseries,
+%  basicstyle=\ttfamily\scriptsize,
+%  numbers=left,
+%  numberstyle=\tiny,
+%  stepnumber=2,
+%  numbersep=3pt,
+%}
 
 \input{text/intro}
 \input{text/model}
